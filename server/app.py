@@ -1,14 +1,15 @@
+import os
 from flask import Flask, jsonify, request, make_response, render_template, session, redirect, url_for
 from flask_restful import Resource, fields, marshal 
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review
 from config import app, db, api
 from flask_cors import CORS
-import bcrypt
+from flask_bcrypt import Bcrypt
 
 CORS(app, supports_credentials=True)
 app.template_folder = "templates"
 app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key')
-bcrypt = bcrypt.Bcrypt(app)
+bcrypt = Bcrypt(app)
 
 user_fields = {
     'id': fields.Integer,
@@ -84,7 +85,6 @@ class SignUp(Resource):
             db.session.add(user)
             db.session.commit()
 
-            user_id = user.id
 
             teacher = Teacher(
                 user_id=user.id,
@@ -142,27 +142,7 @@ class SubstituteSignUp(Resource):
             print(e)
             return make_response({'errors': ['Validation errors']}, 400)
 
-        
-class LogIn(Resource):
-    def post(self):
-        data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
-
-        if not email or not password:
-            return make_response({'errors': ['Email and password are required fields']}, 400)
-
-        user = Teacher.query.filter_by(email=email).first() or Substitute.query.filter_by(email=email).first()
-
-        if user and self.check_password_hash(user.password_hash, password):
-            session['user_id'] = user.id
-            return make_response({'message': 'Login successful'}, 201)
-        else:
-            return make_response({'errors': ['Invalid credentials']}, 401)
-
-    def check_password_hash(self, hashed_password, user_password):
-        return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password.encode('utf-8'))
-
+    
     
 class LogOut(Resource):
     def delete(self):
@@ -211,8 +191,6 @@ class ReviewResource(Resource):
         return jsonify(serialized_reviews)
     
 api.add_resource(SignUp, '/signup')
-api.add_resource(LogIn, '/login')
-api.add_resource(LogOut, '/logout')
 api.add_resource(UserResource, '/users')
 api.add_resource(TeacherResource, '/teachers')
 api.add_resource(SubstituteResource, '/substitutes')
@@ -257,43 +235,6 @@ def substitute_form():
         return make_response({'message': 'Substitute added successfully'}, 201)
     return render_template('substitute_form.html')
 
-@app.route('/signup', methods=['POST'])
-def signup():
-    try:
-        data = request.get_json()
-
-        password = data.get('password')
-        confirm_password = data.get('confirm_password')
-        if password != confirm_password:
-            return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
-
-        user = User(
-            email=data['email'],
-            password=bcrypt.generate_password_hash(password).decode('utf-8'),
-            role='Teacher',
-        )
-        db.session.add(user)
-        db.session.commit()
-
-        user_id = user.id
-
-        teacher = Teacher(
-            user_id=user.id,
-            name=data['name'],
-            email=data['email'],
-            phone=data['phone'],
-            school=data['school'],
-            location=data['location'],
-            grade_or_course=data['grade_or_course'],
-        )
-        db.session.add(teacher)
-        db.session.commit()
-
-        return make_response({'message': 'New teacher created successfully'}, 201)
-    except Exception as e:
-        print(e)
-        return make_response({'errors': ['Validation errors']}, 400)
-
 @app.route('/substitute-signup', methods=['POST'])
 def substitute_signup():
     try:
@@ -332,24 +273,7 @@ def substitute_signup():
     except Exception as e:
         print(e)
         return make_response({'errors': ['Validation errors']}, 400)
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    if not email or not password:
-        return make_response({'errors': ['Email and password are required fields']}, 400)
-
-    user = Teacher.query.filter_by(email=email).first() or Substitute.query.filter_by(email=email).first()
-
-    if user and bcrypt.check_password_hash(user.password_hash, password):
-        session['user_id'] = user.id
-        return make_response({'message': 'Login successful'}, 201)
-    else:
-        return make_response({'errors': ['Invalid credentials']}, 401)
-
+    
 @app.route('/logout', methods=['DELETE'])
 def logout():
     if 'user_id' in session:
