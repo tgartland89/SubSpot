@@ -94,6 +94,44 @@ class SignUp(Resource):
         except Exception as e:
             print(e) 
             return make_response({'errors': ['Validation errors']}, 400)
+        
+class SubstituteSignUp(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+       
+
+            user = User(
+                email=data['email'],
+                password=data['password'], 
+                role='Substitute',
+            )
+      
+            db.session.add(user)
+            db.session.commit()
+
+      
+            user_id = user.id
+
+
+            substitute = Substitute(
+                user_id=user_id,  
+                name=data['name'],
+                email=data['email'],
+                phone=data['phone'],
+                location=data['location'],
+                grade_or_course=data['grade_or_course'],
+                verification_id=data['verification_id'],
+                qualifications=data['qualifications'],
+            )
+   
+            db.session.add(substitute)
+            db.session.commit()
+
+            return make_response({'message': 'New substitute created successfully'}, 201)
+        except Exception as e:
+            print(e) 
+            return make_response({'errors': ['Validation errors']}, 400)
 
         
 class LogIn(Resource):
@@ -163,6 +201,8 @@ api.add_resource(SubstituteResource, '/substitutes')
 api.add_resource(SiteAdminResource, '/site_admins')
 api.add_resource(CourseResource, '/courses')
 api.add_resource(ReviewResource, '/reviews')
+api.add_resource(SubstituteSignUp, '/substitute-signup')
+
 
 # Route for teacher form
 @app.route('/teacher-form', methods=['GET', 'POST'])
