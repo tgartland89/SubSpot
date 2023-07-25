@@ -10,11 +10,8 @@ from sqlalchemy import MetaData
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key')
 
-metadata = MetaData(naming_convention={
-    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-})
-
 basedir = os.path.abspath(os.path.dirname(__file__))
+
 # SQLite database for testing purposes
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')  # Use app.db for the application
 

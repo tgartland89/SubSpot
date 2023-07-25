@@ -6,6 +6,9 @@ from config import db, bcrypt
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users' 
+
+    serialize_rules = ('-reviews', '-profile_picture', '-password_hash')
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
@@ -22,6 +25,9 @@ class User(db.Model, SerializerMixin):
 
 class Teacher(db.Model, SerializerMixin):
     __tablename__ = 'teachers'
+
+    serialize_rules = ('-user.reviews', '-user.profile_picture', '-user.password_hash')
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
@@ -30,6 +36,9 @@ class Teacher(db.Model, SerializerMixin):
 
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes'  
+
+    serialize_rules = ('-user.reviews', '-user.profile_picture', '-user.password_hash')
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
@@ -38,6 +47,9 @@ class Substitute(db.Model, SerializerMixin):
 
 class SiteAdmin(db.Model, SerializerMixin):
     __tablename__ = 'site_admins'  
+
+    serialize_rules = ('-user.reviews', '-user.profile_picture', '-user.password_hash')
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
@@ -45,6 +57,9 @@ class SiteAdmin(db.Model, SerializerMixin):
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'  
+
+    serialize_rules = ('-teacher.reviews', '-substitute.reviews')
+
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
     substitute_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)
@@ -55,8 +70,12 @@ class Course(db.Model, SerializerMixin):
 
 class Review(db.Model, SerializerMixin):
     __tablename__ = 'reviews'  
+
+    serialize_rules = ('-writer.reviews', '-writer.profile_picture', '-writer.password_hash', '-rental.reviews')
+
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
     substitute_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
+
