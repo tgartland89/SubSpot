@@ -3,6 +3,8 @@ from flask_restful import Resource, fields, marshal
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review
 from config import app, db, api
 from flask_cors import CORS
+import bcrypt
+
 
 CORS(app, supports_credentials=True)
 app.template_folder = "templates"
@@ -137,22 +139,31 @@ class SubstituteSignUp(Resource):
 class LogIn(Resource):
     def post(self):
         data = request.get_json()
-        # Your logic for authenticating the user login credentials goes here
         email = data.get('email')
         password = data.get('password')
-        teacher = Teacher.query.filter_by(email=email).first()
 
-        if teacher and teacher.password_hash == password:  # In real-world, use proper password hashing
-            session['user_id'] = teacher.id
+        if not email or not password:
+            return make_response({'errors': ['Email and password are required fields']}, 400)
+
+        user = Teacher.query.filter_by(email=email).first() or Substitute.query.filter_by(email=email).first()
+
+        if user and self.check_password_hash(user.password_hash, password):
+            session['user_id'] = user.id
             return make_response({'message': 'Login successful'}, 201)
         else:
             return make_response({'errors': ['Invalid credentials']}, 401)
 
+    def check_password_hash(self, hashed_password, user_password):
+        return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    
 class LogOut(Resource):
     def delete(self):
-        # Your logic for logging out the user (clearing the session) goes here
-        session.pop('user_id', None)  # Clear the user_id from the session
-        return make_response({'message': 'Logged out successfully'}, 204)
+        # Check if the user is logged in before logging out
+        if 'user_id' in session:
+            session.pop('user_id', None)
+            return make_response({'message': 'Logged out successfully'}, 204)
+        else:
+            return make_response({'errors': ['User not logged in']}, 401)
 
 
 class UserResource(Resource):
@@ -164,7 +175,6 @@ class UserResource(Resource):
 class TeacherResource(Resource):
     def get(self):
         teachers = Teacher.query.all()
-        # Use marshal to serialize the Teacher objects
         serialized_teachers = [marshal(teacher, teacher_fields) for teacher in teachers]
         return jsonify(serialized_teachers)
 
@@ -202,7 +212,6 @@ api.add_resource(SiteAdminResource, '/site_admins')
 api.add_resource(CourseResource, '/courses')
 api.add_resource(ReviewResource, '/reviews')
 api.add_resource(SubstituteSignUp, '/substitute-signup')
-
 
 # Route for teacher form
 @app.route('/teacher-form', methods=['GET', 'POST'])

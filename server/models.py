@@ -12,14 +12,14 @@ class User(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    profile_picture = db.Column(db.String(255))  # Add the profile_picture attribute here
+    profile_picture = db.Column(db.String(255))  
     role = db.Column(db.Enum('Teacher', 'Substitute', 'Site Admin'), nullable=False)
 
-    def __init__(self, email, password, role, profile_picture=None):  # Update the constructor
+    def __init__(self, email, password, role, profile_picture=None):  
         self.email = email
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         self.role = role
-        self.profile_picture = profile_picture  # Set the profile_picture attribute
+        self.profile_picture = profile_picture  
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
@@ -67,6 +67,19 @@ class Substitute(db.Model, SerializerMixin):
     qualifications = db.Column(db.Text)
     image_url = db.Column(db.String(255), default='default_image_url.png')
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'verification_id': self.verification_id,
+            'location': self.location,
+            'grade_or_course': self.grade_or_course,
+            'phone': self.phone,
+            'email': self.email,
+            'qualifications': self.qualifications,
+            'image_url': self.image_url,
+        }
+
 class SiteAdmin(db.Model, SerializerMixin):
     __tablename__ = 'site_admins'  
 
@@ -76,6 +89,13 @@ class SiteAdmin(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
     image_url = db.Column(db.String(255), default='default_image_url.png')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'image_url': self.image_url,
+        }
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'  
@@ -90,6 +110,17 @@ class Course(db.Model, SerializerMixin):
     time = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), nullable=False)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'teacher_id': self.teacher_id,
+            'substitute_id': self.substitute_id,
+            'class_subject': self.class_subject,
+            'date': self.date.isoformat(), 
+            'time': self.time,
+            'status': self.status,
+        }
+
 class Review(db.Model, SerializerMixin):
     __tablename__ = 'reviews'  
 
@@ -101,3 +132,11 @@ class Review(db.Model, SerializerMixin):
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'teacher_id': self.teacher_id,
+            'substitute_id': self.substitute_id,
+            'rating': self.rating,
+            'comment': self.comment,
+        }
