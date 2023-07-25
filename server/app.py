@@ -82,5 +82,6 @@ api.add_resource(CourseResource, '/courses')
 api.add_resource(ReviewResource, '/reviews')
 
 if __name__ == '__main__':
-    db.create_all()
+    with app.app_context():
+        db.create_all()
     app.run(port=5555)

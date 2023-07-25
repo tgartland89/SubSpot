@@ -7,18 +7,19 @@ from config import db, bcrypt
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users' 
 
-    serialize_rules = ('-reviews', '-profile_picture', '-password_hash')
+    serialize_rules = ('-reviews', '-password_hash')
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    profile_picture = db.Column(db.LargeBinary)
+    profile_picture = db.Column(db.String(255))  # Add the profile_picture attribute here
     role = db.Column(db.Enum('Teacher', 'Substitute', 'Site Admin'), nullable=False)
 
-    def __init__(self, email, password, role):
+    def __init__(self, email, password, role, profile_picture=None):  # Update the constructor
         self.email = email
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         self.role = role
+        self.profile_picture = profile_picture  # Set the profile_picture attribute
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)

@@ -43,7 +43,7 @@ def create_users_and_roles(num_users):
     for _ in range(num_users):
         email = fake.email()
         password = generate_random_password()
-        user = create_user(email, password, rc(roles))
+        user = create_user(email, password, random.choice(roles))  
         role = user.role
         if role == 'Teacher':
             create_teacher(user.id)
@@ -54,21 +54,21 @@ def create_users_and_roles(num_users):
 
 def create_courses_and_reviews(num_courses, teachers, substitutes):
     for _ in range(num_courses):
-        teacher = rc(teachers)
-        substitute = rc(substitutes)
+        teacher = random.choice(teachers)  # Use random.choice() here
+        substitute = random.choice(substitutes)  # Use random.choice() here
         course = Course(
             teacher_id=teacher.id,
             substitute_id=substitute.id,
             class_subject=fake.job(),
             date=fake.date_this_year(),
             time=fake.time(),
-            status=rc(['Scheduled', 'Completed', 'Canceled'])
+            status=random.choice(['Scheduled', 'Completed', 'Canceled'])  # Use random.choice() here
         )
         db.session.add(course)
         review = Review(
             teacher_id=teacher.id,
             substitute_id=substitute.id,
-            rating=randint(1, 5),
+            rating=random.randint(1, 5),  # Use random.randint() here
             comment=fake.text()
         )
         db.session.add(review)
@@ -87,12 +87,17 @@ def seed_database(num_users=5, num_courses=10):
         create_users_and_roles(num_users)
         print("Complete")
 
+        # Retrieve teachers and substitutes from the database
         teachers = Teacher.query.all()
         substitutes = Substitute.query.all()
 
-        print("Generating Courses and Reviews...")
-        create_courses_and_reviews(num_courses, teachers, substitutes)
-        print("Complete")
+        # Check if there are records in teachers and substitutes tables
+        if teachers and substitutes:
+            print("Generating Courses and Reviews...")
+            create_courses_and_reviews(num_courses, teachers, substitutes)
+            print("Complete")
+        else:
+            print("No teachers or substitutes found in the database. Skipping course and review generation.")
 
         db.session.commit()
 
