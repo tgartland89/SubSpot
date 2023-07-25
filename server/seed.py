@@ -1,11 +1,13 @@
+from flask import Flask
+from config import app, db
+from models import User, Teacher, Substitute, SiteAdmin, Course, Review
+from faker import Faker
 import random
+import requests
 import string
 from config import db
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review
-from faker import Faker
-from random import randint, choice as rc
-import os
-from app import app
+
 
 fake = Faker()
 
