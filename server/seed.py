@@ -27,11 +27,29 @@ def create_user(email, password, role):
     return user
 
 def create_teacher(user_id, image_url=None):  
-    teacher = Teacher(user_id=user_id, name=fake.name(), contact_details=fake.address(), image_url=image_url)  
+    teacher = Teacher(
+        user_id=user_id,
+        name=fake.name(),
+        email=fake.email(),
+        phone=fake.phone_number(),
+        school=fake.company(),
+        location=fake.address(),
+        grade_or_course=fake.job(),
+        image_url=image_url
+    )
     db.session.add(teacher)
 
-def create_substitute(user_id, image_url=None):  
-    substitute = Substitute(user_id=user_id, name=fake.name(), qualifications=fake.text(), image_url=image_url)  
+def create_substitute(user_id, image_url=None):
+    substitute = Substitute(
+        user_id=user_id,
+        name=fake.name(),
+        qualifications=fake.text(),
+        location=fake.city(),
+        grade_or_course=fake.job(),  
+        phone=fake.phone_number(),  
+        email=fake.email(),  
+        image_url=image_url
+    )
     db.session.add(substitute)
 
 def create_site_admin(user_id):

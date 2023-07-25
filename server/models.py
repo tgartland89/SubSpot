@@ -32,8 +32,15 @@ class Teacher(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
-    contact_details = db.Column(db.Text)
+    email = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    school = db.Column(db.String(120), nullable=False)
+    location = db.Column(db.String(120), nullable=False)
+    grade_or_course = db.Column(db.String(120), nullable=False)
     image_url = db.Column(db.String(255), default='default_image_url.png')
+ 
+  
+
 
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes'  
@@ -43,6 +50,11 @@ class Substitute(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
+    verification_id = db.Column(db.String(6), nullable=True)
+    location = db.Column(db.String(120), nullable=False)
+    grade_or_course = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    email = db.Column(db.String(120))
     qualifications = db.Column(db.Text)
     image_url = db.Column(db.String(255), default='default_image_url.png')
 

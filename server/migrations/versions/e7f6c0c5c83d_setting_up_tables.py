@@ -1,8 +1,8 @@
-"""initial migration
+"""setting up tables
 
-Revision ID: 89c930014d09
+Revision ID: e7f6c0c5c83d
 Revises: 
-Create Date: 2023-07-24 16:35:04.272560
+Create Date: 2023-07-25 12:19:29.931247
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '89c930014d09'
+revision = 'e7f6c0c5c83d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,7 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('password_hash', sa.String(length=255), nullable=False),
-    sa.Column('profile_picture', sa.LargeBinary(), nullable=True),
+    sa.Column('profile_picture', sa.String(length=255), nullable=True),
     sa.Column('role', sa.Enum('Teacher', 'Substitute', 'Site Admin'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
@@ -31,6 +31,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=120), nullable=False),
+    sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_site_admins_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -39,7 +40,13 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=120), nullable=False),
+    sa.Column('verification_id', sa.String(length=6), nullable=True),
+    sa.Column('location', sa.String(length=120), nullable=False),
+    sa.Column('grade_or_course', sa.String(length=120), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
     sa.Column('qualifications', sa.Text(), nullable=True),
+    sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_substitutes_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -48,7 +55,12 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=120), nullable=False),
-    sa.Column('contact_details', sa.Text(), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('phone', sa.String(length=20), nullable=False),
+    sa.Column('school', sa.String(length=120), nullable=False),
+    sa.Column('location', sa.String(length=120), nullable=False),
+    sa.Column('grade_or_course', sa.String(length=120), nullable=False),
+    sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_teachers_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')

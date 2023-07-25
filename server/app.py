@@ -1,13 +1,12 @@
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, jsonify, request, make_response, render_template
 from flask_restful import Resource
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review
 from config import app, db, api
-from flask_migrate import Migrate
 from flask_cors import CORS
 
-migrate = Migrate(app, db)
-
 CORS(app, supports_credentials=True)
+app.template_folder = "templates"
+
 
 class SignUp(Resource):
     def post(self):
@@ -81,7 +80,43 @@ api.add_resource(SiteAdminResource, '/site_admins')
 api.add_resource(CourseResource, '/courses')
 api.add_resource(ReviewResource, '/reviews')
 
+# Route for teacher form
+@app.route('/teacher-form', methods=['GET', 'POST'])
+def teacher_form():
+    if request.method == 'POST':
+        # Get form data and create a new Teacher record in the database
+        data = request.form
+        teacher = Teacher(
+            name=data['name'],
+            school=data['school'],
+            location=data['location'],
+            grade_or_course=data['grade_or_course'],
+            email=data['email'],
+            phone=data['phone']
+        )
+        db.session.add(teacher)
+        db.session.commit()
+        return make_response({'message': 'Teacher added successfully'}, 201)
+    return render_template('teacher_form.html')
+
+# Route for substitute form
+@app.route('/substitute-form', methods=['GET', 'POST'])
+def substitute_form():
+    if request.method == 'POST':
+        # Get form data and create a new Substitute record in the database
+        data = request.form
+        substitute = Substitute(
+            name=data['name'],
+            verification_id=data['verification_id'],
+            location=data['location'],
+            grade_or_course=data['grade_or_course'],
+            email=data['email'],
+            phone=data['phone']
+        )
+        db.session.add(substitute)
+        db.session.commit()
+        return make_response({'message': 'Substitute added successfully'}, 201)
+    return render_template('substitute_form.html')
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(port=5555)
