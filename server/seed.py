@@ -47,7 +47,8 @@ def create_substitute(user_id, image_url=None):
         location=fake.city(),
         grade_or_course=fake.job(),  
         phone=fake.phone_number(),  
-        email=fake.email(),  
+        email=fake.email(), 
+        verification_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=6)),  
         image_url=image_url
     )
     db.session.add(substitute)
