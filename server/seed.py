@@ -73,21 +73,21 @@ def create_users_and_roles(num_users):
 
 def create_courses_and_reviews(num_courses, teachers, substitutes):
     for _ in range(num_courses):
-        teacher = random.choice(teachers)  # Use random.choice() here
-        substitute = random.choice(substitutes)  # Use random.choice() here
+        teacher = random.choice(teachers)  
+        substitute = random.choice(substitutes) 
         course = Course(
             teacher_id=teacher.id,
             substitute_id=substitute.id,
             class_subject=fake.job(),
             date=fake.date_this_year(),
             time=fake.time(),
-            status=random.choice(['Scheduled', 'Completed', 'Canceled'])  # Use random.choice() here
+            status=random.choice(['Scheduled', 'Completed', 'Canceled'])  
         )
         db.session.add(course)
         review = Review(
             teacher_id=teacher.id,
             substitute_id=substitute.id,
-            rating=random.randint(1, 5),  # Use random.randint() here
+            rating=random.randint(1, 5),  
             comment=fake.text()
         )
         db.session.add(review)
@@ -106,11 +106,11 @@ def seed_database(num_users=5, num_courses=10):
         create_users_and_roles(num_users)
         print("Complete")
 
-        # Retrieve teachers and substitutes from the database
+      
         teachers = Teacher.query.all()
         substitutes = Substitute.query.all()
 
-        # Check if there are records in teachers and substitutes tables
+       
         if teachers and substitutes:
             print("Generating Courses and Reviews...")
             create_courses_and_reviews(num_courses, teachers, substitutes)

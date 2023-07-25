@@ -12,9 +12,8 @@ app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key')
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# SQLite database for testing purposes
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')  # Use app.db for the application
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')  
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 

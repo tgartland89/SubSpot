@@ -69,19 +69,24 @@ class SignUp(Resource):
     def post(self):
         try:
             data = request.get_json()
-       
+
+            password = data.get('password')
+            confirm_password = data.get('confirm_password')
+            if password != confirm_password:
+                return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
+
             user = User(
                 email=data['email'],
-                password=data['password'], 
+                password=password,  
                 role='Teacher',
             )
             db.session.add(user)
             db.session.commit()
 
-            user_id =user.id
+            user_id = user.id
 
             teacher = Teacher(
-                user_id=user.id,  
+                user_id=user.id,
                 name=data['name'],
                 email=data['email'],
                 phone=data['phone'],
@@ -94,30 +99,31 @@ class SignUp(Resource):
 
             return make_response({'message': 'New teacher created successfully'}, 201)
         except Exception as e:
-            print(e) 
+            print(e)
             return make_response({'errors': ['Validation errors']}, 400)
         
 class SubstituteSignUp(Resource):
     def post(self):
         try:
             data = request.get_json()
-       
+
+            password = data.get('password')
+            confirm_password = data.get('confirm_password')
+            if password != confirm_password:
+                return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
 
             user = User(
                 email=data['email'],
-                password=data['password'], 
+                password=password,  
                 role='Substitute',
             )
-      
             db.session.add(user)
             db.session.commit()
 
-      
             user_id = user.id
 
-
             substitute = Substitute(
-                user_id=user_id,  
+                user_id=user_id,
                 name=data['name'],
                 email=data['email'],
                 phone=data['phone'],
@@ -126,13 +132,13 @@ class SubstituteSignUp(Resource):
                 verification_id=data['verification_id'],
                 qualifications=data['qualifications'],
             )
-   
+
             db.session.add(substitute)
             db.session.commit()
 
             return make_response({'message': 'New substitute created successfully'}, 201)
         except Exception as e:
-            print(e) 
+            print(e)
             return make_response({'errors': ['Validation errors']}, 400)
 
         
@@ -155,15 +161,16 @@ class LogIn(Resource):
 
     def check_password_hash(self, hashed_password, user_password):
         return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
     
 class LogOut(Resource):
     def delete(self):
-        # Check if the user is logged in before logging out
         if 'user_id' in session:
             session.pop('user_id', None)
             return make_response({'message': 'Logged out successfully'}, 204)
         else:
             return make_response({'errors': ['User not logged in']}, 401)
+
 
 
 class UserResource(Resource):
@@ -213,11 +220,10 @@ api.add_resource(CourseResource, '/courses')
 api.add_resource(ReviewResource, '/reviews')
 api.add_resource(SubstituteSignUp, '/substitute-signup')
 
-# Route for teacher form
 @app.route('/teacher-form', methods=['GET', 'POST'])
 def teacher_form():
     if request.method == 'POST':
-        # Get form data and create a new Teacher record in the database
+
         data = request.form
         teacher = Teacher(
             name=data['name'],
@@ -232,11 +238,10 @@ def teacher_form():
         return make_response({'message': 'Teacher added successfully'}, 201)
     return render_template('teacher_form.html')
 
-# Route for substitute form
 @app.route('/substitute-form', methods=['GET', 'POST'])
 def substitute_form():
     if request.method == 'POST':
-        # Get form data and create a new Substitute record in the database
+
         data = request.form
         substitute = Substitute(
             name=data['name'],
