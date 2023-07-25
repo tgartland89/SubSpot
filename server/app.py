@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, make_response, render_template
+from flask import Flask, jsonify, request, make_response, render_template, session
 from flask_restful import Resource, fields, marshal 
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review
 from config import app, db, api
@@ -67,30 +67,53 @@ class SignUp(Resource):
     def post(self):
         try:
             data = request.get_json()
-            # Your logic for creating a new user and saving it to the database goes here
-            # Make sure to handle password hashing and error handling
-            return make_response({'message': 'New user created successfully'}, 201)
-        except:
+       
+            user = User(
+                email=data['email'],
+                password=data['password'], 
+                role='Teacher',
+            )
+            db.session.add(user)
+            db.session.commit()
+
+            user_id =user.id
+
+            teacher = Teacher(
+                user_id=user.id,  
+                name=data['name'],
+                email=data['email'],
+                phone=data['phone'],
+                school=data['school'],
+                location=data['location'],
+                grade_or_course=data['grade_or_course'],
+            )
+            db.session.add(teacher)
+            db.session.commit()
+
+            return make_response({'message': 'New teacher created successfully'}, 201)
+        except Exception as e:
+            print(e) 
             return make_response({'errors': ['Validation errors']}, 400)
 
-class CheckSession(Resource):
-    def get(self):
-        # Your logic for checking the current user session and returning the user data if logged in goes here
-        # Make sure to handle the case where no user is currently logged in
-        return make_response({'message': 'User session checked successfully'}, 200)
-
+        
 class LogIn(Resource):
     def post(self):
         data = request.get_json()
         # Your logic for authenticating the user login credentials goes here
-        # Make sure to handle invalid username and password cases
-        # If login is successful, set the user_id in the session
-        return make_response({'message': 'Login successful'}, 201)
+        email = data.get('email')
+        password = data.get('password')
+        teacher = Teacher.query.filter_by(email=email).first()
+
+        if teacher and teacher.password_hash == password:  # In real-world, use proper password hashing
+            session['user_id'] = teacher.id
+            return make_response({'message': 'Login successful'}, 201)
+        else:
+            return make_response({'errors': ['Invalid credentials']}, 401)
 
 class LogOut(Resource):
     def delete(self):
         # Your logic for logging out the user (clearing the session) goes here
-        # Make sure to handle the case where no user is currently logged in
+        session.pop('user_id', None)  # Clear the user_id from the session
         return make_response({'message': 'Logged out successfully'}, 204)
 
 
@@ -132,7 +155,6 @@ class ReviewResource(Resource):
         return jsonify(serialized_reviews)
     
 api.add_resource(SignUp, '/signup')
-api.add_resource(CheckSession, '/check_session')
 api.add_resource(LogIn, '/login')
 api.add_resource(LogOut, '/logout')
 api.add_resource(UserResource, '/users')
