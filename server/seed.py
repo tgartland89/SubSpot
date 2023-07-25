@@ -8,11 +8,20 @@ import string
 from config import db
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review
 
+def fetch_random_image():
+    try:
+        response = requests.get('https://source.unsplash.com/featured/?profile_pic')
+        response.raise_for_status()  
+        return response.url
+    except requests.exceptions.RequestException as e:
+        print('Error fetching random image:', e)
+        return None
 
 fake = Faker()
 
 def create_user(email, password, role):
-    user = User(email=email, password=password, role=role)
+    profile_picture = fetch_random_image()
+    user = User(email=email, password=password, role=role, profile_picture=profile_picture)
     db.session.add(user)
     db.session.commit()
     return user
@@ -21,7 +30,7 @@ def create_teacher(user_id, image_url=None):
     teacher = Teacher(user_id=user_id, name=fake.name(), contact_details=fake.address(), image_url=image_url)  
     db.session.add(teacher)
 
-def create_substitute(user_id, image_url=None):  # Provide image_url parameter with a default value None
+def create_substitute(user_id, image_url=None):  
     substitute = Substitute(user_id=user_id, name=fake.name(), qualifications=fake.text(), image_url=image_url)  
     db.session.add(substitute)
 
