@@ -24,6 +24,7 @@ class Teacher(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
     contact_details = db.Column(db.Text)
+    image_url = db.Column(db.String(255), default='default_image_url.png')
 
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes'  
@@ -31,12 +32,14 @@ class Substitute(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
     qualifications = db.Column(db.Text)
+    image_url = db.Column(db.String(255), default='default_image_url.png')
 
 class SiteAdmin(db.Model, SerializerMixin):
     __tablename__ = 'site_admins'  
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
+    image_url = db.Column(db.String(255), default='default_image_url.png')
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'  
