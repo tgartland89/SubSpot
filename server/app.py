@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, make_response, render_template
-from flask_restful import Resource
+from flask_restful import Resource, fields, marshal 
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review
 from config import app, db, api
 from flask_cors import CORS
@@ -7,6 +7,61 @@ from flask_cors import CORS
 CORS(app, supports_credentials=True)
 app.template_folder = "templates"
 
+user_fields = {
+    'id': fields.Integer,
+    'email': fields.String,
+    'password_hash': fields.String,
+    'profile_picture': fields.String,
+    'role': fields.String,
+}
+
+teacher_fields = {
+    'id': fields.Integer,
+    'name': fields.String,
+    'email': fields.String,
+    'phone': fields.String,
+    'school': fields.String,
+    'location': fields.String,
+    'grade_or_course': fields.String,
+    'image_url': fields.String,
+}
+
+substitute_fields = {
+    'id': fields.Integer,
+    'user_id': fields.Integer,
+    'name': fields.String,
+    'email': fields.String,
+    'phone': fields.String,
+    'verification_id': fields.String,
+    'location': fields.String,
+    'grade_or_course': fields.String,
+    'qualifications': fields.String,
+    'image_url': fields.String,
+}
+
+site_admin_fields = {
+    'id': fields.Integer,
+    'user_id': fields.Integer,
+    'name': fields.String,
+    'image_url': fields.String,
+}
+
+course_fields = {
+    'id': fields.Integer,
+    'teacher_id': fields.Integer,
+    'substitute_id': fields.Integer,
+    'class_subject': fields.String,
+    'date': fields.String,
+    'time': fields.String,
+    'status': fields.String,
+}
+review_fields = {
+    'id': fields.Integer,
+    'teacher_id': fields.Integer,
+    'substitute_id': fields.Integer,
+    'rating': fields.Float,
+    'comment': fields.String,
+}
 
 class SignUp(Resource):
     def post(self):
@@ -42,32 +97,39 @@ class LogOut(Resource):
 class UserResource(Resource):
     def get(self):
         users = User.query.all()
-        return jsonify(users)
+        serialized_users = [marshal(user, user_fields) for user in users]
+        return jsonify(serialized_users)
 
 class TeacherResource(Resource):
     def get(self):
         teachers = Teacher.query.all()
-        return jsonify(teachers)
+        # Use marshal to serialize the Teacher objects
+        serialized_teachers = [marshal(teacher, teacher_fields) for teacher in teachers]
+        return jsonify(serialized_teachers)
 
 class SubstituteResource(Resource):
     def get(self):
         substitutes = Substitute.query.all()
-        return jsonify(substitutes)
+        serialized_substitutes = [marshal(substitute, substitute_fields) for substitute in substitutes]
+        return jsonify(serialized_substitutes)
 
 class SiteAdminResource(Resource):
     def get(self):
         site_admins = SiteAdmin.query.all()
-        return jsonify(site_admins)
+        serialized_site_admins = [marshal(admin, site_admin_fields) for admin in site_admins]
+        return jsonify(serialized_site_admins)
 
 class CourseResource(Resource):
     def get(self):
         courses = Course.query.all()
-        return jsonify(courses)
+        serialized_courses = [marshal(course, course_fields) for course in courses]
+        return jsonify(serialized_courses)
 
 class ReviewResource(Resource):
     def get(self):
         reviews = Review.query.all()
-        return jsonify(reviews)
+        serialized_reviews = [marshal(review, review_fields) for review in reviews]
+        return jsonify(serialized_reviews)
     
 api.add_resource(SignUp, '/signup')
 api.add_resource(CheckSession, '/check_session')

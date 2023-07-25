@@ -39,8 +39,17 @@ class Teacher(db.Model, SerializerMixin):
     grade_or_course = db.Column(db.String(120), nullable=False)
     image_url = db.Column(db.String(255), default='default_image_url.png')
  
-  
-
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'phone': self.phone,
+            'school': self.school,
+            'location': self.location,
+            'grade_or_course': self.grade_or_course,
+            'image_url': self.image_url,
+        }
 
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes'  
