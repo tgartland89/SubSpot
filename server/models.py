@@ -6,9 +6,6 @@ from sqlalchemy.orm import validates
 
 from config import db, bcrypt
 
-
-
-
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users' 
 
@@ -28,6 +25,11 @@ class User(db.Model, SerializerMixin):
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
+    
+ 
+    teacher = db.relationship('Teacher', back_populates="user", lazy='joined')
+    substitute = db.relationship('Substitute', back_populates="user", lazy='joined')
+    site_admin = db.relationship('SiteAdmin', back_populates="user", lazy='joined')
 
     
 class Teacher(db.Model, SerializerMixin):
@@ -57,8 +59,7 @@ class Teacher(db.Model, SerializerMixin):
             'image_url': self.image_url,
         }
     
-    user = db.relationship('User', back_populates='teacher')
-
+    user = db.relationship('User', back_populates='teacher', uselist=False, lazy='joined')
 
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes'  
@@ -89,7 +90,7 @@ class Substitute(db.Model, SerializerMixin):
             'image_url': self.image_url,
         }
 
-    user = db.relationship('User', back_populates='substitute')
+    user = db.relationship('User', back_populates='substitute', uselist=False, lazy='joined')
 
 
 class SiteAdmin(db.Model, SerializerMixin):
@@ -109,7 +110,8 @@ class SiteAdmin(db.Model, SerializerMixin):
             'image_url': self.image_url,
         }
 
-    user = db.relationship('User', back_populates='site_admin')
+    user = db.relationship('User', back_populates='site_admin', uselist=False, lazy='joined')
+
 
 User.teacher = relationship("Teacher", back_populates="user", uselist=False, lazy='joined')
 User.substitute = relationship("Substitute", back_populates="user", uselist=False, lazy='joined')
@@ -128,21 +130,26 @@ class Course(db.Model, SerializerMixin):
     time = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), nullable=False)
 
-    # Explicitly specify foreign keys for the teacher and substitute relationships
+    teacher_reviewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    substitute_reviewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    writer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+  
     teacher = db.relationship('User', foreign_keys=[teacher_id], backref='teacher_courses', lazy='joined')
     substitute = db.relationship('User', foreign_keys=[substitute_id], backref='substitute_courses', lazy='joined')
 
     def to_dict(self):
         return {
             'id': self.id,
+            'writer_id': self.writer_id,  
             'teacher_id': self.teacher_id,
             'substitute_id': self.substitute_id,
             'class_subject': self.class_subject,
-            'date': self.date.isoformat(), 
+            'date': self.date.isoformat(),
             'time': self.time,
             'status': self.status,
         }
-
+    
 class Review(db.Model, SerializerMixin):
     __tablename__ = 'reviews'
 
@@ -153,16 +160,23 @@ class Review(db.Model, SerializerMixin):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
+ 
+    teacher_reviewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    substitute_reviewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-  # relationships
-    writer = db.relationship('User', backref='reviews', lazy='joined')
-    course = db.relationship('Course', backref='reviews', lazy='joined')
+   
+    writer = db.relationship('User', foreign_keys=[writer_id], backref='reviews', lazy='joined')
+    teacher_reviewed = db.relationship('User', foreign_keys=[teacher_reviewed_id], backref='teacher_reviews', lazy='joined')
+    substitute_reviewed = db.relationship('User', foreign_keys=[substitute_reviewed_id], backref='substitute_reviews', lazy='joined')
+
 
     def to_dict(self):
         return {
             'id': self.id,
             'writer_id': self.writer_id,
             'course_id': self.course_id,
+            'teacher_reviewed_id': self.teacher_reviewed_id,
+            'substitute_reviewed_id': self.substitute_reviewed_id,
             'rating': self.rating,
             'comment': self.comment,
         }
