@@ -71,12 +71,10 @@ class SignUp(Resource):
     def post(self):
         try:
             data = request.get_json()
-
             password = data.get('password')
             confirm_password = data.get('confirm_password')
             if password != confirm_password:
                 return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
-
             user = User(
                 email=data['email'],
                 password=password,  
@@ -84,7 +82,6 @@ class SignUp(Resource):
             )
             db.session.add(user)
             db.session.commit()
-
 
             teacher = Teacher(
                 user_id=user.id,
@@ -107,7 +104,6 @@ class SubstituteSignUp(Resource):
     def post(self):
         try:
             data = request.get_json()
-
             password = data.get('password')
             confirm_password = data.get('confirm_password')
             if password != confirm_password:
@@ -142,7 +138,32 @@ class SubstituteSignUp(Resource):
             print(e)
             return make_response({'errors': ['Validation errors']}, 400)
 
-    
+class LogIn(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
+
+  
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return make_response({'errors': ['User not found']}, 404)
+
+            if not bcrypt.check_password_hash(user.password_hash, password):
+                return make_response({'errors': ['Invalid password']}, 401)
+
+            session['user_id'] = user.id
+
+            if user.role == 'Teacher':
+                return redirect(url_for('teacher_form'))
+            elif user.role == 'Substitute':
+                return redirect(url_for('substitute_form'))
+            else:
+                return make_response({'errors': ['Invalid user role']}, 400)
+        except Exception as e:
+            print(e)
+            return make_response({'errors': ['Validation errors']}, 400)
     
 class LogOut(Resource):
     def delete(self):
@@ -151,8 +172,6 @@ class LogOut(Resource):
             return make_response({'message': 'Logged out successfully'}, 204)
         else:
             return make_response({'errors': ['User not logged in']}, 401)
-
-
 
 class UserResource(Resource):
     def get(self):
@@ -201,45 +220,36 @@ api.add_resource(SubstituteSignUp, '/substitute-signup')
 
 @app.route('/teacher-form', methods=['GET', 'POST'])
 def teacher_form():
-    if request.method == 'POST':
 
-        data = request.form
-        teacher = Teacher(
-            name=data['name'],
-            school=data['school'],
-            location=data['location'],
-            grade_or_course=data['grade_or_course'],
-            email=data['email'],
-            phone=data['phone']
-        )
-        db.session.add(teacher)
-        db.session.commit()
-        return make_response({'message': 'Teacher added successfully'}, 201)
-    return render_template('teacher_form.html')
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        if user and user.role == 'Teacher':
+            if request.method == 'POST':
+
+                return make_response({'message': 'Teacher added successfully'}, 201)
+            return render_template('teacher_form.html')
+
+    return make_response({'errors': ['Unauthorized']}, 401)
 
 @app.route('/substitute-form', methods=['GET', 'POST'])
 def substitute_form():
-    if request.method == 'POST':
 
-        data = request.form
-        substitute = Substitute(
-            name=data['name'],
-            verification_id=data['verification_id'],
-            location=data['location'],
-            grade_or_course=data['grade_or_course'],
-            email=data['email'],
-            phone=data['phone']
-        )
-        db.session.add(substitute)
-        db.session.commit()
-        return make_response({'message': 'Substitute added successfully'}, 201)
-    return render_template('substitute_form.html')
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        if user and user.role == 'Substitute':
+            if request.method == 'POST':
+  
+                return make_response({'message': 'Substitute added successfully'}, 201)
+            return render_template('substitute_form.html')
+
+    return make_response({'errors': ['Unauthorized']}, 401)
 
 @app.route('/substitute-signup', methods=['POST'])
 def substitute_signup():
     try:
         data = request.get_json()
-
         password = data.get('password')
         confirm_password = data.get('confirm_password')
         if password != confirm_password:
@@ -273,7 +283,31 @@ def substitute_signup():
     except Exception as e:
         print(e)
         return make_response({'errors': ['Validation errors']}, 400)
-    
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        data = request.form
+        email = data['email']
+        password = data['password']
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return make_response({'errors': ['User not found']}, 404)
+
+        if not bcrypt.check_password_hash(user.password_hash, password):
+            return make_response({'errors': ['Invalid password']}, 401)
+
+        session['user_id'] = user.id
+
+        if user.role == 'Teacher':
+            return redirect(url_for('teacher_form'))
+        elif user.role == 'Substitute':
+            return redirect(url_for('substitute_form'))
+        else:
+            return make_response({'errors': ['Invalid user role']}, 400)
+
+    return render_template('login.html') 
+
 @app.route('/logout', methods=['DELETE'])
 def logout():
     if 'user_id' in session:
