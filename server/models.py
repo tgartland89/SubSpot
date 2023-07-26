@@ -1,8 +1,13 @@
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Date
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
 
 from config import db, bcrypt
+
+
+
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users' 
@@ -23,13 +28,8 @@ class User(db.Model, SerializerMixin):
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
-    
-    # Relationships
-    teacher = db.relationship("Teacher", backref="user", uselist=False)
-    substitute = db.relationship("Substitute", backref="user", uselist=False)
-    site_admin = db.relationship("SiteAdmin", backref="user", uselist=False)
-    
 
+    
 class Teacher(db.Model, SerializerMixin):
     __tablename__ = 'teachers'
 
@@ -44,7 +44,7 @@ class Teacher(db.Model, SerializerMixin):
     location = db.Column(db.String(120), nullable=False)
     grade_or_course = db.Column(db.String(120), nullable=False)
     image_url = db.Column(db.String(255), default='default_image_url.png')
- 
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -56,7 +56,9 @@ class Teacher(db.Model, SerializerMixin):
             'grade_or_course': self.grade_or_course,
             'image_url': self.image_url,
         }
-    user = db.relationship('User', backref='teacher')
+    
+    user = db.relationship('User', back_populates='teacher')
+
 
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes'  
@@ -87,7 +89,8 @@ class Substitute(db.Model, SerializerMixin):
             'image_url': self.image_url,
         }
 
-user = db.relationship('User', backref='substitute')
+    user = db.relationship('User', back_populates='substitute')
+
 
 class SiteAdmin(db.Model, SerializerMixin):
     __tablename__ = 'site_admins'  
@@ -106,7 +109,11 @@ class SiteAdmin(db.Model, SerializerMixin):
             'image_url': self.image_url,
         }
 
-user = db.relationship('User', backref='site_admin')
+    user = db.relationship('User', back_populates='site_admin')
+
+User.teacher = relationship("Teacher", back_populates="user", uselist=False, lazy='joined')
+User.substitute = relationship("Substitute", back_populates="user", uselist=False, lazy='joined')
+User.site_admin = relationship("SiteAdmin", back_populates="user", uselist=False, lazy='joined')
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'  
@@ -122,8 +129,8 @@ class Course(db.Model, SerializerMixin):
     status = db.Column(db.String(50), nullable=False)
 
     # Explicitly specify foreign keys for the teacher and substitute relationships
-    teacher = db.relationship('User', foreign_keys=[teacher_id], backref='teacher_courses')
-    substitute = db.relationship('User', foreign_keys=[substitute_id], backref='substitute_courses')
+    teacher = db.relationship('User', foreign_keys=[teacher_id], backref='teacher_courses', lazy='joined')
+    substitute = db.relationship('User', foreign_keys=[substitute_id], backref='substitute_courses', lazy='joined')
 
     def to_dict(self):
         return {
@@ -147,9 +154,9 @@ class Review(db.Model, SerializerMixin):
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
 
-    # relationships
-    writer = db.relationship('User', backref='reviews')
-    course = db.relationship('Course', backref='reviews')
+  # relationships
+    writer = db.relationship('User', backref='reviews', lazy='joined')
+    course = db.relationship('Course', backref='reviews', lazy='joined')
 
     def to_dict(self):
         return {

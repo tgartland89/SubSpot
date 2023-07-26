@@ -263,6 +263,7 @@ def substitute_signup():
     except Exception as e:
         print(e)
         return make_response({'errors': ['Validation errors']}, 400)
+    
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -295,6 +296,9 @@ def logout():
         return make_response({'message': 'Logged out successfully'}, 204)
     else:
         return make_response({'errors': ['User not logged in']}, 401)
-
+    
 if __name__ == '__main__':
+    # Move db.create_all() here within the application context
+    with app.app_context():
+        db.create_all()
     app.run(port=5555)
