@@ -75,65 +75,45 @@ class SignUp(Resource):
             confirm_password = data.get('confirm_password')
             if password != confirm_password:
                 return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
+            
+            role = data.get('role')  # Get the chosen role (Teacher or Substitute)
+
             user = User(
                 email=data['email'],
-                password=password,  
-                role='Teacher',
+                password=password,
+                role=role,  # Use the chosen role in creating the user
             )
             db.session.add(user)
             db.session.commit()
 
-            teacher = Teacher(
-                user_id=user.id,
-                name=data['name'],
-                email=data['email'],
-                phone=data['phone'],
-                school=data['school'],
-                location=data['location'],
-                grade_or_course=data['grade_or_course'],
-            )
-            db.session.add(teacher)
+            if role == 'Teacher':
+                teacher = Teacher(
+                    user_id=user.id,
+                    name=data['name'],
+                    email=data['email'],
+                    phone=data['phone'],
+                    school=data['school'],
+                    location=data['location'],
+                    grade_or_course=data['grade_or_course'],
+                )
+                db.session.add(teacher)
+
+            elif role == 'Substitute':
+                substitute = Substitute(
+                    user_id=user.id,
+                    name=data['name'],
+                    email=data['email'],
+                    phone=data['phone'],
+                    location=data['location'],
+                    grade_or_course=data['grade_or_course'],
+                    verification_id=data['verification_id'],
+                    qualifications=data['qualifications'],
+                )
+                db.session.add(substitute)
+
             db.session.commit()
 
-            return make_response({'message': 'New teacher created successfully'}, 201)
-        except Exception as e:
-            print(e)
-            return make_response({'errors': ['Validation errors']}, 400)
-        
-class SubstituteSignUp(Resource):
-    def post(self):
-        try:
-            data = request.get_json()
-            password = data.get('password')
-            confirm_password = data.get('confirm_password')
-            if password != confirm_password:
-                return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
-
-            user = User(
-                email=data['email'],
-                password=password,  
-                role='Substitute',
-            )
-            db.session.add(user)
-            db.session.commit()
-
-            user_id = user.id
-
-            substitute = Substitute(
-                user_id=user_id,
-                name=data['name'],
-                email=data['email'],
-                phone=data['phone'],
-                location=data['location'],
-                grade_or_course=data['grade_or_course'],
-                verification_id=data['verification_id'],
-                qualifications=data['qualifications'],
-            )
-
-            db.session.add(substitute)
-            db.session.commit()
-
-            return make_response({'message': 'New substitute created successfully'}, 201)
+            return make_response({'message': f'New {role} created successfully'}, 201)
         except Exception as e:
             print(e)
             return make_response({'errors': ['Validation errors']}, 400)
@@ -216,7 +196,7 @@ api.add_resource(SubstituteResource, '/substitutes')
 api.add_resource(SiteAdminResource, '/site_admins')
 api.add_resource(CourseResource, '/courses')
 api.add_resource(ReviewResource, '/reviews')
-api.add_resource(SubstituteSignUp, '/substitute-signup')
+
 
 @app.route('/teacher-form', methods=['GET', 'POST'])
 def teacher_form():
