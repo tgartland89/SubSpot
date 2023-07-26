@@ -38,6 +38,7 @@ def create_teacher(user_id, image_url=None):
         image_url=image_url
     )
     db.session.add(teacher)
+    db.session.commit()
 
 def create_substitute(user_id, image_url=None):
     substitute = Substitute(
@@ -52,48 +53,42 @@ def create_substitute(user_id, image_url=None):
         image_url=image_url
     )
     db.session.add(substitute)
+    db.session.commit()
 
 def create_site_admin(user_id):
     site_admin = SiteAdmin(user_id=user_id, name=fake.name())
     db.session.add(site_admin)
+    db.session.commit()
 
-def create_users_and_roles(num_users):
-    roles = ['Teacher', 'Substitute', 'Site Admin']
-    teacher_created = False
-    substitute_created = False
-    admin_created = False
-
-    for _ in range(num_users):
+def create_users_and_roles(num_teachers=10, num_subs=5, num_admins=2):
+    for _ in range(num_teachers):
         email = fake.email()
         password = generate_random_password()
-        role = random.choice(roles)
-        user = create_user(email, password, role)
-
-        if role == 'Teacher' and not teacher_created:
-            create_teacher(user.id)
-            teacher_created = True
-
-        if role == 'Substitute' and not substitute_created:
-            create_substitute(user.id)
-            substitute_created = True
-
-        if role == 'Site Admin' and not admin_created:
-            create_site_admin(user.id)
-            admin_created = True
-
-        if teacher_created and substitute_created and admin_created:
-            break
-
-    if not teacher_created:
+        user = create_user(email, password, 'Teacher')
         create_teacher(user.id)
 
-    if not substitute_created:
+    for _ in range(num_subs):
+        email = fake.email()
+        password = generate_random_password()
+        user = create_user(email, password, 'Substitute')
         create_substitute(user.id)
 
-    if not admin_created:
+    for _ in range(num_admins):
+        email = fake.email()
+        password = generate_random_password()
+        user = create_user(email, password, 'Site Admin')
         create_site_admin(user.id)
 
-def create_courses_and_reviews(num_courses, teachers, substitutes):
+    db.session.commit()
+
+def create_courses_and_reviews(num_courses=10, num_reviews=5):
+    teachers = Teacher.query.all()
+    substitutes = Substitute.query.all()
+
+    if not teachers or not substitutes:
+        print("No teachers or substitutes found in the database. Skipping course and review generation.")
+        return
+
     for _ in range(num_courses):
         teacher = random.choice(teachers)
         substitute = random.choice(substitutes)
@@ -107,10 +102,16 @@ def create_courses_and_reviews(num_courses, teachers, substitutes):
             status=random.choice(['Scheduled', 'Completed', 'Canceled'])
         )
         db.session.add(course)
-        db.session.commit()
+    db.session.commit()
 
+    courses = Course.query.all()
+
+    for _ in range(num_reviews):
+        course = random.choice(courses)
+        writer = random.choice([course.teacher, course.substitute])
+        
         review = Review(
-            writer_id=random.choice([teacher.user_id, substitute.user_id]),
+            writer_id=writer.id,
             course_id=course.id,
             rating=random.randint(1, 5),
             comment=fake.text()
@@ -119,10 +120,11 @@ def create_courses_and_reviews(num_courses, teachers, substitutes):
 
     db.session.commit()
 
+
 def generate_random_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
-def seed_database(num_users=5, num_courses=10):
+def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=5):
     with app.app_context():
         print("Wiping old Data...")
         db.drop_all()
@@ -130,20 +132,12 @@ def seed_database(num_users=5, num_courses=10):
         print("Complete")
 
         print("Generating Users and Roles...")
-        create_users_and_roles(num_users)
+        create_users_and_roles(num_teachers, num_subs, num_admins)
         print("Complete")
 
-      
-        teachers = Teacher.query.all()
-        substitutes = Substitute.query.all()
-
-       
-        if teachers and substitutes:
-            print("Generating Courses and Reviews...")
-            create_courses_and_reviews(num_courses, teachers, substitutes)
-            print("Complete")
-        else:
-            print("No teachers or substitutes found in the database. Skipping course and review generation.")
+        print("Generating Courses and Reviews...")
+        create_courses_and_reviews(num_courses, num_reviews)
+        print("Complete")
 
         db.session.commit()
 
