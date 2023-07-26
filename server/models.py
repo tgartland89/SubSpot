@@ -24,6 +24,11 @@ class User(db.Model, SerializerMixin):
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
     
+    # Relationships
+    teacher = db.relationship("Teacher", backref="user", uselist=False)
+    substitute = db.relationship("Substitute", backref="user", uselist=False)
+    site_admin = db.relationship("SiteAdmin", backref="user", uselist=False)
+    
 
 class Teacher(db.Model, SerializerMixin):
     __tablename__ = 'teachers'
@@ -51,6 +56,7 @@ class Teacher(db.Model, SerializerMixin):
             'grade_or_course': self.grade_or_course,
             'image_url': self.image_url,
         }
+    user = db.relationship('User', backref='teacher')
 
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes'  
@@ -81,6 +87,8 @@ class Substitute(db.Model, SerializerMixin):
             'image_url': self.image_url,
         }
 
+user = db.relationship('User', backref='substitute')
+
 class SiteAdmin(db.Model, SerializerMixin):
     __tablename__ = 'site_admins'  
 
@@ -97,6 +105,8 @@ class SiteAdmin(db.Model, SerializerMixin):
             'name': self.name,
             'image_url': self.image_url,
         }
+
+user = db.relationship('User', backref='site_admin')
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'  
