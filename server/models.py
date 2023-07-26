@@ -4,6 +4,12 @@ from sqlalchemy.orm import validates
 
 from config import db, bcrypt
 
+teacher_substitute_association = db.Table(
+    'teacher_substitute_association',
+    db.Column('teacher_id', db.Integer, db.ForeignKey('teachers.id'), primary_key=True),
+    db.Column('substitute_id', db.Integer, db.ForeignKey('substitutes.id'), primary_key=True)
+)
+
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users' 
 
@@ -23,6 +29,7 @@ class User(db.Model, SerializerMixin):
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
+    
 
 class Teacher(db.Model, SerializerMixin):
     __tablename__ = 'teachers'
@@ -32,11 +39,10 @@ class Teacher(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     school = db.Column(db.String(120), nullable=False)
-    location = db.Column(db.String(120), nullable=False)
-    grade_or_course = db.Column(db.String(120), nullable=False)
+    location = db.Column(db.String(120), nullable=False, index=True)  
+    grade_or_course = db.Column(db.String(120), nullable=False, index=True)  
     image_url = db.Column(db.String(255), default='default_image_url.png')
  
     def to_dict(self):
@@ -60,10 +66,10 @@ class Substitute(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
     verification_id = db.Column(db.String(6), nullable=True)
-    location = db.Column(db.String(120), nullable=False)
-    grade_or_course = db.Column(db.String(120))
+    location = db.Column(db.String(120), nullable=False, index=True)  
+    grade_or_course = db.Column(db.String(120), index=True)  
     phone = db.Column(db.String(20))
-    email = db.Column(db.String(120))
+    email = db.Column(db.String(120), index=True)  
     qualifications = db.Column(db.Text)
     image_url = db.Column(db.String(255), default='default_image_url.png')
 
