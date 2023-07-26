@@ -7,13 +7,13 @@ from config import db, bcrypt
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users' 
 
-    serialize_rules = ('-reviews', '-password_hash')
+    serialize_rules = ('-reviews', '-courses', '-password_hash')
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    profile_picture = db.Column(db.String(255))  
     role = db.Column(db.Enum('Teacher', 'Substitute', 'Site Admin'), nullable=False)
+    profile_picture = db.Column(db.String(255))  
 
     def __init__(self, email, password, role, profile_picture=None):  
         self.email = email
@@ -23,6 +23,7 @@ class User(db.Model, SerializerMixin):
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
+    
 
 class Teacher(db.Model, SerializerMixin):
     __tablename__ = 'teachers'
@@ -103,12 +104,16 @@ class Course(db.Model, SerializerMixin):
     serialize_rules = ('-teacher.reviews', '-substitute.reviews')
 
     id = db.Column(db.Integer, primary_key=True)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
-    substitute_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    substitute_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     class_subject = db.Column(db.String(255), nullable=False)
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), nullable=False)
+
+    # Explicitly specify foreign keys for the teacher and substitute relationships
+    teacher = db.relationship('User', foreign_keys=[teacher_id], backref='teacher_courses')
+    substitute = db.relationship('User', foreign_keys=[substitute_id], backref='substitute_courses')
 
     def to_dict(self):
         return {
@@ -122,21 +127,25 @@ class Course(db.Model, SerializerMixin):
         }
 
 class Review(db.Model, SerializerMixin):
-    __tablename__ = 'reviews'  
+    __tablename__ = 'reviews'
 
-    serialize_rules = ('-writer.reviews', '-writer.profile_picture', '-writer.password_hash', '-rental.reviews')
+    serialize_rules = ('-writer.reviews', '-writer.courses', '-writer.password_hash')
 
     id = db.Column(db.Integer, primary_key=True)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
-    substitute_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)
+    writer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
+
+    # relationships
+    writer = db.relationship('User', backref='reviews')
+    course = db.relationship('Course', backref='reviews')
 
     def to_dict(self):
         return {
             'id': self.id,
-            'teacher_id': self.teacher_id,
-            'substitute_id': self.substitute_id,
+            'writer_id': self.writer_id,
+            'course_id': self.course_id,
             'rating': self.rating,
             'comment': self.comment,
         }

@@ -5,8 +5,9 @@ from faker import Faker
 import random
 import requests
 import string
-from config import db
-from models import User, Teacher, Substitute, SiteAdmin, Course, Review
+
+
+fake = Faker()
 
 def fetch_random_image():
     try:
@@ -16,8 +17,7 @@ def fetch_random_image():
     except requests.exceptions.RequestException as e:
         print('Error fetching random image:', e)
         return None
-
-fake = Faker()
+    
 
 def create_user(email, password, role):
     profile_picture = fetch_random_image()
@@ -59,38 +59,65 @@ def create_site_admin(user_id):
 
 def create_users_and_roles(num_users):
     roles = ['Teacher', 'Substitute', 'Site Admin']
+    teacher_created = False
+    substitute_created = False
+    admin_created = False
+
     for _ in range(num_users):
         email = fake.email()
         password = generate_random_password()
-        user = create_user(email, password, random.choice(roles))  
-        role = user.role
-        if role == 'Teacher':
+        role = random.choice(roles)
+        user = create_user(email, password, role)
+
+        if role == 'Teacher' and not teacher_created:
             create_teacher(user.id)
-        elif role == 'Substitute':
+            teacher_created = True
+
+        if role == 'Substitute' and not substitute_created:
             create_substitute(user.id)
-        else:
+            substitute_created = True
+
+        if role == 'Site Admin' and not admin_created:
             create_site_admin(user.id)
+            admin_created = True
+
+        if teacher_created and substitute_created and admin_created:
+            break
+
+    if not teacher_created:
+        create_teacher(user.id)
+
+    if not substitute_created:
+        create_substitute(user.id)
+
+    if not admin_created:
+        create_site_admin(user.id)
 
 def create_courses_and_reviews(num_courses, teachers, substitutes):
     for _ in range(num_courses):
-        teacher = random.choice(teachers)  
-        substitute = random.choice(substitutes) 
+        teacher = random.choice(teachers)
+        substitute = random.choice(substitutes)
+
         course = Course(
-            teacher_id=teacher.id,
-            substitute_id=substitute.id,
+            teacher_id=teacher.user_id,
+            substitute_id=substitute.user_id,
             class_subject=fake.job(),
             date=fake.date_this_year(),
             time=fake.time(),
-            status=random.choice(['Scheduled', 'Completed', 'Canceled'])  
+            status=random.choice(['Scheduled', 'Completed', 'Canceled'])
         )
         db.session.add(course)
+        db.session.commit()
+
         review = Review(
-            teacher_id=teacher.id,
-            substitute_id=substitute.id,
-            rating=random.randint(1, 5),  
+            writer_id=random.choice([teacher.user_id, substitute.user_id]),
+            course_id=course.id,
+            rating=random.randint(1, 5),
             comment=fake.text()
         )
         db.session.add(review)
+
+    db.session.commit()
 
 def generate_random_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
