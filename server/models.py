@@ -149,6 +149,7 @@ class Course(db.Model, SerializerMixin):
             'time': self.time,
             'status': self.status,
         }
+        
     
 class Review(db.Model, SerializerMixin):
     __tablename__ = 'reviews'

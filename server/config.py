@@ -11,9 +11,8 @@ app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key')
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')  
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.json.compact = False
 
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -28,10 +27,10 @@ convention = {
 }
 
 db = SQLAlchemy(metadata=metadata)
+db.init_app(app)
 
 bcrypt = Bcrypt(app)
 
 migrate = Migrate(app, db)
-db.init_app(app)
 
 api = Api(app)

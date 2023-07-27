@@ -8,7 +8,6 @@ from resources import *
 from routes import *
 
 CORS(app, supports_credentials=True)
-app.template_folder = "templates"
 app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key')
 
 api.add_resource(SignUp, '/signup')
