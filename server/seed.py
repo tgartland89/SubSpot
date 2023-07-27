@@ -6,7 +6,6 @@ import random
 import requests
 import string
 
-
 fake = Faker()
 
 def fetch_random_image():
@@ -17,7 +16,6 @@ def fetch_random_image():
     except requests.exceptions.RequestException as e:
         print('Error fetching random image:', e)
         return None
-    
 
 def create_user(email, password, role):
     profile_picture = fetch_random_image()
@@ -89,9 +87,18 @@ def create_courses_and_reviews(num_courses=10, num_reviews=5):
         print("No teachers or substitutes found in the database. Skipping course and review generation.")
         return
 
+    course_review_pairs = set()
+
     for _ in range(num_courses):
         teacher = random.choice(teachers)
         substitute = random.choice(substitutes)
+
+        # Ensure that the course and substitute pairing is unique
+        while (teacher, substitute) in course_review_pairs:
+            teacher = random.choice(teachers)
+            substitute = random.choice(substitutes)
+
+        course_review_pairs.add((teacher, substitute))
 
         course = Course(
             teacher_id=teacher.user_id,
@@ -99,22 +106,33 @@ def create_courses_and_reviews(num_courses=10, num_reviews=5):
             class_subject=fake.job(),
             date=fake.date_this_year(),
             time=fake.time(),
-            status=random.choice(['Scheduled', 'Completed', 'Canceled'])
+            status=random.choice(['Scheduled', 'Completed', 'Canceled']),
+            teacher_reviewed_id=substitute.user_id,
+            substitute_reviewed_id=teacher.user_id,
+            writer_id=teacher.user_id,
         )
         db.session.add(course)
+
     db.session.commit()
 
     courses = Course.query.all()
 
     for _ in range(num_reviews):
         course = random.choice(courses)
-        writer = random.choice([course.teacher, course.substitute])
-        
+
+        # Only allow teachers to review substitutes, not courses
+        if course.substitute_id == course.teacher_reviewed_id:
+            continue
+
+        writer = random.choice(teachers)
+
         review = Review(
-            writer_id=writer.id,
+            writer_id=writer.user_id,
             course_id=course.id,
             rating=random.randint(1, 5),
-            comment=fake.text()
+            comment=fake.text(),
+            teacher_reviewed_id=course.substitute_id,
+            substitute_reviewed_id=course.teacher_id,
         )
         db.session.add(review)
 
@@ -124,7 +142,7 @@ def create_courses_and_reviews(num_courses=10, num_reviews=5):
 def generate_random_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
-def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=5):
+def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30):
     with app.app_context():
         print("Wiping old Data...")
         db.drop_all()
@@ -138,8 +156,6 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
         print("Generating Courses and Reviews...")
         create_courses_and_reviews(num_courses, num_reviews)
         print("Complete")
-
-        db.session.commit()
 
 if __name__ == '__main__':
     seed_database()

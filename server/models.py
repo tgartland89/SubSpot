@@ -130,9 +130,9 @@ class Course(db.Model, SerializerMixin):
     time = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), nullable=False)
 
-    teacher_reviewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    substitute_reviewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    writer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    teacher_reviewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    substitute_reviewed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    writer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
 
   
     teacher = db.relationship('User', foreign_keys=[teacher_id], backref='teacher_courses', lazy='joined')
