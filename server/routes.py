@@ -11,9 +11,8 @@ def teacher_form():
         user = User.query.get(user_id)
         if user and user.role == 'Teacher':
             if request.method == 'POST':
-
                 return make_response({'message': 'Teacher added successfully'}, 201)
-            return render_template('teacher_form.html')
+            return make_response({'message': 'Teacher form is available'}, 200)
 
     return make_response({'errors': ['Unauthorized']}, 401)
 
@@ -25,12 +24,10 @@ def substitute_form():
         user = User.query.get(user_id)
         if user and user.role == 'Substitute':
             if request.method == 'POST':
-  
                 return make_response({'message': 'Substitute added successfully'}, 201)
-            return render_template('substitute_form.html')
+            return make_response({'message': 'Substitute form is available'}, 200)
 
     return make_response({'errors': ['Unauthorized']}, 401)
-
 @app.route('/substitute-signup', methods=['POST'])
 def substitute_signup():
     try:
@@ -69,12 +66,12 @@ def substitute_signup():
         print(e)
         return make_response({'errors': ['Validation errors']}, 400)
     
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        data = request.form
-        email = data['email']
-        password = data['password']
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
 
         user = User.query.filter_by(email=email).first()
         if not user:
@@ -86,13 +83,14 @@ def login():
         session['user_id'] = user.id
 
         if user.role == 'Teacher':
-            return redirect(url_for('teacher_form'))
+            return make_response({'message': 'Teacher logged in successfully'}, 200)
         elif user.role == 'Substitute':
-            return redirect(url_for('substitute_form'))
+            return make_response({'message': 'Substitute logged in successfully'}, 200)
         else:
             return make_response({'errors': ['Invalid user role']}, 400)
-
-    return render_template('login.html') 
+    except Exception as e:
+        print(e)
+        return make_response({'errors': ['Validation errors']}, 400)
 
 @app.route('/logout', methods=['DELETE'])
 def logout():
