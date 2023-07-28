@@ -161,24 +161,25 @@ class UserResource(Resource):
         users = User.query.all()
         serialized_users = [marshal(user, user_fields) for user in users]
         return jsonify(serialized_users)
-
+    
 class TeacherResource(Resource):
     def get(self):
         teachers = Teacher.query.all()
-        serialized_teachers = [marshal(teacher, teacher_fields) for teacher in teachers]
+        serialized_teachers = [marshal({**teacher.to_dict(), 'user': marshal(teacher.user, user_fields)}, teacher_fields) for teacher in teachers]
         return jsonify(serialized_teachers)
 
 class SubstituteResource(Resource):
     def get(self):
         substitutes = Substitute.query.all()
-        serialized_substitutes = [marshal(substitute, substitute_fields) for substitute in substitutes]
+        serialized_substitutes = [marshal({**substitute.to_dict(), 'user': marshal(substitute.user, user_fields)}, substitute_fields) for substitute in substitutes]
         return jsonify(serialized_substitutes)
 
 class SiteAdminResource(Resource):
     def get(self):
         site_admins = SiteAdmin.query.all()
-        serialized_site_admins = [marshal(admin, site_admin_fields) for admin in site_admins]
+        serialized_site_admins = [marshal({**site_admin.to_dict(), 'user': marshal(site_admin.user, user_fields)}, site_admin_fields) for site_admin in site_admins]
         return jsonify(serialized_site_admins)
+
 
 class CourseResource(Resource):
     def get(self):

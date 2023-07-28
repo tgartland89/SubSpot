@@ -34,8 +34,6 @@ class User(db.Model, SerializerMixin):
     site_admin = db.relationship('SiteAdmin', back_populates='user', uselist=False, lazy='joined')
 
 
-
-
 class Teacher(db.Model, SerializerMixin):
     __tablename__ = 'teachers'
 
@@ -44,6 +42,8 @@ class Teacher(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     school_name = db.Column(db.String(120), nullable=False)
+
+    user = db.relationship('User', back_populates='teacher', uselist=False, lazy='joined')
 
     def to_dict(self):
         return {
@@ -57,7 +57,7 @@ class Teacher(db.Model, SerializerMixin):
             'profile_picture': self.user.profile_picture,
         }
     
-    user = db.relationship('User', back_populates='teacher', uselist=False, lazy='joined')
+
 
 
 class Substitute(db.Model, SerializerMixin):
@@ -121,6 +121,9 @@ class Request(db.Model, SerializerMixin):
     Message_sub_sent_to = db.Column(db.String(120))
     Teacher_if_declined = db.Column(db.String(120))
 
+    substitute = db.relationship('Substitute', backref='requests', uselist=False)
+
+
 
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'
@@ -133,6 +136,9 @@ class Course(db.Model, SerializerMixin):
     Course_school_name = db.Column(db.String(120))
     Course_location = db.Column(db.String(120))
 
+    teacher = db.relationship('Teacher', backref='courses')
+    substitute = db.relationship('Substitute', backref='courses')
+
 
 class Review(db.Model, SerializerMixin):
     __tablename__ = 'reviews'
@@ -142,3 +148,7 @@ class Review(db.Model, SerializerMixin):
     Rating = db.Column(db.Integer)
     Review = db.Column(db.String(255))
     Correlating_Substitute_ID = db.Column(db.Integer, db.ForeignKey('substitutes.id'))
+
+    teacher = db.relationship('Teacher', backref='reviews')
+    substitute = db.relationship('Substitute', backref='reviews')
+
