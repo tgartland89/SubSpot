@@ -15,7 +15,7 @@ def home():
     <body>
         <h1>Welcome to SubSpot!</h1>
         <p>Find substitutes quickly for your teaching needs.</p>
-        <a href="/login">Login</a> or <a href="/signup">Sign Up</a>
+        <a href="/login">Log In</a> or <a href="/signup">Sign Up</a>
     </body>
     </html>
     """

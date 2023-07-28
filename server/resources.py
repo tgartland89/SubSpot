@@ -1,5 +1,5 @@
 from flask.views import MethodView
-from flask import request, make_response, jsonify, session
+from flask import request, make_response, jsonify, session, redirect, render_template
 from flask_restful import fields, marshal, marshal_with
 from config import db, bcrypt
 from models import User, Teacher, Substitute, Request, Course, Review, SiteAdmin
@@ -71,21 +71,25 @@ request_fields = {
     'Message_sub_sent_to': fields.String,
     'Teacher_if_declined': fields.String,
 }
-
 class SignUp(MethodView):
+
+
     def post(self):
         try:
-            data = request.get_json()
+            data = request.form
             password = data.get('password')
             confirm_password = data.get('confirm_password')
             if password != confirm_password:
                 return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
-            
-            role = data.get('role')  
+
+            role = data.get('role')
+            if role not in ['Teacher', 'Substitute']:
+                return make_response({'errors': ['Invalid user role']}, 400)
+
             user = User(
                 email=data['email'],
                 password=password,
-                role=role, 
+                role=role,
             )
             db.session.add(user)
             db.session.commit()
@@ -117,12 +121,102 @@ class SignUp(MethodView):
 
             db.session.commit()
 
-            return make_response({'message': f'New {role} created successfully'}, 201)
+            if role == 'Teacher':
+                return make_response({'message': 'Teacher registered successfully'}, 201)
+            elif role == 'Substitute':
+                return make_response({'message': 'Substitute registered successfully'}, 201)
+
+        except IntegrityError as e:
+            db.session.rollback()
+            return make_response({'errors': ['Database integrity error']}, 500)
         except Exception as e:
             print(e)
             return make_response({'errors': ['Validation errors']}, 400)
 
 
+class TeacherSignUp(MethodView):
+    def get(self):
+        return make_response({'message': 'Teacher sign-up form is available'}, 200)
+
+    def post(self):
+        try:
+            data = request.get_json()
+            password = data.get('password')
+            confirm_password = data.get('confirm_password')
+            if password != confirm_password:
+                return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
+
+            user = User(
+                email=data['email'],
+                password=password,
+                role='Teacher',
+            )
+            db.session.add(user)
+            db.session.commit()
+
+            teacher = Teacher(
+                user_id=user.id,
+                name=data['name'],
+                email=data['email'],
+                phone=data['phone'],
+                school=data['school'],
+                location=data['location'],
+                grade_or_course=data['grade_or_course'],
+            )
+            db.session.add(teacher)
+            db.session.commit()
+
+            return make_response({'message': 'Teacher registered successfully'}, 201)
+
+        except IntegrityError as e:
+            db.session.rollback()
+            return make_response({'errors': ['Database integrity error']}, 500)
+        except Exception as e:
+            print(e)
+            return make_response({'errors': ['Validation errors']}, 400)
+
+class SubstituteSignUp(MethodView):
+    def get(self):
+        return make_response({'message': 'Substitute sign-up form is available'}, 200)
+
+    def post(self):
+        try:
+            data = request.get_json()
+            password = data.get('password')
+            confirm_password = data.get('confirm_password')
+            if password != confirm_password:
+                return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
+
+            user = User(
+                email=data['email'],
+                password=password,
+                role='Substitute',
+            )
+            db.session.add(user)
+            db.session.commit()
+
+            substitute = Substitute(
+                user_id=user.id,
+                name=data['name'],
+                email=data['email'],
+                phone=data['phone'],
+                location=data['location'],
+                grade_or_course=data['grade_or_course'],
+                verification_id=data['verification_id'],
+                qualifications=data['qualifications'],
+            )
+            db.session.add(substitute)
+            db.session.commit()
+
+            return make_response({'message': 'Substitute registered successfully'}, 201)
+
+        except IntegrityError as e:
+            db.session.rollback()
+            return make_response({'errors': ['Database integrity error']}, 500)
+        except Exception as e:
+            print(e)
+            return make_response({'errors': ['Validation errors']}, 400)
+        
 class LogIn(MethodView):
     def post(self):
         try:
