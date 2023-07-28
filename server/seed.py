@@ -1,6 +1,6 @@
 from flask import Flask
 from config import app, db
-from models import User, Teacher, Substitute, SiteAdmin, Course, Review
+from models import User, Teacher, Substitute, SiteAdmin, Course, Review, Request
 from faker import Faker
 import random
 import requests
@@ -11,50 +11,44 @@ fake = Faker()
 def fetch_random_image():
     try:
         response = requests.get('https://source.unsplash.com/featured/?profile_pic')
-        response.raise_for_status()  
+        response.raise_for_status()
         return response.url
     except requests.exceptions.RequestException as e:
         print('Error fetching random image:', e)
         return None
 
 def create_user(email, password, role):
+    name = fake.name()
+    location = fake.city()
+    phone = fake.phone_number()
     profile_picture = fetch_random_image()
-    user = User(email=email, password=password, role=role, profile_picture=profile_picture)
+    user = User(name=name, email=email, location=location, phone=phone, password=password, role=role, profile_picture=profile_picture)
     db.session.add(user)
     db.session.commit()
     return user
 
-def create_teacher(user_id, image_url=None):  
+def generate_random_password():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+
+def create_teacher(user_id):
     teacher = Teacher(
         user_id=user_id,
-        name=fake.name(),
-        email=fake.email(),
-        phone=fake.phone_number(),
-        school=fake.company(),
-        location=fake.address(),
-        grade_or_course=fake.job(),
-        image_url=image_url
+        school_name=fake.company()
     )
     db.session.add(teacher)
     db.session.commit()
 
-def create_substitute(user_id, image_url=None):
+def create_substitute(user_id):
     substitute = Substitute(
         user_id=user_id,
-        name=fake.name(),
-        qualifications=fake.text(),
-        location=fake.city(),
-        grade_or_course=fake.job(),  
-        phone=fake.phone_number(),  
-        email=fake.email(), 
-        verification_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=6)),  
-        image_url=image_url
+        qualification=fake.text(),
+        verification_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     )
     db.session.add(substitute)
     db.session.commit()
 
 def create_site_admin(user_id):
-    site_admin = SiteAdmin(user_id=user_id, name=fake.name())
+    site_admin = SiteAdmin(user_id=user_id)
     db.session.add(site_admin)
     db.session.commit()
 
@@ -74,12 +68,10 @@ def create_users_and_roles(num_teachers=10, num_subs=5, num_admins=2):
     for _ in range(num_admins):
         email = fake.email()
         password = generate_random_password()
-        user = create_user(email, password, 'Site Admin')
+        user = create_user(email, password, 'SiteAdmin')
         create_site_admin(user.id)
 
-    db.session.commit()
-
-def create_courses_and_reviews(num_courses=10, num_reviews=5):
+def create_courses_and_reviews(num_courses=10, num_reviews=30):
     teachers = Teacher.query.all()
     substitutes = Substitute.query.all()
 
@@ -101,15 +93,12 @@ def create_courses_and_reviews(num_courses=10, num_reviews=5):
         course_review_pairs.add((teacher, substitute))
 
         course = Course(
-            teacher_id=teacher.user_id,
-            substitute_id=substitute.user_id,
-            class_subject=fake.job(),
-            date=fake.date_this_year(),
-            time=fake.time(),
-            status=random.choice(['Scheduled', 'Completed', 'Canceled']),
-            teacher_reviewed_id=substitute.user_id,
-            substitute_reviewed_id=teacher.user_id,
-            writer_id=teacher.user_id,
+            Correlating_teacher_ID=teacher.user_id,
+            Correlating_substitute_ID=substitute.user_id,
+            Course_name=fake.job(),
+            Course_status=random.choice(['Available', 'Unavailable']),
+            Course_school_name=fake.company(),
+            Course_location=fake.address(),
         )
         db.session.add(course)
 
@@ -119,30 +108,44 @@ def create_courses_and_reviews(num_courses=10, num_reviews=5):
 
     for _ in range(num_reviews):
         course = random.choice(courses)
-
-        # Only allow teachers to review substitutes, not courses
-        if course.substitute_id == course.teacher_reviewed_id:
-            continue
-
-        writer = random.choice(teachers)
+       
 
         review = Review(
-            writer_id=writer.user_id,
-            course_id=course.id,
-            rating=random.randint(1, 5),
-            comment=fake.text(),
-            teacher_reviewed_id=course.substitute_id,
-            substitute_reviewed_id=course.teacher_id,
+            Teacher_Id=course.Correlating_teacher_ID,
+            Rating=random.randint(1, 5),
+            Review=fake.text(),
+            Correlating_Substitute_ID=course.Correlating_substitute_ID,
         )
         db.session.add(review)
 
     db.session.commit()
 
+def create_request(substitute_id):
+    request = Request(
+        Substitute_user_id=substitute_id,
+        Teacher_name=fake.name(),
+        Teacher_school=fake.company(),
+        Teacher_school_location=fake.address(),
+        Course_Being_covered=fake.job(),
+        Confirmation=random.choice(['Accept', 'Decline']),
+        Message_sub_sent_to=fake.email(),
+        Teacher_if_declined=fake.text(),
+    )
+    db.session.add(request)
+    db.session.commit()
 
-def generate_random_password():
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+def create_requests(num_requests=10):
+    substitutes = Substitute.query.all()
 
-def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30):
+    if not substitutes:
+        print("No substitutes found in the database. Skipping request generation.")
+        return
+
+    for _ in range(num_requests):
+        substitute = random.choice(substitutes)
+        create_request(substitute.user_id)
+
+def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=20):
     with app.app_context():
         print("Wiping old Data...")
         db.drop_all()
@@ -155,6 +158,10 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
 
         print("Generating Courses and Reviews...")
         create_courses_and_reviews(num_courses, num_reviews)
+        print("Complete")
+
+        print("Generating Requests...")
+        create_requests(num_requests)
         print("Complete")
 
 if __name__ == '__main__':

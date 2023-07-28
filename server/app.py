@@ -17,6 +17,7 @@ api.add_resource(SubstituteResource, '/substitutes')
 api.add_resource(SiteAdminResource, '/site_admins')
 api.add_resource(CourseResource, '/courses')
 api.add_resource(ReviewResource, '/reviews')
+api.add_resource(RequestResource, '/requests', '/requests/<int:request_id>')
 
 
 if __name__ == '__main__':

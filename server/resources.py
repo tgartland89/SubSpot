@@ -1,6 +1,6 @@
 from flask import request, make_response, jsonify, session 
-from flask_restful import Resource, fields, marshal 
-from models import User, Teacher, Substitute, Course, Review, SiteAdmin
+from flask_restful import Resource, reqparse, fields, marshal_with
+from models import User, Teacher, Substitute, Request, Course, Review, SiteAdmin
 from config import db, app, bcrypt  
 
 user_fields = {
@@ -58,6 +58,19 @@ review_fields = {
     'rating': fields.Float,
     'comment': fields.String,
 }
+
+request_fields = {
+    'Request_ID': fields.Integer,
+    'Substitute_user_id': fields.Integer,
+    'Teacher_name': fields.String,
+    'Teacher_school': fields.String,
+    'Teacher_school_location': fields.String,
+    'Course_Being_covered': fields.String,
+    'Confirmation': fields.String,
+    'Message_sub_sent_to': fields.String,
+    'Teacher_if_declined': fields.String,
+}
+
 
 class SignUp(Resource):
     def post(self):
@@ -172,6 +185,19 @@ class CourseResource(Resource):
         courses = Course.query.all()
         serialized_courses = [marshal(course, course_fields) for course in courses]
         return jsonify(serialized_courses)
+
+class RequestResource(Resource):
+    def get(self, request_id):
+        # Implementation for GET request to retrieve a specific request by its ID...
+        pass
+
+    def post(self):
+        # Implementation for POST request to create a new request...
+        pass
+
+    def delete(self, request_id):
+        # Implementation for DELETE request to delete a specific request...
+        pass
 
 class ReviewResource(Resource):
     def get(self):
