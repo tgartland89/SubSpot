@@ -1,6 +1,6 @@
 from config import app, db, bcrypt
 from flask import session, request, make_response, render_template_string, redirect, url_for
-from models import User, Teacher, Substitute, Course, Review  
+from models import User, Teacher, Substitute, Course, Review, Request  
 from config import app, db
 from sqlalchemy.exc import IntegrityError
 

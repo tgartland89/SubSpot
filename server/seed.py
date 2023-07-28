@@ -30,46 +30,48 @@ def create_user(email, password, role):
 def generate_random_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
-def create_teacher(user_id):
+def create_teacher(user):
     teacher = Teacher(
-        user_id=user_id,
+        user_id=user.id,
         school_name=fake.company()
     )
     db.session.add(teacher)
-    db.session.commit()
 
-def create_substitute(user_id):
+def create_substitute(user):
     substitute = Substitute(
-        user_id=user_id,
+        user_id=user.id,
         qualification=fake.text(),
         verification_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     )
     db.session.add(substitute)
-    db.session.commit()
 
-def create_site_admin(user_id):
-    site_admin = SiteAdmin(user_id=user_id)
+def create_site_admin(user):
+    site_admin = SiteAdmin(user_id=user.id)
     db.session.add(site_admin)
-    db.session.commit()
-
 def create_users_and_roles(num_teachers=10, num_subs=5, num_admins=2):
     for _ in range(num_teachers):
         email = fake.email()
         password = generate_random_password()
-        user = create_user(email, password, 'Teacher')
-        create_teacher(user.id)
+        user = User(name=fake.name(), email=email, location=fake.city(), phone=fake.phone_number(), password=password, role='Teacher', profile_picture=fetch_random_image())
+        db.session.add(user)
+        db.session.commit()  # Commit the User record first to get the auto-generated user.id
+        create_teacher(user)
 
     for _ in range(num_subs):
         email = fake.email()
         password = generate_random_password()
-        user = create_user(email, password, 'Substitute')
-        create_substitute(user.id)
+        user = User(name=fake.name(), email=email, location=fake.city(), phone=fake.phone_number(), password=password, role='Substitute', profile_picture=fetch_random_image())
+        db.session.add(user)
+        db.session.commit()  # Commit the User record first to get the auto-generated user.id
+        create_substitute(user)
 
     for _ in range(num_admins):
         email = fake.email()
         password = generate_random_password()
-        user = create_user(email, password, 'SiteAdmin')
-        create_site_admin(user.id)
+        user = User(name=fake.name(), email=email, location=fake.city(), phone=fake.phone_number(), password=password, role='SiteAdmin', profile_picture=fetch_random_image())
+        db.session.add(user)
+        db.session.commit()  # Commit the User record first to get the auto-generated user.id
+        create_site_admin(user)
 
 def create_courses_and_reviews(num_courses=10, num_reviews=30):
     teachers = Teacher.query.all()

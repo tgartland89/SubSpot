@@ -1,5 +1,5 @@
 from flask import request, make_response, jsonify, session 
-from flask_restful import Resource, reqparse, fields, marshal_with
+from flask_restful import Resource, reqparse, fields, marshal, marshal_with
 from models import User, Teacher, Substitute, Request, Course, Review, SiteAdmin
 from config import db, app, bcrypt  
 
