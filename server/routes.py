@@ -1,10 +1,10 @@
-from config import bcrypt
-from flask import session, request, make_response, render_template_string, redirect, url_for, redirect, render_template
-from models import User, Teacher, Substitute, Course, Review, Request  
-from config import app, db
+from flask import render_template_string, request, make_response, redirect, url_for
+from app import app, db, bcrypt
+from models import User, Teacher, Substitute, Course, Review
 from sqlalchemy.exc import IntegrityError
+from resources import SignUp, LogIn, LogOut, UserResource, TeacherResource, SubstituteResource, SiteAdminResource, CourseResource, ReviewResource, RequestResource
 
-@app.route('/home')
+@app.route('/')
 def home():
     home_page_content = """
     <!DOCTYPE html>
@@ -19,65 +19,24 @@ def home():
     </body>
     </html>
     """
-    return home_page_content
+    return render_template_string(home_page_content)
 
-@app.route('/signup', methods=['GET'])
-def signup_selection():
-    # The signup_selection route is responsible for rendering the page where the user can choose their role.
-    # This page will contain links to the Teacher Signup and Substitute Signup pages.
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Signup Selection</title>
-    </head>
-    <body>
-        <h1>Choose your role:</h1>
-        <a href="/signup/teacher">Teacher Signup</a>
-        <a href="/signup/substitute">Substitute Signup</a>
-    </body>
-    </html>
-    """
-
-@app.route('/signup/teacher', methods=['GET', 'POST'])
+@app.route('/teacher-signup', methods=['POST'])
 def teacher_signup():
-    # The teacher_signup route is responsible for handling both the rendering of the teacher signup form
-    # and the form submission.
-    if request.method == 'GET':
-        # Render the teacher signup form
-        return """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Teacher Signup</title>
-        </head>
-        <body>
-            <h1>Teacher Signup</h1>
-            <form action="/teacher-signup" method="post">
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-                <input type="submit" value="Submit">
-            </form>
-        </body>
-        </html>
-        """
-
-    elif request.method == 'POST':
-        # Handle the teacher signup form submission and registration logic
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
+    try:
+        data = request.get_json()
+        password = data.get('password')
+        confirm_password = data.get('confirm_password')
 
         if password != confirm_password:
             return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
 
-        existing_user = User.query.filter_by(email=email).first()
+        existing_user = User.query.filter_by(email=data['email']).first()
         if existing_user:
             return make_response({'errors': ['Email already in use']}, 400)
 
         user = User(
-            email=email,
+            email=data['email'],
             password=bcrypt.generate_password_hash(password).decode('utf-8'),
             role='Teacher',
         )
@@ -86,45 +45,41 @@ def teacher_signup():
 
         return make_response({'message': 'Teacher registered successfully'}, 201)
 
-@app.route('/signup/substitute', methods=['GET', 'POST'])
+    except IntegrityError as e:
+        db.session.rollback()  
+        return make_response({'errors': ['Database integrity error']}, 500)
+    except Exception as e:
+        print(e)
+        return make_response({'errors': ['Validation errors']}, 400)
+
+@app.route('/teacher-form', methods=['GET', 'POST'])
+def teacher_form():
+
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        if user and user.role == 'Teacher':
+            if request.method == 'POST':
+                return make_response({'message': 'Teacher added successfully'}, 201)
+            return make_response({'message': 'Teacher form is available'}, 200)
+
+    return make_response({'errors': ['Unauthorized']}, 401)
+
+@app.route('/substitute-signup', methods=['POST'])
 def substitute_signup():
-    # The substitute_signup route is responsible for handling both the rendering of the substitute signup form
-    # and the form submission.
-    if request.method == 'GET':
-        # Render the substitute signup form
-        return """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Substitute Signup</title>
-        </head>
-        <body>
-            <h1>Substitute Signup</h1>
-            <form action="/substitute-signup" method="post">
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-                <input type="submit" value="Submit">
-            </form>
-        </body>
-        </html>
-        """
-
-    elif request.method == 'POST':
-        # Handle the substitute signup form submission and registration logic
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-
+    try:
+        data = request.get_json()
+        password = data.get('password')
+        confirm_password = data.get('confirm_password')
         if password != confirm_password:
             return make_response({'errors': ['Password and Confirm Password do not match']}, 400)
 
-        existing_user = User.query.filter_by(email=email).first()
+        existing_user = User.query.filter_by(email=data['email']).first()
         if existing_user:
             return make_response({'errors': ['Email already in use']}, 400)
 
         user = User(
-            email=email,
+            email=data['email'],
             password=bcrypt.generate_password_hash(password).decode('utf-8'),
             role='Substitute',
         )
@@ -132,6 +87,26 @@ def substitute_signup():
         db.session.commit()
 
         return make_response({'message': 'Substitute registered successfully'}, 201)
+
+    except IntegrityError as e:
+        db.session.rollback()  
+        return make_response({'errors': ['Database integrity error']}, 500)
+    except Exception as e:
+        print(e)
+        return make_response({'errors': ['Validation errors']}, 400)
+
+@app.route('/substitute-form', methods=['GET', 'POST'])
+def substitute_form():
+
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        if user and user.role == 'Substitute':
+            if request.method == 'POST':
+                return make_response({'message': 'Substitute added successfully'}, 201)
+            return make_response({'message': 'Substitute form is available'}, 200)
+
+    return make_response({'errors': ['Unauthorized']}, 401)
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
@@ -200,37 +175,3 @@ def respond_to_request(request_id):
     db.session.commit()
 
     return make_response({'message': 'Response sent successfully'}, 200)
-
-@app.route('/login', methods=['POST'])
-def login():
-    try:
-        data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
-
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            return make_response({'errors': ['User not found']}, 404)
-
-        if not bcrypt.check_password_hash(user.password_hash, password):
-            return make_response({'errors': ['Invalid password']}, 401)
-
-        session['user_id'] = user.id
-
-        if user.role == 'Teacher':
-            return make_response({'message': 'Teacher logged in successfully'}, 200)
-        elif user.role == 'Substitute':
-            return make_response({'message': 'Substitute logged in successfully'}, 200)
-        else:
-            return make_response({'errors': ['Invalid user role']}, 400)
-    except Exception as e:
-        print(e)
-        return make_response({'errors': ['Validation errors']}, 400)
-
-@app.route('/logout', methods=['DELETE'])
-def logout():
-    if 'user_id' in session:
-        session.pop('user_id', None)
-        return make_response({'message': 'Logged out successfully'}, 204)
-    else:
-        return make_response({'errors': ['User not logged in']}, 401)

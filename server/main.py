@@ -1,5 +1,6 @@
-from flask import Flask, redirect, url_for
+from flask import Flask
 from app import app, db
+from routes import home
 from resources import SignUp, LogIn, LogOut, UserResource, TeacherResource, SubstituteResource, SiteAdminResource, CourseResource, ReviewResource, RequestResource
 from models import User, Teacher, Substitute, SiteAdmin, Review, Request, Course
 from faker import Faker
@@ -7,6 +8,7 @@ import random
 import requests
 import string
 
+app.add_url_rule('/', view_func=home)
 app.add_url_rule('/signup', view_func=SignUp.as_view('signup'))
 app.add_url_rule('/login', view_func=LogIn.as_view('login'))
 app.add_url_rule('/logout', view_func=LogOut.as_view('logout'))
