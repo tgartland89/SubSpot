@@ -1,6 +1,6 @@
-from flask import Flask
-from config import app, db
+from app import app, db  
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review, Request
+from resources import SignUp, LogIn, LogOut, UserResource, TeacherResource, SubstituteResource, SiteAdminResource, CourseResource, ReviewResource, RequestResource
 from faker import Faker
 import random
 import requests
