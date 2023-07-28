@@ -1,7 +1,8 @@
-from flask import request, make_response, jsonify, session 
-from flask_restful import Resource, reqparse, fields, marshal, marshal_with
+from flask.views import MethodView
+from flask import request, make_response, jsonify, session
+from flask_restful import fields, marshal, marshal_with
+from config import db, bcrypt
 from models import User, Teacher, Substitute, Request, Course, Review, SiteAdmin
-from config import db, app, bcrypt  
 
 user_fields = {
     'id': fields.Integer,
@@ -71,8 +72,7 @@ request_fields = {
     'Teacher_if_declined': fields.String,
 }
 
-
-class SignUp(Resource):
+class SignUp(MethodView):
     def post(self):
         try:
             data = request.get_json()
@@ -122,7 +122,8 @@ class SignUp(Resource):
             print(e)
             return make_response({'errors': ['Validation errors']}, 400)
 
-class LogIn(Resource):
+
+class LogIn(MethodView):
     def post(self):
         try:
             data = request.get_json()
@@ -148,7 +149,8 @@ class LogIn(Resource):
             print(e)
             return make_response({'errors': ['Validation errors']}, 400)
     
-class LogOut(Resource):
+
+class LogOut(MethodView):
     def delete(self):
         if 'user_id' in session:
             session.pop('user_id', None)
@@ -156,38 +158,37 @@ class LogOut(Resource):
         else:
             return make_response({'errors': ['User not logged in']}, 401)
 
-class UserResource(Resource):
+class UserResource(MethodView):
     def get(self):
         users = User.query.all()
         serialized_users = [marshal(user, user_fields) for user in users]
         return jsonify(serialized_users)
     
-class TeacherResource(Resource):
+class TeacherResource(MethodView):
     def get(self):
         teachers = Teacher.query.all()
         serialized_teachers = [marshal({**teacher.to_dict(), 'user': marshal(teacher.user, user_fields)}, teacher_fields) for teacher in teachers]
         return jsonify(serialized_teachers)
 
-class SubstituteResource(Resource):
+class SubstituteResource(MethodView):
     def get(self):
         substitutes = Substitute.query.all()
         serialized_substitutes = [marshal({**substitute.to_dict(), 'user': marshal(substitute.user, user_fields)}, substitute_fields) for substitute in substitutes]
         return jsonify(serialized_substitutes)
 
-class SiteAdminResource(Resource):
+class SiteAdminResource(MethodView):
     def get(self):
         site_admins = SiteAdmin.query.all()
         serialized_site_admins = [marshal({**site_admin.to_dict(), 'user': marshal(site_admin.user, user_fields)}, site_admin_fields) for site_admin in site_admins]
         return jsonify(serialized_site_admins)
 
-
-class CourseResource(Resource):
+class CourseResource(MethodView):
     def get(self):
         courses = Course.query.all()
         serialized_courses = [marshal(course, course_fields) for course in courses]
         return jsonify(serialized_courses)
 
-class RequestResource(Resource):
+class RequestResource(MethodView):
     def get(self, request_id):
         # Implementation for GET request to retrieve a specific request by its ID...
         pass
@@ -200,7 +201,7 @@ class RequestResource(Resource):
         # Implementation for DELETE request to delete a specific request...
         pass
 
-class ReviewResource(Resource):
+class ReviewResource(MethodView):
     def get(self):
         user_id = session.get('user_id')
         if user_id:
@@ -219,5 +220,3 @@ class ReviewResource(Resource):
             return jsonify(serialized_reviews)
         else:
             return make_response({'errors': ['Unauthorized']}, 401)
-
-    

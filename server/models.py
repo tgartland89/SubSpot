@@ -58,8 +58,6 @@ class Teacher(db.Model, SerializerMixin):
         }
     
 
-
-
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes'  
 
@@ -124,7 +122,6 @@ class Request(db.Model, SerializerMixin):
     substitute = db.relationship('Substitute', backref='requests', uselist=False)
 
 
-
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'
 
@@ -139,7 +136,6 @@ class Course(db.Model, SerializerMixin):
     teacher = db.relationship('Teacher', backref='courses')
     substitute = db.relationship('Substitute', backref='courses')
 
-
 class Review(db.Model, SerializerMixin):
     __tablename__ = 'reviews'
 
@@ -151,4 +147,3 @@ class Review(db.Model, SerializerMixin):
 
     teacher = db.relationship('Teacher', backref='reviews')
     substitute = db.relationship('Substitute', backref='reviews')
-
