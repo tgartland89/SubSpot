@@ -1,8 +1,25 @@
 from config import bcrypt
-from flask import session, request, make_response, render_template_string, redirect, url_for, redirect
+from flask import session, request, make_response, render_template_string, redirect, url_for, redirect, render_template
 from models import User, Teacher, Substitute, Course, Review, Request  
 from config import app, db
 from sqlalchemy.exc import IntegrityError
+
+@app.route('/home')
+def home():
+    home_page_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>SubSpot - Home</title>
+    </head>
+    <body>
+        <h1>Welcome to SubSpot!</h1>
+        <p>Find substitutes quickly for your teaching needs.</p>
+        <a href="/login">Login</a> or <a href="/signup">Sign Up</a>
+    </body>
+    </html>
+    """
+    return home_page_content
 
 @app.route('/signup', methods=['GET'])
 def signup_selection():

@@ -140,15 +140,14 @@ class LogIn(MethodView):
             session['user_id'] = user.id
 
             if user.role == 'Teacher':
-                return redirect(url_for('teacher_form'))
+                return jsonify({'redirect_url': '/teacher_form'})
             elif user.role == 'Substitute':
-                return redirect(url_for('substitute_form'))
+                return jsonify({'redirect_url': '/substitute_form'})
             else:
                 return make_response({'errors': ['Invalid user role']}, 400)
         except Exception as e:
             print(e)
             return make_response({'errors': ['Validation errors']}, 400)
-    
 
 class LogOut(MethodView):
     def delete(self):
