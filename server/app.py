@@ -52,7 +52,6 @@ def home():
     response.headers['Content-Type'] = 'text/html'
     return response
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -114,61 +113,6 @@ def login():
     response.headers['Content-Type'] = 'text/html'
     return response
 
-def get_substitute_details(substitute):
-    reviews = Review.query.filter_by(substitute_id=substitute.id).all()
-    reviews_list = [{'rating': review.rating, 'comment': review.comment} for review in reviews]
-    return {
-        'id': substitute.id,
-        'name': substitute.name,
-        'location': substitute.location,
-        'profile_picture': substitute.user.profile_picture,
-        'phone': substitute.phone,
-        'email': substitute.email,
-        'qualifications': substitute.qualifications,
-        'verification_id': substitute.verification_id,
-        'reviews': reviews_list,
-    }
-
-@app.route('/substitute/<int:substitute_id>', methods=['GET'])
-def substitute_details(substitute_id):
-    if 'user_id' in session:
-        substitute = Substitute.query.get(substitute_id)
-
-        if substitute:
-            details = get_substitute_details(substitute)
-
-            return jsonify(details)
-        else:
-            return jsonify({'error': 'Substitute not found'}), 404
-    else:
-        return jsonify({'error': 'Unauthorized access'}), 401
-    
-@app.route('/request_substitute/<int:substitute_id>', methods=['POST'])
-def request_substitute(substitute_id):
-    if 'user_id' in session:
-        teacher_id = session['user_id']
-        teacher = Teacher.query.filter_by(user_id=teacher_id).first()
-        substitute = Substitute.query.get(substitute_id)
-
-        if teacher and substitute:
-            request = Request(
-                Substitute_user_id=substitute_id,
-                Teacher_name=teacher.name,
-                Teacher_school=teacher.course_name,
-                Teacher_school_location=teacher.location,
-                Course_Being_covered=fake.job(),  
-                Confirmation=None,
-                Message_sub_sent_to=substitute.email,
-                Teacher_if_declined=None,
-            )
-            db.session.add(request)
-            db.session.commit()
-            return jsonify({'message': 'Request sent successfully'})
-        else:
-            return jsonify({'error': 'Teacher or Substitute not found'}), 404
-    else:
-        return jsonify({'error': 'Unauthorized access'}), 401
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -196,7 +140,7 @@ def signup():
             db.session.add(teacher)
             db.session.commit()
 
-            return redirect(url_for('home'))
+            return signup_confirmation_message(role)
 
         elif role == 'Substitute':
             qualifications = request.form.get('qualifications')
@@ -210,7 +154,7 @@ def signup():
             db.session.add(substitute)
             db.session.commit()
 
-            return redirect(url_for('home'))
+            return signup_confirmation_message(role)
 
     signup_page_content = """
 <!DOCTYPE html>
@@ -309,6 +253,27 @@ def signup():
 </html>
 """
     response = make_response(signup_page_content)
+    response.headers['Content-Type'] = 'text/html'
+    return response
+
+def signup_confirmation_message(role):
+    if role not in ['Teacher', 'Substitute']:
+        return redirect(url_for('home'))
+
+    confirmation_page_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>SubSpot - Sign Up Confirmation</title>
+    </head>
+    <body>
+        <h1>Sign Up Successful!</h1>
+        <p>Congratulations! You have successfully signed up as a {role}.</p>
+        <a href="/">Go to Home</a>
+    </body>
+    </html>
+    """
+    response = make_response(confirmation_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
 
