@@ -25,6 +25,7 @@ def home():
         <body>
             <h1>Welcome to SubSpot!</h1>
             <p>Find substitutes quickly for your teaching needs.</p>
+            <a href="/dashboard">Dashboard</a>
             <a href="/logout">Log Out</a>
         </body>
         </html>
@@ -61,29 +62,52 @@ def login():
         if user and user.authenticate(password):
             session['user_id'] = user.id
             return redirect(url_for('home'))
+        else:
+            login_page_content = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>SubSpot - Log In</title>
+            </head>
+            <body>
+                <h1>Log In</h1>
+                <p style="color: red;">Invalid email or password. Please try again.</p>
+                <form method="post">
+                    <label for="email">Email:</label>
+                    <input type="email" name="email" required><br>
 
-        return redirect(url_for('login'))
+                    <label for="password">Password:</label>
+                    <input type="password" name="password" required><br>
+
+                    <input type="submit" value="Log In">
+                </form>
+            </body>
+            </html>
+            """
+            response = make_response(login_page_content)
+            response.headers['Content-Type'] = 'text/html'
+            return response
 
     login_page_content = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>SubSpot - Log In</title>
-</head>
-<body>
-    <h1>Log In</h1>
-    <form method="post">
-        <label for="email">Email:</label>
-        <input type="email" name="email" required><br>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>SubSpot - Log In</title>
+    </head>
+    <body>
+        <h1>Log In</h1>
+        <form method="post">
+            <label for="email">Email:</label>
+            <input type="email" name="email" required><br>
 
-        <label for="password">Password:</label>
-        <input type="password" name="password" required><br>
+            <label for="password">Password:</label>
+            <input type="password" name="password" required><br>
 
-        <input type="submit" value="Log In">
-    </form>
-</body>
-</html>
-"""
+            <input type="submit" value="Log In">
+        </form>
+    </body>
+    </html>
+    """
     response = make_response(login_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
@@ -230,6 +254,46 @@ def signup():
     response = make_response(signup_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
+
+@app.route('/substitute_dashboard')
+def substitute_dashboard():
+    if 'user_id' in session:
+        substitute_id = session['user_id']
+        substitute = Substitute.query.filter_by(user_id=substitute_id).first()
+
+        if substitute:
+            requests = Request.query.filter_by(substitute_id=substitute.id).all()
+
+            dashboard_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>SubSpot - Substitute Dashboard</title>
+            </head>
+            <body>
+                <h1>Welcome, {substitute.name}!</h1>
+                <h2>Your Requests:</h2>
+                <ul>
+            """
+
+            for request in requests:
+                dashboard_content += f"<li>{request.teacher.name} - {request.course.name}</li>"
+
+            dashboard_content += """
+                </ul>
+                <a href="/logout">Log Out</a>
+            </body>
+            </html>
+            """
+        else:
+            dashboard_content = "<h1>Error: Substitute not found</h1>"
+    else:
+        dashboard_content = "<h1>Error: Unauthorized access</h1>"
+
+    response = make_response(dashboard_content)
+    response.headers['Content-Type'] = 'text/html'
+    return response
+
 
 @app.route('/logout')
 def logout():
