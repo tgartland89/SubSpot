@@ -19,6 +19,9 @@ bcrypt.init_app(app)
 @app.route('/')
 def home():
     if 'user_id' in session:
+        substitutes = Substitute.query.all()
+
+        # Generate the HTML content directly
         home_page_content = """
         <!DOCTYPE html>
         <html>
@@ -29,9 +32,14 @@ def home():
             <h1>Welcome to SubSpot!</h1>
             <p>Find substitutes quickly for your teaching needs.</p>
             <a href="/logout">Log Out</a>
+            <!-- Display the list of substitutes -->
+            <h2>Substitutes:</h2>
+            <ul>
+                %s
+            </ul>
         </body>
         </html>
-        """
+        """ % generate_substitute_list(substitutes)
     else:
         home_page_content = """
         <!DOCTYPE html>
@@ -51,6 +59,13 @@ def home():
     response = make_response(home_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
+
+def generate_substitute_list(substitutes):
+    # Generate the list of substitutes in HTML format
+    list_html = ""
+    for substitute in substitutes:
+        list_html += "<li><a href='/substitute/{0}'>{1}</a></li>".format(substitute.id, substitute.name)
+    return list_html
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -112,6 +127,39 @@ def login():
     response = make_response(login_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
+
+@app.route('/substitute/<int:substitute_id>')
+def substitute_info(substitute_id):
+    substitute = Substitute.query.get(substitute_id)
+
+    if substitute:
+        substitute_info_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>SubSpot - Substitute Information</title>
+        </head>
+        <body>
+            <h1>{substitute.name}'s Information</h1>
+            <p><strong>Name:</strong> {substitute.name}</p>
+            <p><strong>Email:</strong> {substitute.email}</p>
+            <p><strong>Location:</strong> {substitute.location}</p>
+            <p><strong>Phone:</strong> {substitute.phone}</p>
+            <p><strong>Qualifications:</strong> {substitute.qualifications}</p>
+            <p><strong>Verification ID:</strong> {substitute.verification_id}</p>
+
+            <!-- You may need to add additional fields here as per your model definition -->
+
+            <!-- Link back to the home page -->
+            <a href="/">Go Back to Home</a>
+        </body>
+        </html>
+        """
+        response = make_response(substitute_info_content)
+        response.headers['Content-Type'] = 'text/html'
+        return response
+    else:
+        return "Substitute not found.", 404
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
