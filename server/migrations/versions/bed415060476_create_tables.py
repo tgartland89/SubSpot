@@ -1,8 +1,8 @@
 """Create tables
 
-Revision ID: dd36593086df
+Revision ID: bed415060476
 Revises: 
-Create Date: 2023-07-28 10:38:41.033333
+Create Date: 2023-07-29 13:48:55.215247
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'dd36593086df'
+revision = 'bed415060476'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,6 +33,9 @@ def upgrade():
     op.create_table('site_admins',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=120), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_site_admins_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -40,7 +43,11 @@ def upgrade():
     op.create_table('substitutes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('qualification', sa.String(length=120), nullable=True),
+    sa.Column('name', sa.String(length=120), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('location', sa.String(length=120), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
+    sa.Column('qualifications', sa.String(length=120), nullable=True),
     sa.Column('verification_id', sa.String(length=120), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_substitutes_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
@@ -49,7 +56,11 @@ def upgrade():
     op.create_table('teachers',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('school_name', sa.String(length=120), nullable=False),
+    sa.Column('name', sa.String(length=120), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('location', sa.String(length=120), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
+    sa.Column('course_name', sa.String(length=120), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_teachers_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')

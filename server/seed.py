@@ -1,6 +1,5 @@
 from app import app, db  
 from models import User, Teacher, Substitute, SiteAdmin, Course, Review, Request
-from resources import SignUp, LogIn, LogOut, UserResource, TeacherResource, SubstituteResource, SiteAdminResource, CourseResource, ReviewResource, RequestResource
 from faker import Faker
 import random
 import requests
@@ -33,44 +32,53 @@ def generate_random_password():
 def create_teacher(user):
     teacher = Teacher(
         user_id=user.id,
-        school_name=fake.company()
+        name=user.name,
+        email=user.email,
+        location=user.location,
+        phone=user.phone,
+        course_name=fake.job()  
     )
     db.session.add(teacher)
 
 def create_substitute(user):
     substitute = Substitute(
         user_id=user.id,
-        qualification=fake.text(),
+        name=user.name,
+        email=user.email,
+        location=user.location,
+        phone=user.phone,
+        qualifications=fake.text(),  
         verification_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     )
     db.session.add(substitute)
 
 def create_site_admin(user):
-    site_admin = SiteAdmin(user_id=user.id)
+    site_admin = SiteAdmin(
+        user_id=user.id,
+        name=user.name,
+        email=user.email,
+        phone=user.phone
+    )
     db.session.add(site_admin)
+
+
 def create_users_and_roles(num_teachers=10, num_subs=5, num_admins=2):
     for _ in range(num_teachers):
         email = fake.email()
         password = generate_random_password()
-        user = User(name=fake.name(), email=email, location=fake.city(), phone=fake.phone_number(), password=password, role='Teacher', profile_picture=fetch_random_image())
-        db.session.add(user)
-        db.session.commit()  # Commit the User record first to get the auto-generated user.id
+        user = create_user(email, password, 'Teacher')
         create_teacher(user)
 
     for _ in range(num_subs):
         email = fake.email()
         password = generate_random_password()
-        user = User(name=fake.name(), email=email, location=fake.city(), phone=fake.phone_number(), password=password, role='Substitute', profile_picture=fetch_random_image())
-        db.session.add(user)
-        db.session.commit()  # Commit the User record first to get the auto-generated user.id
+        user = create_user(email, password, 'Substitute')
         create_substitute(user)
 
     for _ in range(num_admins):
         email = fake.email()
         password = generate_random_password()
-        user = User(name=fake.name(), email=email, location=fake.city(), phone=fake.phone_number(), password=password, role='SiteAdmin', profile_picture=fetch_random_image())
-        db.session.add(user)
-        db.session.commit()  # Commit the User record first to get the auto-generated user.id
+        user = create_user(email, password, 'SiteAdmin')
         create_site_admin(user)
 
 def create_courses_and_reviews(num_courses=10, num_reviews=30):
@@ -87,7 +95,7 @@ def create_courses_and_reviews(num_courses=10, num_reviews=30):
         teacher = random.choice(teachers)
         substitute = random.choice(substitutes)
 
-        # Ensure that the course and substitute pairing is unique
+
         while (teacher, substitute) in course_review_pairs:
             teacher = random.choice(teachers)
             substitute = random.choice(substitutes)
@@ -167,5 +175,5 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
         print("Complete")
 
 if __name__ == '__main__':
-    seed_database()
+    seed_database(num_teachers=10, num_subs=5, num_admins=2)  
     print("Database seeded successfully!")

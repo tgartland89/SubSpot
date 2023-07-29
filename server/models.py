@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy_serializer import SerializerMixin
 from config import db, bcrypt
@@ -37,11 +37,13 @@ class User(db.Model, SerializerMixin):
 class Teacher(db.Model, SerializerMixin):
     __tablename__ = 'teachers'
 
-    serialize_rules = ('-user.reviews', '-user.profile_picture', '-user.password_hash')
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
-    school_name = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(120))
+    email = db.Column(db.String(120))
+    location = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    course_name = db.Column(db.String(120))
 
     user = db.relationship('User', back_populates='teacher', uselist=False, lazy='joined')
 
@@ -49,57 +51,57 @@ class Teacher(db.Model, SerializerMixin):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'name': self.user.name,
-            'email': self.user.email,
-            'location': self.user.location,
-            'phone': self.user.phone,
-            'school_name': self.school_name,
+            'name': self.name,
+            'email': self.email,
+            'location': self.location,
+            'phone': self.phone,
+            'course_name': self.course_name,
             'profile_picture': self.user.profile_picture,
         }
-    
 
 class Substitute(db.Model, SerializerMixin):
-    __tablename__ = 'substitutes'  
-
-    serialize_rules = ('-user.reviews', '-user.profile_picture', '-user.password_hash')
+    __tablename__ = 'substitutes' 
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
-    qualification = db.Column(db.String(120))
+    name = db.Column(db.String(120))
+    email = db.Column(db.String(120))
+    location = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    qualifications = db.Column(db.String(120))
     verification_id = db.Column(db.String(120))
 
     def to_dict(self):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'name': self.user.name,
-            'email': self.user.email,
-            'location': self.user.location,
-            'phone': self.user.phone,
-            'qualification': self.qualification,
+            'name': self.name,
+            'email': self.email,
+            'location': self.location,
+            'phone': self.phone,
+            'qualifications': self.qualifications,
             'verification_id': self.verification_id,
             'profile_picture': self.user.profile_picture,
         }
 
     user = db.relationship('User', back_populates='substitute', uselist=False, lazy='joined')
 
-
 class SiteAdmin(db.Model, SerializerMixin):
-    __tablename__ = 'site_admins'  
-
-    serialize_rules = ('-user.reviews', '-user.profile_picture', '-user.password_hash')
+    __tablename__ = 'site_admins'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    name = db.Column(db.String(120))
+    email = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
 
     def to_dict(self):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'name': self.user.name,
-            'email': self.user.email,
-            'location': self.user.location,
-            'phone': self.user.phone,
+            'name': self.name,
+            'email': self.email,
+            'phone': self.phone,
             'profile_picture': self.user.profile_picture,
         }
 
@@ -119,7 +121,7 @@ class Request(db.Model, SerializerMixin):
     Message_sub_sent_to = db.Column(db.String(120))
     Teacher_if_declined = db.Column(db.String(120))
 
-    substitute = db.relationship('Substitute', backref='requests', uselist=False)
+   
 
 
 class Course(db.Model, SerializerMixin):
