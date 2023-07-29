@@ -1,5 +1,5 @@
 import os
-from flask import Flask, make_response, request, redirect, url_for
+from flask import Flask, make_response, request, redirect, url_for, session
 from config import db, bcrypt
 from models import User, Teacher, Substitute, SiteAdmin, Review, Request, Course
 from flask_migrate import Migrate
@@ -32,8 +32,19 @@ def home():
     response.headers['Content-Type'] = 'text/html'
     return response
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        user = User.query.filter_by(email=email).first()
+
+        if user and user.authenticate(password):
+            session['user_id'] = user.id
+            return redirect(url_for('home'))
+
+        return redirect(url_for('login'))
     login_page_content = """
     <!DOCTYPE html>
     <html>
@@ -42,7 +53,15 @@ def login():
     </head>
     <body>
         <h1>Log In</h1>
-        <!-- Add your login form here -->
+        <form method="post">
+            <label for="email">Email:</label>
+            <input type="email" name="email" required><br>
+
+            <label for="password">Password:</label>
+            <input type="password" name="password" required><br>
+
+            <input type="submit" value="Log In">
+        </form>
     </body>
     </html>
     """
