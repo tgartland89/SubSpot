@@ -21,7 +21,6 @@ def home():
     if 'user_id' in session:
         substitutes = Substitute.query.all()
 
-        # Generate the HTML content directly
         home_page_content = """
         <!DOCTYPE html>
         <html>
@@ -61,7 +60,7 @@ def home():
     return response
 
 def generate_substitute_list(substitutes):
-    # Generate the list of substitutes in HTML format
+
     list_html = ""
     for substitute in substitutes:
         list_html += "<li><a href='/substitute/{0}'>{1}</a></li>".format(substitute.id, substitute.name)
@@ -148,7 +147,10 @@ def substitute_info(substitute_id):
             <p><strong>Qualifications:</strong> {substitute.qualifications}</p>
             <p><strong>Verification ID:</strong> {substitute.verification_id}</p>
 
-            <!-- You may need to add additional fields here as per your model definition -->
+            <!-- Add the Request button -->
+            <form method="post" action="/request/{substitute_id}">
+                <input type="submit" value="Request">
+            </form>
 
             <!-- Link back to the home page -->
             <a href="/">Go Back to Home</a>
@@ -160,6 +162,24 @@ def substitute_info(substitute_id):
         return response
     else:
         return "Substitute not found.", 404
+    
+@app.route('/request/<int:substitute_id>', methods=['POST'])
+def request_substitute(substitute_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    teacher_id = session['user_id']
+
+    new_request = Request(Substitute_user_id=substitute_id, Teacher_name="Teacher Name", Teacher_school="School Name",
+                          Teacher_school_location="School Location", Confirmation=None, Message_sub_sent_to=None,
+                          Teacher_if_declined=None)
+    db.session.add(new_request)
+    db.session.commit()
+
+    return redirect(url_for('substitute_info', substitute_id=substitute_id))
+
+
+    return "Request sent successfully!"
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():

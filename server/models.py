@@ -107,13 +107,12 @@ class SiteAdmin(db.Model, SerializerMixin):
 
     user = db.relationship('User', back_populates='site_admin', uselist=False, lazy='joined')
 
-
 class Request(db.Model, SerializerMixin):
     __tablename__ = 'requests'
 
     Request_ID = db.Column(db.Integer, primary_key=True)
     Substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'))
-    Teacher_name = db.Column(db.String(120))
+    Teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     Teacher_school = db.Column(db.String(120))
     Teacher_school_location = db.Column(db.String(120))
     Course_Being_covered = db.Column(db.String(120))
@@ -121,6 +120,21 @@ class Request(db.Model, SerializerMixin):
     Message_sub_sent_to = db.Column(db.String(120))
     Teacher_if_declined = db.Column(db.String(120))
 
+    substitute = db.relationship('Substitute', backref='requests', foreign_keys=[Substitute_user_id])
+    teacher = db.relationship('Teacher', backref='requests', foreign_keys=[Teacher_id])
+
+    def to_dict(self):
+        return {
+            'Request_ID': self.Request_ID,
+            'Substitute_user_id': self.Substitute_user_id,
+            'Teacher_name': self.teacher.name if self.teacher else None,
+            'Teacher_school': self.Teacher_school,
+            'Teacher_school_location': self.Teacher_school_location,
+            'Course_Being_covered': self.Course_Being_covered,
+            'Confirmation': self.Confirmation,
+            'Message_sub_sent_to': self.Message_sub_sent_to,
+            'Teacher_if_declined': self.Teacher_if_declined,
+        }
    
 
 
