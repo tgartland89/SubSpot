@@ -1,8 +1,11 @@
 import os
-from flask import Flask, make_response, request, redirect, url_for, session
+from flask import Flask, make_response, request, redirect, url_for, session, jsonify
 from config import db, bcrypt
 from models import User, Teacher, Substitute, SiteAdmin, Review, Request, Course
 from flask_migrate import Migrate
+from faker import Faker 
+
+fake = Faker()
 
 app = Flask(__name__)
 migrate = Migrate(app, db) 
@@ -25,7 +28,6 @@ def home():
         <body>
             <h1>Welcome to SubSpot!</h1>
             <p>Find substitutes quickly for your teaching needs.</p>
-            <a href="/dashboard">Dashboard</a>
             <a href="/logout">Log Out</a>
         </body>
         </html>
@@ -111,6 +113,61 @@ def login():
     response = make_response(login_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
+
+def get_substitute_details(substitute):
+    reviews = Review.query.filter_by(substitute_id=substitute.id).all()
+    reviews_list = [{'rating': review.rating, 'comment': review.comment} for review in reviews]
+    return {
+        'id': substitute.id,
+        'name': substitute.name,
+        'location': substitute.location,
+        'profile_picture': substitute.user.profile_picture,
+        'phone': substitute.phone,
+        'email': substitute.email,
+        'qualifications': substitute.qualifications,
+        'verification_id': substitute.verification_id,
+        'reviews': reviews_list,
+    }
+
+@app.route('/substitute/<int:substitute_id>', methods=['GET'])
+def substitute_details(substitute_id):
+    if 'user_id' in session:
+        substitute = Substitute.query.get(substitute_id)
+
+        if substitute:
+            details = get_substitute_details(substitute)
+
+            return jsonify(details)
+        else:
+            return jsonify({'error': 'Substitute not found'}), 404
+    else:
+        return jsonify({'error': 'Unauthorized access'}), 401
+    
+@app.route('/request_substitute/<int:substitute_id>', methods=['POST'])
+def request_substitute(substitute_id):
+    if 'user_id' in session:
+        teacher_id = session['user_id']
+        teacher = Teacher.query.filter_by(user_id=teacher_id).first()
+        substitute = Substitute.query.get(substitute_id)
+
+        if teacher and substitute:
+            request = Request(
+                Substitute_user_id=substitute_id,
+                Teacher_name=teacher.name,
+                Teacher_school=teacher.course_name,
+                Teacher_school_location=teacher.location,
+                Course_Being_covered=fake.job(),  
+                Confirmation=None,
+                Message_sub_sent_to=substitute.email,
+                Teacher_if_declined=None,
+            )
+            db.session.add(request)
+            db.session.commit()
+            return jsonify({'message': 'Request sent successfully'})
+        else:
+            return jsonify({'error': 'Teacher or Substitute not found'}), 404
+    else:
+        return jsonify({'error': 'Unauthorized access'}), 401
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -254,46 +311,6 @@ def signup():
     response = make_response(signup_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
-
-@app.route('/substitute_dashboard')
-def substitute_dashboard():
-    if 'user_id' in session:
-        substitute_id = session['user_id']
-        substitute = Substitute.query.filter_by(user_id=substitute_id).first()
-
-        if substitute:
-            requests = Request.query.filter_by(substitute_id=substitute.id).all()
-
-            dashboard_content = f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>SubSpot - Substitute Dashboard</title>
-            </head>
-            <body>
-                <h1>Welcome, {substitute.name}!</h1>
-                <h2>Your Requests:</h2>
-                <ul>
-            """
-
-            for request in requests:
-                dashboard_content += f"<li>{request.teacher.name} - {request.course.name}</li>"
-
-            dashboard_content += """
-                </ul>
-                <a href="/logout">Log Out</a>
-            </body>
-            </html>
-            """
-        else:
-            dashboard_content = "<h1>Error: Substitute not found</h1>"
-    else:
-        dashboard_content = "<h1>Error: Unauthorized access</h1>"
-
-    response = make_response(dashboard_content)
-    response.headers['Content-Type'] = 'text/html'
-    return response
-
 
 @app.route('/logout')
 def logout():
