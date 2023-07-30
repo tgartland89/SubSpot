@@ -1,8 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Switch, Route } from "react-router-dom";
+import LoginComponent from "./Login";
+import Home from "./Home";
 
 function App() {
-  // Code goes here!
+  return (
+    <div>
+      <Switch>
+        <Route path="/login" component={LoginComponent} />
+        <Route path="/" component={Home} />
+      </Switch>
+    </div>
+  );
 }
 
 export default App;
