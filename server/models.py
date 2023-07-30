@@ -136,8 +136,6 @@ class Request(db.Model, SerializerMixin):
             'Teacher_if_declined': self.Teacher_if_declined,
         }
    
-
-
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'
 

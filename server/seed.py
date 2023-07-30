@@ -7,6 +7,7 @@ import string
 
 fake = Faker()
 
+
 def fetch_random_image():
     try:
         response = requests.get('https://source.unsplash.com/featured/?profile_pic')
@@ -155,6 +156,40 @@ def create_requests(num_requests=10):
         substitute = random.choice(substitutes)
         create_request(substitute.user_id)
 
+def create_request(substitute_id):
+    teachers = Teacher.query.all()
+
+    if not teachers:
+        print("No teachers found in the database. Skipping request generation.")
+        return
+
+    teacher = random.choice(teachers)
+    request = Request(
+        Substitute_user_id=substitute_id,
+        Teacher_id=teacher.id,
+        Teacher_school=fake.company(),
+        Teacher_school_location=fake.address(),
+        Course_Being_covered=fake.job(),
+        Confirmation=random.choice(['Accept', 'Decline']),
+        Message_sub_sent_to=fake.email(),
+        Teacher_if_declined=fake.text(),
+    )
+    db.session.add(request)
+    db.session.commit()
+
+def create_requests(num_requests=10):
+    substitutes = Substitute.query.all()
+
+    if not substitutes:
+        print("No substitutes found in the database. Skipping request generation.")
+        return
+
+    num_requests = min(num_requests, len(substitutes))  # Limit requests to the number of substitutes
+
+    for _ in range(num_requests):
+        substitute = random.choice(substitutes)
+        create_request(substitute.user_id)
+
 def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=20):
     with app.app_context():
         print("Wiping old Data...")
@@ -175,5 +210,5 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
         print("Complete")
 
 if __name__ == '__main__':
-    seed_database(num_teachers=10, num_subs=5, num_admins=2)  
+    seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=10)  
     print("Database seeded successfully!")

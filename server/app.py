@@ -1,5 +1,5 @@
 import os
-from flask import Flask, make_response, request, redirect, url_for, session, jsonify
+from flask import Flask, make_response, request, redirect, url_for, session, render_template_string
 from config import db, bcrypt
 from models import User, Teacher, Substitute, SiteAdmin, Review, Request, Course
 from flask_migrate import Migrate
@@ -132,23 +132,23 @@ def substitute_info(substitute_id):
     substitute = Substitute.query.get(substitute_id)
 
     if substitute:
-        substitute_info_content = f"""
+        substitute_info_content = """
         <!DOCTYPE html>
         <html>
         <head>
             <title>SubSpot - Substitute Information</title>
         </head>
         <body>
-            <h1>{substitute.name}'s Information</h1>
-            <p><strong>Name:</strong> {substitute.name}</p>
-            <p><strong>Email:</strong> {substitute.email}</p>
-            <p><strong>Location:</strong> {substitute.location}</p>
-            <p><strong>Phone:</strong> {substitute.phone}</p>
-            <p><strong>Qualifications:</strong> {substitute.qualifications}</p>
-            <p><strong>Verification ID:</strong> {substitute.verification_id}</p>
+            <h1>{{ substitute.name }}'s Information</h1>
+            <p><strong>Name:</strong> {{ substitute.name }}</p>
+            <p><strong>Email:</strong> {{ substitute.email }}</p>
+            <p><strong>Location:</strong> {{ substitute.location }}</p>
+            <p><strong>Phone:</strong> {{ substitute.phone }}</p>
+            <p><strong>Qualifications:</strong> {{ substitute.qualifications }}</p>
+            <p><strong>Verification ID:</strong> {{ substitute.verification_id }}</p>
 
             <!-- Add the Request button -->
-            <form method="post" action="/request/{substitute_id}">
+            <form method="post" action="/request/{{ substitute.id }}">
                 <input type="submit" value="Request">
             </form>
 
@@ -157,9 +157,7 @@ def substitute_info(substitute_id):
         </body>
         </html>
         """
-        response = make_response(substitute_info_content)
-        response.headers['Content-Type'] = 'text/html'
-        return response
+        return render_template_string(substitute_info_content, substitute=substitute)
     else:
         return "Substitute not found.", 404
     
@@ -170,16 +168,57 @@ def request_substitute(substitute_id):
 
     teacher_id = session['user_id']
 
-    new_request = Request(Substitute_user_id=substitute_id, Teacher_name="Teacher Name", Teacher_school="School Name",
-                          Teacher_school_location="School Location", Confirmation=None, Message_sub_sent_to=None,
-                          Teacher_if_declined=None)
+    new_request = Request(
+        Substitute_user_id=substitute_id,
+        Teacher_id=session['user_id'],
+        Teacher_school="School Name",
+        Teacher_school_location="School Location",
+        Course_Being_covered="Course Name",
+        Confirmation=None,
+        Message_sub_sent_to=None,
+        Teacher_if_declined=None
+    )
+
     db.session.add(new_request)
     db.session.commit()
 
     return redirect(url_for('substitute_info', substitute_id=substitute_id))
 
 
-    return "Request sent successfully!"
+@app.route('/substitute/request_received/<int:request_id>')
+def substitute_request_received(request_id):
+    request_data = Request.query.get(request_id)
+    if request_data is None:
+        return "Request not found.", 404
+
+    substitute = Substitute.query.get(request_data.Substitute_user_id)
+
+    substitute_request_received_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>SubSpot - Request Received</title>
+    </head>
+    <body>
+        <h1>Request Received</h1>
+        <p>You have received a request from {{ request_data.Teacher_name }}.</p>
+        <p>School: {{ request_data.Teacher_school }}</p>
+        <p>Location: {{ request_data.Teacher_school_location }}</p>
+
+        <form method="post" action="/substitute/confirm/{{ request_data.id }}">
+            <input type="submit" value="Confirm">
+        </form>
+
+        <form method="post" action="/substitute/decline/{{ request_data.id }}">
+            <input type="submit" value="Decline">
+        </form>
+
+        <a href="/">Go Back to Home</a>
+    </body>
+    </html>
+    """
+    return render_template_string(substitute_request_received_content, request_data=request_data)
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -230,7 +269,7 @@ def signup():
 <head>
     <title>SubSpot - Sign Up</title>
 </head>
-<body>
+<body onload="toggleFormFields()">
     <h1>Sign Up</h1>
     <form method="post" id="signup-form">
         <label for="role">Choose Role:</label>
