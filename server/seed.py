@@ -7,7 +7,6 @@ import string
 
 fake = Faker()
 
-
 def fetch_random_image():
     try:
         response = requests.get('https://source.unsplash.com/featured/?profile_pic')
@@ -119,7 +118,6 @@ def create_courses_and_reviews(num_courses=10, num_reviews=30):
 
     for _ in range(num_reviews):
         course = random.choice(courses)
-       
 
         review = Review(
             Teacher_Id=course.Correlating_teacher_ID,
