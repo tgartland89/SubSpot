@@ -184,7 +184,7 @@ def create_requests(num_requests=10):
         print("No substitutes found in the database. Skipping request generation.")
         return
 
-    num_requests = min(num_requests, len(substitutes))  # Limit requests to the number of substitutes
+    num_requests = min(num_requests, len(substitutes))  
 
     for _ in range(num_requests):
         substitute = random.choice(substitutes)

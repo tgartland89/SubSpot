@@ -20,7 +20,6 @@ bcrypt.init_app(app)
 def home():
     if 'user_id' in session:
         substitutes = Substitute.query.all()
-
         home_page_content = """
         <!DOCTYPE html>
         <html>
@@ -54,13 +53,11 @@ def home():
         </body>
         </html>
         """
-
     response = make_response(home_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
 
 def generate_substitute_list(substitutes):
-
     list_html = ""
     for substitute in substitutes:
         list_html += "<li><a href='/substitute/{0}'>{1}</a></li>".format(substitute.id, substitute.name)
@@ -71,7 +68,6 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-
         user = User.query.filter_by(email=email).first()
 
         if user and user.authenticate(password):
@@ -132,6 +128,8 @@ def substitute_info(substitute_id):
     substitute = Substitute.query.get(substitute_id)
 
     if substitute:
+        requests_received = Request.query.filter_by(Substitute_user_id=substitute_id).all()
+
         substitute_info_content = """
         <!DOCTYPE html>
         <html>
@@ -152,14 +150,33 @@ def substitute_info(substitute_id):
                 <input type="submit" value="Request">
             </form>
 
+            <!-- Display the list of requests -->
+            <h2>Requests Received:</h2>
+            <ul>
+                {% for request_data in requests_received %}
+                    <li>
+                        <strong>Teacher:</strong> {{ request_data.teacher.name }}<br>
+                        <strong>School:</strong> {{ request_data.Teacher_school }}<br>
+                        <strong>Location:</strong> {{ request_data.Teacher_school_location }}<br>
+                        <form method="post" action="/substitute/confirm/{{ request_data.id }}">
+                            <input type="submit" value="Confirm">
+                        </form>
+                        <form method="post" action="/substitute/decline/{{ request_data.id }}">
+                            <input type="submit" value="Decline">
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+
             <!-- Link back to the home page -->
             <a href="/">Go Back to Home</a>
         </body>
         </html>
         """
-        return render_template_string(substitute_info_content, substitute=substitute)
+        return render_template_string(substitute_info_content, substitute=substitute, requests_received=requests_received)
     else:
         return "Substitute not found.", 404
+
     
 @app.route('/request/<int:substitute_id>', methods=['POST'])
 def request_substitute(substitute_id):
@@ -184,7 +201,6 @@ def request_substitute(substitute_id):
 
     return redirect(url_for('substitute_info', substitute_id=substitute_id))
 
-
 @app.route('/substitute/request_received/<int:request_id>')
 def substitute_request_received(request_id):
     request_data = Request.query.get(request_id)
@@ -192,7 +208,6 @@ def substitute_request_received(request_id):
         return "Request not found.", 404
 
     substitute = Substitute.query.get(request_data.Substitute_user_id)
-
     substitute_request_received_content = """
     <!DOCTYPE html>
     <html>
@@ -224,7 +239,6 @@ def substitute_request_received(request_id):
 def signup():
     if request.method == 'POST':
         role = request.form.get('role')
-
         name = request.form.get('name')
         email = request.form.get('email')
         password = request.form.get('password')
