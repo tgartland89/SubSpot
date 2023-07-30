@@ -61,7 +61,6 @@ def create_site_admin(user):
     )
     db.session.add(site_admin)
 
-
 def create_users_and_roles(num_teachers=10, num_subs=5, num_admins=2):
     for _ in range(num_teachers):
         email = fake.email()
@@ -94,7 +93,6 @@ def create_courses_and_reviews(num_courses=10, num_reviews=30):
     for _ in range(num_courses):
         teacher = random.choice(teachers)
         substitute = random.choice(substitutes)
-
 
         while (teacher, substitute) in course_review_pairs:
             teacher = random.choice(teachers)

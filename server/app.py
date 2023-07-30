@@ -1,10 +1,11 @@
 import os
-from flask import Flask, make_response, request, redirect, url_for, session, render_template_string, jsonify
+from flask import Flask, make_response, request, redirect, url_for, session, jsonify, render_template
 from config import db, bcrypt
-from models import User, Teacher, Substitute, SiteAdmin, Review, Request, Course
+from models import User, Teacher, Substitute
 from flask_migrate import Migrate
 from faker import Faker 
 from flask_cors import CORS
+from functools import wraps
 
 fake = Faker()
 
@@ -34,7 +35,6 @@ def home():
     response.headers['Content-Type'] = 'text/html'
     return response
 
-
 @app.route('/about')
 def about():
     about_content = "SubSpot is a site built by the son of a fourth grade teacher who was looking for alternatives to find substitute teachers quickly and efficiently."
@@ -49,6 +49,7 @@ def login():
 
         if user and user.authenticate(password):
             session['user_id'] = user.id
+            session['user_role'] = user.role
             return redirect(url_for('home'))
         else:
             login_page_content = "Invalid email or password. Please try again."
@@ -61,39 +62,35 @@ def login():
     response.headers['Content-Type'] = 'text/html'
     return response
 
-@app.route('/substitute/<int:substitute_id>')
-def substitute_info(substitute_id):
-    substitute = Substitute.query.get(substitute_id)
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
-    if substitute:
-        requests_received = Request.query.filter_by(Substitute_user_id=substitute_id).all()
-        substitute_info_content = f"{substitute.name}'s Information:\nName: {substitute.name}\nEmail: {substitute.email}\nLocation: {substitute.location}\nPhone: {substitute.phone}\nQualifications: {substitute.qualifications}\nVerification ID: {substitute.verification_id}"
-        return substitute_info_content
-    else:
-        return "Substitute not found.", 404
-
-@app.route('/request/<int:substitute_id>', methods=['POST'])
-def request_substitute(substitute_id):
+@app.route('/get_user_role', methods=['GET'])
+@login_required
+def get_user_role():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return jsonify({"role": None})
 
-    teacher_id = session['user_id']
+    user_id = session['user_id']
+    user = User.query.get(user_id)
 
-    new_request = Request(
-        Substitute_user_id=substitute_id,
-        Teacher_id=session['user_id'],
-        Teacher_school="School Name",
-        Teacher_school_location="School Location",
-        Course_Being_covered="Course Name",
-        Confirmation=None,
-        Message_sub_sent_to=None,
-        Teacher_if_declined=None
-    )
-
-    db.session.add(new_request)
-    db.session.commit()
-
-    return redirect(url_for('substitute_info', substitute_id=substitute_id))
+    if user:
+        return jsonify({"role": user.role}) 
+    else:
+        return jsonify({"role": None})
+    
+@app.route('/teacher-dashboard')
+@login_required
+def teacher_dashboard():
+    if session['user_role'] != 'teacher':  
+        return redirect(url_for('home'))
+    
+    return render_template('TeacherDashboard.js')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -147,7 +144,6 @@ def signup_confirmation_message(role):
         return "You have successfully signed up as a Substitute!"
     else:
         return "You have successfully signed up!"
-  
 
 @app.route('/logout')
 def logout():
