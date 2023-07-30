@@ -1,32 +1,25 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { loginUser } from "./api"; // Import the loginUser function
 
 function LoginComponent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
+  const [userRole, setUserRole] = useState("");
 
   const handleLogin = (event) => {
     event.preventDefault();
-
-    // Perform login logic and API call here using the email and password state variables.
-    // You may use fetch or Axios to make an API call to your Flask backend.
-    // Upon successful login, redirect to the home page.
-    // Example using fetch:
-
-    fetch("/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          history.push("/"); // Redirect to the home page upon successful login.
-        } else {
-          // Handle invalid login here.
-          console.log("Invalid email or password. Please try again.");
+    loginUser(email, password)
+      .then((data) => {
+        setUserRole(data.role);
+        // Redirect to the appropriate dashboard page based on the user's role
+        if (data.role === "teacher") {
+          history.push("/teacher-dashboard");
+        } else if (data.role === "admin") {
+          history.push("/admin-dashboard");
+        } else if (data.role === "substitute") {
+          history.push("/substitute-dashboard");
         }
       })
       .catch((error) => {

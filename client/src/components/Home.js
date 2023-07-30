@@ -22,8 +22,11 @@ function Home() {
         <h2>Sign Up</h2>
         <Link to="/signup">Sign Up</Link>
       </div>
+      <div>
+        <h2>About</h2>
+        <Link to="/about">About</Link>
+      </div>
     </div>
   );
 }
-
 export default Home;
