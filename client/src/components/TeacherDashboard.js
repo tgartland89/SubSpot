@@ -10,7 +10,7 @@ const TeacherDashboard = () => {
     })
       .then((response) => {
         if (response.ok) {
-          history.push("/login"); // Use useHistory to navigate to "/login" after logout
+          history.push("/login");
         } else {
           console.log("Error occurred during logout.");
         }
@@ -23,7 +23,6 @@ const TeacherDashboard = () => {
   return (
     <div>
       <h1>Welcome to Teacher Dashboard</h1>
-      {/* Add the content for the Teacher Dashboard */}
       <p>Here you can manage your teaching-related activities and view reviews.</p>
 
       <button onClick={handleLogout}>Log Out</button>

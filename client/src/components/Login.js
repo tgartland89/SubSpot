@@ -5,8 +5,9 @@ import { loginUser } from "./api"; // Import the loginUser function
 function LoginComponent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+   // eslint-disable-next-line 
+  const [userRole, setUserRole] = useState(""); // Define the setUserRole function here
   const history = useHistory();
-  const [userRole, setUserRole] = useState("");
 
   const handleLogin = (event) => {
     event.preventDefault();

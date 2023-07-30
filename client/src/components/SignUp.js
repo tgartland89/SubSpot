@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+
 
 function SignUp() {
   const [role, setRole] = useState("Teacher");
@@ -17,8 +17,6 @@ function SignUp() {
   });
 
   const [confirmationMessage, setConfirmationMessage] = useState("")
-
-  const history = useHistory();
 
   const handleRoleChange = (event) => {
     setRole(event.target.value);
