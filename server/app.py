@@ -25,9 +25,20 @@ def home():
         home_page_content = "Welcome to SubSpot! Find substitutes quickly for your teaching needs."
     else:
         home_page_content = "Welcome to SubSpot! Find substitutes quickly for your teaching needs."
+
+    login_link = "<a href='/login'>Log In</a>"
+    signup_link = "<a href='/signup'>Sign Up</a>"
+
+    home_page_content += f"<br/><br/>{login_link} | {signup_link}"
     response = make_response(home_page_content)
     response.headers['Content-Type'] = 'text/html'
     return response
+
+
+@app.route('/about')
+def about():
+    about_content = "SubSpot is a site built by the son of a fourth grade teacher who was looking for alternatives to find substitute teachers quickly and efficiently."
+    return about_content
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
