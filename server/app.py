@@ -84,14 +84,6 @@ def get_user_role():
     else:
         return jsonify({"role": None})
     
-@app.route('/teacher-dashboard')
-@login_required
-def teacher_dashboard():
-    if session['user_role'] != 'teacher':  
-        return redirect(url_for('home'))
-    
-    return render_template('TeacherDashboard.js')
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
