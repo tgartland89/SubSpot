@@ -1,7 +1,7 @@
 import os
 from flask import Flask, make_response, request, redirect, url_for, session, jsonify, render_template
 from config import db, bcrypt
-from models import User, Teacher, Substitute
+from models import User, Teacher, Substitute, SiteAdmin, Request
 from flask_migrate import Migrate
 from faker import Faker 
 from flask_cors import CORS
@@ -53,11 +53,6 @@ def login():
             return jsonify({"role": user.role})
 
     return jsonify({"error": "Invalid email or password. Please try again."}), 400
-
-    login_page_content = "Log In"
-    response = make_response(login_page_content)
-    response.headers['Content-Type'] = 'text/html'
-    return response
 
 def login_required(f):
     @wraps(f)
@@ -141,7 +136,6 @@ def teacher_dashboard():
         return jsonify({"error": "Access denied"})
 
     substitutes = Substitute.query.all()
-
     substitute_list = []
     for substitute in substitutes:
         substitute_details = {
@@ -162,10 +156,12 @@ def teacher_dashboard():
 def admin_dashboard():
     if session['user_role'] != 'SiteAdmin':
         return jsonify({"error": "Access denied"})
-
-    # Add logic to retrieve admin dashboard data here
-
-    return jsonify({"message": "Admin Dashboard"})
+    
+    site_admin = SiteAdmin.query.first()
+    if not site_admin:
+        return jsonify({"error": "No SiteAdmin found."})
+    admin_details = site_admin.to_dict()
+    return jsonify(admin_details)
 
 @app.route('/substitute-dashboard', methods=['GET'])
 @login_required
@@ -173,11 +169,14 @@ def substitute_dashboard():
     if session['user_role'] != 'Substitute':
         return jsonify({"error": "Access denied"})
 
-    # Add logic to retrieve substitute dashboard data here
+    user_id = session['user_id']
+    substitute = Substitute.query.filter_by(user_id=user_id).first()
 
-    return jsonify({"message": "Substitute Dashboard"})
+    if not substitute:
+        return jsonify({"error": "Substitute not found."})
+    substitute_details = substitute.to_dict()
 
-
+    return jsonify(substitute_details)
 
 @app.route('/make_request', methods=['POST'])
 @login_required
@@ -187,8 +186,28 @@ def make_request():
 
     data = request.json
     substitute_id = data.get('substitute_id')
-    return jsonify({"message": "Request sent successfully"})
+    
+    substitute = Substitute.query.get(substitute_id)
+    teacher_id = session['user_id']
+    teacher = Teacher.query.get(teacher_id)
 
+    if not substitute or not teacher:
+        return jsonify({"error": "Substitute or Teacher not found."})
+    
+    new_request = Request(
+        Substitute_user_id=substitute.id,
+        Teacher_id=teacher.id,
+        Teacher_school=teacher.school_name,
+        Teacher_school_location=teacher.location,
+        Course_Being_covered=teacher.course_name,
+        Confirmation=None,
+        Message_sub_sent_to=substitute.name,
+        Teacher_if_declined=None
+    )
+    db.session.add(new_request)
+    db.session.commit()
+
+    return jsonify({"message": "Request sent successfully"})
 
 @app.route('/logout')
 def logout():
