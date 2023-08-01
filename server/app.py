@@ -40,7 +40,7 @@ def about():
     about_content = "SubSpot is a site built by the son of a fourth grade teacher who was looking for alternatives to find substitute teachers quickly and efficiently."
     return about_content
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -50,12 +50,9 @@ def login():
         if user and user.authenticate(password):
             session['user_id'] = user.id
             session['user_role'] = user.role
-            return redirect(url_for('home'))
-        else:
-            login_page_content = "Invalid email or password. Please try again."
-            response = make_response(login_page_content)
-            response.headers['Content-Type'] = 'text/html'
-            return response
+            return jsonify({"role": user.role})
+
+    return jsonify({"error": "Invalid email or password. Please try again."}), 400
 
     login_page_content = "Log In"
     response = make_response(login_page_content)
@@ -136,6 +133,62 @@ def signup_confirmation_message(role):
         return "You have successfully signed up as a Substitute!"
     else:
         return "You have successfully signed up!"
+    
+@app.route('/teacher-dashboard', methods=['GET'])
+@login_required
+def teacher_dashboard():
+    if session['user_role'] != 'Teacher':
+        return jsonify({"error": "Access denied"})
+
+    substitutes = Substitute.query.all()
+
+    substitute_list = []
+    for substitute in substitutes:
+        substitute_details = {
+            "name": substitute.name,
+            "email": substitute.email,
+            "location": substitute.location,
+            "phone": substitute.phone,
+            "qualifications": substitute.qualifications,
+            "verification_id": substitute.verification_id,
+        }
+        substitute_list.append(substitute_details)
+
+    return jsonify({"substitutes": substitute_list})
+
+
+@app.route('/admin-dashboard', methods=['GET'])
+@login_required
+def admin_dashboard():
+    if session['user_role'] != 'SiteAdmin':
+        return jsonify({"error": "Access denied"})
+
+    # Add logic to retrieve admin dashboard data here
+
+    return jsonify({"message": "Admin Dashboard"})
+
+@app.route('/substitute-dashboard', methods=['GET'])
+@login_required
+def substitute_dashboard():
+    if session['user_role'] != 'Substitute':
+        return jsonify({"error": "Access denied"})
+
+    # Add logic to retrieve substitute dashboard data here
+
+    return jsonify({"message": "Substitute Dashboard"})
+
+
+
+@app.route('/make_request', methods=['POST'])
+@login_required
+def make_request():
+    if session['user_role'] != 'Teacher':
+        return jsonify({"error": "Access denied"})
+
+    data = request.json
+    substitute_id = data.get('substitute_id')
+    return jsonify({"message": "Request sent successfully"})
+
 
 @app.route('/logout')
 def logout():
