@@ -1,5 +1,5 @@
 import os
-from flask import Flask, make_response, request, redirect, url_for, session, jsonify, render_template
+from flask import Flask, make_response, request, redirect, url_for, session, jsonify, g
 from config import db, bcrypt
 from models import User, Teacher, Substitute, SiteAdmin, Request
 from flask_migrate import Migrate
@@ -40,11 +40,33 @@ def about():
     about_content = "SubSpot is a site built by the son of a fourth grade teacher who was looking for alternatives to find substitute teachers quickly and efficiently."
     return about_content
 
+def is_logged_in():
+    return 'user_id' in session
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not is_logged_in():
+            return jsonify({"error": "Login required."}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        content_type = request.headers.get('Content-Type')
+
+        if content_type == 'application/json':
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
+        else:
+            email = request.form.get('email')
+            password = request.form.get('password')
+
+        if not email or not password:
+            return jsonify({"error": "Missing email or password."}), 400
+
         user = User.query.filter_by(email=email).first()
 
         if user and user.authenticate(password):
@@ -52,16 +74,8 @@ def login():
             session['user_role'] = user.role
             return jsonify({"role": user.role})
 
-    return jsonify({"error": "Invalid email or password. Please try again."}), 400
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
+        return jsonify({"error": "Invalid email or password. Please try again."}), 401
+    
 @app.route('/get_user_role', methods=['GET'])
 @login_required
 def get_user_role():
@@ -149,7 +163,6 @@ def teacher_dashboard():
         substitute_list.append(substitute_details)
 
     return jsonify({"substitutes": substitute_list})
-
 
 @app.route('/admin-dashboard', methods=['GET'])
 @login_required
