@@ -1,8 +1,8 @@
 """Create tables
 
-Revision ID: bed415060476
+Revision ID: d5d66e9bb513
 Revises: 
-Create Date: 2023-07-29 13:48:55.215247
+Create Date: 2023-08-01 16:02:43.552048
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bed415060476'
+revision = 'd5d66e9bb513'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -80,7 +80,7 @@ def upgrade():
     op.create_table('requests',
     sa.Column('Request_ID', sa.Integer(), nullable=False),
     sa.Column('Substitute_user_id', sa.Integer(), nullable=True),
-    sa.Column('Teacher_name', sa.String(length=120), nullable=True),
+    sa.Column('Teacher_id', sa.Integer(), nullable=True),
     sa.Column('Teacher_school', sa.String(length=120), nullable=True),
     sa.Column('Teacher_school_location', sa.String(length=120), nullable=True),
     sa.Column('Course_Being_covered', sa.String(length=120), nullable=True),
@@ -88,6 +88,7 @@ def upgrade():
     sa.Column('Message_sub_sent_to', sa.String(length=120), nullable=True),
     sa.Column('Teacher_if_declined', sa.String(length=120), nullable=True),
     sa.ForeignKeyConstraint(['Substitute_user_id'], ['substitutes.id'], name=op.f('fk_requests_Substitute_user_id_substitutes')),
+    sa.ForeignKeyConstraint(['Teacher_id'], ['teachers.id'], name=op.f('fk_requests_Teacher_id_teachers')),
     sa.PrimaryKeyConstraint('Request_ID')
     )
     op.create_table('reviews',

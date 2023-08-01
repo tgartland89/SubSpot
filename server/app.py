@@ -66,17 +66,16 @@ def login():
 
         if not email or not password:
             return jsonify({"error": "Missing email or password."}), 400
-        
+
         user = User.query.filter_by(email=email).first()
 
-        if user and bcrypt.check_password_hash(user.password_hash, password):
+        if user and user.authenticate(password):
             session['user_id'] = user.id
             session['user_role'] = user.role
             return jsonify({"role": user.role})
 
-    return jsonify({"error": "Invalid email or password. Please try again."}), 401
-
-
+        return jsonify({"error": "Invalid email or password. Please try again."}), 401
+    
 @app.route('/get_user_role', methods=['GET'])
 @login_required
 def get_user_role():
@@ -91,7 +90,7 @@ def get_user_role():
     else:
         return jsonify({"role": None})
     
-@app.route('/signup', methods=['GET', 'POST'])
+@app.route('/auth/signup', methods=['POST'])
 def signup():
     if request.method == 'POST':
         role = request.json.get('role')
@@ -102,54 +101,37 @@ def signup():
         location = request.json.get('location')
         phone = request.json.get('phone')
 
-        if not role or role not in ['Teacher', 'Substitute']:
-            return jsonify({"error": "Invalid role."}), 400
-
-        if not name or not email or not password or not confirm_password:
-            return jsonify({"error": "Missing required fields."}), 400
-
         if password != confirm_password:
-            return jsonify({"error": "Passwords do not match."}), 400
+            return redirect(url_for('signup'))
 
         if role == 'Teacher':
             school_name = request.json.get('school_name')
             course_name = request.json.get('course_name')
 
-            if not school_name or not course_name:
-                return jsonify({"error": "Missing required fields for Teacher signup."}), 400
+            new_user = User(name=name, email=email, location=location, phone=phone, role=role, password=password)
+            db.session.add(new_user)
+            db.session.commit()
+
+            new_teacher = Teacher(user=new_user, name=name, email=email, location=location, phone=phone, course_name=course_name)
+            db.session.add(new_teacher)
+            db.session.commit()
+
+            return jsonify(message=signup_confirmation_message(role))
 
         elif role == 'Substitute':
             qualifications = request.json.get('qualifications')
             verification_id = request.json.get('verification_id')
 
-            if not qualifications or not verification_id:
-                return jsonify({"error": "Missing required fields for Substitute signup."}), 400
-
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
-        new_user = User(
-            name=name,
-            email=email,
-            location=location,
-            phone=phone,
-            role=role,
-            password_hash=hashed_password
-        )
-        db.session.add(new_user)
-        db.session.commit()
-
-
-        if role == 'Teacher':
-            new_teacher = Teacher(user=new_user, name=name, email=email, location=location, phone=phone, course_name=course_name)
-            db.session.add(new_teacher)
+            new_user = User(name=name, email=email, location=location, phone=phone, role=role, password=password)
+            db.session.add(new_user)
             db.session.commit()
-        elif role == 'Substitute':
+
             new_substitute = Substitute(user=new_user, name=name, email=email, location=location, phone=phone,
                                         qualifications=qualifications, verification_id=verification_id)
             db.session.add(new_substitute)
             db.session.commit()
 
-        return jsonify({"message": signup_confirmation_message(role)})
+            return jsonify({"message": signup_confirmation_message(role)})
 
     return "Sign Up Form"
 
@@ -218,16 +200,13 @@ def make_request():
     data = request.json
     substitute_id = data.get('substitute_id')
     
-    if not substitute_id:
-        return jsonify({"error": "Missing 'substitute_id' in the request."}), 400
-
     substitute = Substitute.query.get(substitute_id)
     teacher_id = session['user_id']
     teacher = Teacher.query.get(teacher_id)
 
     if not substitute or not teacher:
-        return jsonify({"error": "Substitute or Teacher not found."}), 404
-
+        return jsonify({"error": "Substitute or Teacher not found."})
+    
     new_request = Request(
         Substitute_user_id=substitute.id,
         Teacher_id=teacher.id,
@@ -243,10 +222,10 @@ def make_request():
 
     return jsonify({"message": "Request sent successfully"})
 
-@app.route('/logout', methods=['DELETE'])
+@app.route('/logout')
 def logout():
     session.clear()
-    return jsonify({"message": "Logout successful"})
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(port=5555)
