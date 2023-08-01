@@ -127,9 +127,17 @@ def signup():
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
-        new_user = User(name=name, email=email, location=location, phone=phone, role=role, password=hashed_password)
+        new_user = User(
+            name=name,
+            email=email,
+            location=location,
+            phone=phone,
+            role=role,
+            password_hash=hashed_password
+        )
         db.session.add(new_user)
         db.session.commit()
+
 
         if role == 'Teacher':
             new_teacher = Teacher(user=new_user, name=name, email=email, location=location, phone=phone, course_name=course_name)

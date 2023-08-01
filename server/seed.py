@@ -4,6 +4,7 @@ from faker import Faker
 import random
 import requests
 import string
+import bcrypt
 
 fake = Faker()
 
@@ -21,10 +22,22 @@ def create_user(email, password, role):
     location = fake.city()
     phone = fake.phone_number()
     profile_picture = fetch_random_image()
-    user = User(name=name, email=email, location=location, phone=phone, password=password, role=role, profile_picture=profile_picture)
+
+    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    user = User(
+        name=name,
+        email=email,
+        location=location,
+        phone=phone,
+        role=role,
+        password=password, 
+        profile_picture=profile_picture
+    )
     db.session.add(user)
     db.session.commit()
     return user
+
 
 def generate_random_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
