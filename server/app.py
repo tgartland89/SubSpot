@@ -222,10 +222,10 @@ def make_request():
 
     return jsonify({"message": "Request sent successfully"})
 
-@app.route('/logout')
+@app.route('/logout', methods=['DELETE'])
 def logout():
     session.clear()
-    return redirect(url_for('home'))
+    return jsonify({"message": "Logout successful"})
 
 if __name__ == '__main__':
     app.run(port=5555)
