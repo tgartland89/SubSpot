@@ -3,12 +3,8 @@ import { Switch, Route } from "react-router-dom";
 import Home from "./Home";
 import LoginComponent from "./Login";
 import SignUp from "./SignUp";
-import AdminDashboard from "./AdminDashboard";
-import AdminNavBar from './AdminNavBar'
-import SubstituteDashboard from "./SubstituteDashboard";
-import SubNavBar from './SubNavBar';
-import TeacherNavBar from './TeacherNavBar';
-import TeacherDashboardPage from "./TeacherDashboardPage";
+import DashboardPage from "./DashboardPage";
+import NavBar from "./NavBar";
 import NotFound from "./NotFound";
 import { loginUser } from "./api";
 
@@ -53,10 +49,7 @@ function App() {
 
   return (
     <div>
-      {userRole === "admin" && <AdminNavBar />}
-      {userRole === "teacher" && <TeacherNavBar />} 
-      {userRole === "substitute" && <SubNavBar />} 
-      {userRole === "teacher" && <TeacherDashboardPage />}
+       <NavBar userRole={userRole} />
 
       <Switch>
         <Route exact path="/" component={Home} />   
@@ -64,9 +57,9 @@ function App() {
         <Route path="/signup" component={SignUp} />
         <Route path="/about" component={About} />
         <Route component={NotFound} /> 
-        <Route path="/substitute-dashboard" component={SubstituteDashboard} />
-        <Route path="/admin-dashboard" component={AdminDashboard} />
-        <Route path="/teacher-dashboard" component={TeacherDashboardPage} /> 
+        <Route path="/teacher-dashboard" render={() => <DashboardPage userRole="teacher" />} />
+        <Route path="/admin-dashboard" render={() => <DashboardPage userRole="admin" />} />
+        <Route path="/substitute-dashboard" render={() => <DashboardPage userRole="substitute" />} />
       </Switch>
     </div>
   );
