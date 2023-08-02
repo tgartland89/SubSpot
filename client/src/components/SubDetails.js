@@ -6,7 +6,7 @@ const SubsDetails = () => {
   const [substituteDetails, setSubstituteDetails] = useState(null);
 
   useEffect(() => {
-    // Fetch substitute details using API
+  
     fetch(`/substitute/${substituteId}`)
       .then((response) => response.json())
       .then((data) => {
@@ -18,7 +18,7 @@ const SubsDetails = () => {
   }, [substituteId]);
 
   if (!substituteDetails) {
-    // Loading state or error handling if necessary
+
     return <div>Loading...</div>;
   }
 
