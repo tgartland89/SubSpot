@@ -32,6 +32,8 @@ function App() {
       loginUser(email, password)
         .then((data) => {
           setUserRole(data.role);
+    
+          window.history.replaceState({}, document.title, window.location.pathname);
         })
         .catch((error) => {
           console.error("Error occurred during login:", error);

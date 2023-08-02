@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { loginUser } from "./api"; 
+import { loginUser } from "./api";
 
 function LoginComponent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-   // eslint-disable-next-line 
-  const [userRole, setUserRole] = useState(""); 
+  // eslint-disable-next-line 
+  const [userRole, setUserRole] = useState("");
   const history = useHistory();
 
   const handleLogin = (event) => {
-    event.preventDefault();
+    event.preventDefault(); 
+
+  
     loginUser(email, password)
       .then((data) => {
         setUserRole(data.role);
