@@ -6,6 +6,7 @@ import SignUp from "./SignUp";
 import DashboardPage from "./DashboardPage";
 import NavBar from "./NavBar";
 import NotFound from "./NotFound";
+import SubsDetails from "./SubDetails";
 import { loginUser } from "./api";
 
 function About() {
@@ -64,6 +65,7 @@ function App() {
         <Route path="/about" component={About} />
         <Route component={NotFound} /> 
         <Route path="/teacher-dashboard" render={() => <DashboardPage userRole="teacher" />} />
+        <Route path="/sub-details/:substituteId" component={SubsDetails}/>
         <Route path="/admin-dashboard" render={() => <DashboardPage userRole="admin" />} />
         <Route path="/substitute-dashboard" render={() => <DashboardPage userRole="substitute" />} />
       </Switch>

@@ -153,6 +153,7 @@ def teacher_dashboard():
     substitute_list = []
     for substitute in substitutes:
         substitute_details = {
+            "id": substitute.id,
             "name": substitute.name,
             "email": substitute.email,
             "location": substitute.location,
@@ -162,35 +163,49 @@ def teacher_dashboard():
         }
         substitute_list.append(substitute_details)
 
-    return jsonify({"substitutes": substitute_list})
+    return jsonify({
+        "message": "Welcome to Teacher Dashboard. Here you can view and request substitutes and add reviews.",
+        "substitutes": substitute_list
+    })
+
+@app.route('/substitute/<int:substitute_id>', methods=['GET'])
+@login_required
+def get_substitute_details(substitute_id):
+    substitute = Substitute.query.get(substitute_id)
+
+    if not substitute:
+        return jsonify({"error": "Substitute not found."}), 404
+
+    substitute_details = {
+        "name": substitute.name,
+        "email": substitute.email,
+        "location": substitute.location,
+        "phone": substitute.phone,
+        "qualifications": substitute.qualifications,
+        "verification_id": substitute.verification_id,
+    }
+
+    return jsonify(substitute_details)
+
 
 @app.route('/create_site_admin', methods=['GET'])
 def create_site_admin():
-    # Replace the following details with the desired information for the SiteAdmin user
     email = 'colly@example.com'
     password = 'Disney4Life!'
     name = 'Collen Chase'
     location = 'Aurora, CO'
     phone = '303-867-5309'
-
-    # Check if a user with the same email already exists
     existing_user = User.query.filter_by(email=email).first()
     if existing_user:
         return jsonify({"error": "User with this email already exists."})
-
-    # Create the new SiteAdmin user
     user = User(name=name, email=email, location=location, phone=phone, role='SiteAdmin', password=password)
     db.session.add(user)
-
-    # Create the associated SiteAdmin instance
     site_admin = SiteAdmin(name=name, email=email, phone=phone)
     db.session.add(site_admin)
 
     db.session.commit()
 
     return jsonify({"message": "SiteAdmin user created successfully."})
-
-
 
 @app.route('/admin-dashboard', methods=['GET'])
 @login_required

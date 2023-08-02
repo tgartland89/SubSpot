@@ -177,7 +177,6 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
         print("Complete")
 
         print("Generating SiteAdmin...")
-        # This line will create the SiteAdmin user
         email = 'colly@example.com'
         password = 'Disney4Life!'
         user = create_user(email, password, 'SiteAdmin')
