@@ -22,6 +22,7 @@ function About() {
 
 function App() {
   const [userRole, setUserRole] = useState(null);
+  // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

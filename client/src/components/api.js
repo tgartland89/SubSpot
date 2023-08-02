@@ -5,5 +5,10 @@ export const loginUser = (email, password) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ email, password }),
-  }).then((response) => response.json());
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error("Failed to log in. Please check your credentials and try again.");
+    }
+    return response.json();
+  });
 };
