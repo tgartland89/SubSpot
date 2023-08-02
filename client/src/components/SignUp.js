@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-
 function SignUp() {
   const [role, setRole] = useState("Teacher");
   const [formData, setFormData] = useState({

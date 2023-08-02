@@ -23,7 +23,6 @@ function App() {
   const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  
   useEffect(() => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const email = urlSearchParams.get("email");
@@ -42,15 +41,19 @@ function App() {
     }
   }, []);
   
-
-  if (isLoading) {
-    return <div>Loading...</div>; 
-  }
+  const handleLogout = () => {
+    fetch("/logout", { method: "DELETE" }) 
+      .then(() => {
+        setUserRole(null);
+      })
+      .catch((error) => {
+        console.error("Error occurred during logout:", error);
+      });
+  };
 
   return (
     <div>
-       <NavBar userRole={userRole} />
-
+      <NavBar userRole={userRole} onLogout={handleLogout} />
       <Switch>
         <Route exact path="/" component={Home} />   
         <Route path="/login" component={LoginComponent} />
