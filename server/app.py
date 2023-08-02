@@ -164,6 +164,34 @@ def teacher_dashboard():
 
     return jsonify({"substitutes": substitute_list})
 
+@app.route('/create_site_admin', methods=['GET'])
+def create_site_admin():
+    # Replace the following details with the desired information for the SiteAdmin user
+    email = 'colly@example.com'
+    password = 'Disney4Life!'
+    name = 'Collen Chase'
+    location = 'Aurora, CO'
+    phone = '303-867-5309'
+
+    # Check if a user with the same email already exists
+    existing_user = User.query.filter_by(email=email).first()
+    if existing_user:
+        return jsonify({"error": "User with this email already exists."})
+
+    # Create the new SiteAdmin user
+    user = User(name=name, email=email, location=location, phone=phone, role='SiteAdmin', password=password)
+    db.session.add(user)
+
+    # Create the associated SiteAdmin instance
+    site_admin = SiteAdmin(name=name, email=email, phone=phone)
+    db.session.add(site_admin)
+
+    db.session.commit()
+
+    return jsonify({"message": "SiteAdmin user created successfully."})
+
+
+
 @app.route('/admin-dashboard', methods=['GET'])
 @login_required
 def admin_dashboard():

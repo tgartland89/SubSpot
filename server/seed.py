@@ -176,10 +176,18 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
         create_courses_and_reviews(num_courses, num_reviews)
         print("Complete")
 
+        print("Generating SiteAdmin...")
+        # This line will create the SiteAdmin user
+        email = 'colly@example.com'
+        password = 'Disney4Life!'
+        user = create_user(email, password, 'SiteAdmin')
+        create_site_admin(user)
+        print("Complete")
+
         print("Generating Requests...")
         create_requests(num_requests)
         print("Complete")
 
 if __name__ == '__main__':
-    seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=10)  
+    seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=10)
     print("Database seeded successfully!")
