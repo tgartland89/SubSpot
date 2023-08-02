@@ -44,15 +44,16 @@ function App() {
   }, []);
   
   const handleLogout = () => {
-    fetch("/logout", { method: "DELETE" }) 
+    fetch("/logout", { method: "DELETE" })
       .then(() => {
         setUserRole(null);
+        window.location.href = '/'; 
       })
       .catch((error) => {
         console.error("Error occurred during logout:", error);
       });
   };
-
+  
   return (
     <div>
       <NavBar userRole={userRole} onLogout={handleLogout} />
