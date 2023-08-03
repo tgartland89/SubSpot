@@ -1,6 +1,11 @@
 import React from "react";
+import NavBar from "./NavBar";
+import TeacherDashboard from "./TeacherDashboard";
+import SubstituteDashboard from "./SubstituteDashboard";
+import AdminDashboard from "./AdminDashboard";
 
 const Dashboard = ({ userRole }) => {
+  console.log("userRole in DashboardPage:", userRole);
   switch (userRole) {
     case "admin":
       return (

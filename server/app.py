@@ -72,6 +72,7 @@ def login():
         if user and user.authenticate(password):
             session['user_id'] = user.id
             session['user_role'] = user.role
+            print("User role after login:", user.role) 
             return jsonify({"role": user.role})
         return jsonify({"error": "Invalid email or password. Please try again."}), 401
     
@@ -86,6 +87,24 @@ def get_user_role():
         return jsonify({"role": user.role}) 
     else:
         return jsonify({"role": None})
+    
+@app.route('/get_substitutes', methods=['GET'])
+@login_required
+def get_substitutes():
+    substitutes = Substitute.query.all()
+    substitute_list = []
+    for substitute in substitutes:
+        substitute_info = {
+            'id': substitute.id,
+            'name': substitute.name,
+            'email': substitute.email,
+            'location': substitute.location,
+            'phone': substitute.phone,
+            'qualifications': substitute.qualifications,
+            'verification_id': substitute.verification_id
+        }
+        substitute_list.append(substitute_info)
+    return jsonify(substitutes=substitute_list)
     
 @app.route('/auth/signup', methods=['POST'])
 def signup():

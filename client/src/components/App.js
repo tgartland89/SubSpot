@@ -34,6 +34,7 @@ function App() {
       loginUser(email, password)
         .then((data) => {
           setUserRole(data.role);
+          console.log("User role after login:", data.role); 
     
           window.history.replaceState({}, document.title, window.location.pathname);
         })
