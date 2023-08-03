@@ -22,7 +22,7 @@ function About() {
 }
 
 function App() {
-  const { user, login, logout } = useAuth();
+  const { user, login } = useAuth();
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(true);
   
@@ -49,30 +49,18 @@ function App() {
     }
   }, [login]);
   
-  const handleLogout = () => {
-    fetch("/logout", { method: "DELETE" })
-      .then(() => {
-        logout();
-        window.location.href = '/'; 
-      })
-      .catch((error) => {
-        console.error("Error occurred during logout:", error);
-      });
-  };
   
   return (
     <div>
-      <NavBar userRole={user?.role} onLogout={handleLogout} />
+      <NavBar />
       <Switch>
         <Route exact path="/" component={Home} />   
         <Route path="/login" component={LoginComponent} />
         <Route path="/signup" component={SignUp} />
         <Route path="/about" component={About} />
-        <Route component={NotFound} /> 
-        <Route path="/teacher-dashboard" render={() => <DashboardPage userRole="teacher" />} />
+        <Route path="/dashboard" render={() => <DashboardPage userRole={user.role} />} />
         <Route path="/sub-details/:substituteId" component={SubsDetails}/>
-        <Route path="/admin-dashboard" render={() => <DashboardPage userRole="admin" />} />
-        <Route path="/substitute-dashboard" render={() => <DashboardPage userRole="substitute" />} />
+        <Route component={NotFound} /> 
       </Switch>
     </div>
   );

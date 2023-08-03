@@ -190,4 +190,3 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
 if __name__ == '__main__':
     seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=10)
     print("Database seeded successfully!")
-    

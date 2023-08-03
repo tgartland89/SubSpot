@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { getSubstitutes } from './api';
 
-function Dashboard({ userRole }) {  
+function Dashboard({ userRole }) { 
+  console.log('Dashboard role:', userRole); 
   const [substitutes, setSubstitutes] = useState([]);
 
   useEffect(() => {

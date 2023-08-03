@@ -31,8 +31,6 @@ def create_user(name, email, location, phone, role, password, profile_picture=No
 
     return user
 
-
-
 @app.route('/')
 def home():
     if 'user_id' in session:
@@ -102,7 +100,7 @@ def get_user_role():
     else:
         return jsonify({"role": None})
     
-@app.route('/teacher-dashboard')
+@app.route('/api/teacher-dashboard')
 @login_required
 def teacher_dashboard():
     frontend_build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend/build')

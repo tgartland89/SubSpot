@@ -2,10 +2,21 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 
-
 const NavBar = ({ onLogout }) => {
-  const { user } = useContext(AuthContext); 
+  const { user, logout } = useContext(AuthContext); 
+  console.log("User: ", user);
   
+  const handleLogout = () => {
+    fetch("/logout", { method: "DELETE" })
+      .then(() => {
+        logout();
+        window.location.href = '/'; 
+      })
+      .catch((error) => {
+        console.error("Error occurred during logout:", error);
+      });
+  };
+
   return (
     <nav>
       <ul>
@@ -32,7 +43,7 @@ const NavBar = ({ onLogout }) => {
         )}
         {user && (
           <li>
-            <button onClick={onLogout}>Log Out</button>
+            <button onClick={handleLogout}>Log Out</button>
           </li>
         )}
       </ul>
