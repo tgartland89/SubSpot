@@ -110,6 +110,52 @@ def get_substitutes():
     substitutes_data = [{"id": substitute.id, "name": substitute.name, "email": substitute.email, "location": substitute.location, "phone": substitute.phone, "qualifications": substitute.qualifications, "verification_id": substitute.verification_id} for substitute in substitutes]
     return jsonify({"substitutes": substitutes_data})
 
+@app.route('/substitute/<int:substitute_id>', methods=['GET'])
+def get_substitute_details(substitute_id):
+    substitute = db.session.get(Substitute, substitute_id)
+    if substitute:
+        return jsonify({
+            "id": substitute.id,
+            "name": substitute.name,
+            "email": substitute.email,
+            "location": substitute.location,
+            "phone": substitute.phone,
+            "qualifications": substitute.qualifications,
+            "verification_id": substitute.verification_id
+        })
+    else:
+        return jsonify({"error": "Substitute not found."}), 404
+
+@app.route('/get_incoming_requests', methods=['GET'])
+def get_incoming_requests():
+    if 'user_id' not in session:
+        return jsonify({"error": "Login required."}), 401
+
+    substitute_id = session['user_id']
+    substitute = Substitute.query.get(substitute_id)
+
+    if not substitute:
+        return jsonify({"error": "Substitute not found."}), 404
+
+    incoming_requests = Request.query.filter_by(Substitute_user_id=substitute.id).all()
+
+    incoming_requests_data = [
+        {
+            "id": request.id,
+            "teacher_name": request.teacher.name,
+            "teacher_email": request.teacher.email,
+            "teacher_location": request.teacher.location,
+            "course_being_covered": request.course_being_covered,
+            "confirmation": request.confirmation,
+            "message_sub_sent_to": request.message_sub_sent_to,
+            "teacher_if_declined": request.teacher_if_declined
+        }
+        for request in incoming_requests
+    ]
+
+    return jsonify({"incoming_requests": incoming_requests_data})
+
+
 @app.route('/auth/signup', methods=['POST'])
 def signup():
     if request.method == 'POST':
@@ -189,9 +235,9 @@ def make_request():
     data = request.json
     substitute_id = data.get('substitute_id')
     
-    substitute = Substitute.query.get(substitute_id)
+    substitute = db.session.get(Substitute, substitute_id)
     teacher_id = session['user_id']
-    teacher = Teacher.query.get(teacher_id)
+    teacher = db.session.get(Teacher, teacher_id)
 
     if not substitute or not teacher:
         return jsonify({"error": "Substitute or Teacher not found."})
