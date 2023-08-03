@@ -19,6 +19,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 bcrypt.init_app(app)
 
+def create_user(name, email, location, phone, role, password, profile_picture=None):  
+    user = User()
+    user.name = name
+    user.email = email
+    user.location = location
+    user.phone = phone
+    user.role = role
+    user.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+    user.profile_picture = profile_picture
+
+    return user
+
+
+
 @app.route('/')
 def home():
     if 'user_id' in session:
@@ -109,11 +123,6 @@ def get_substitutes():
         substitute_info = {
             'id': substitute.id,
             'name': substitute.name,
-            'email': substitute.email,
-            'location': substitute.location,
-            'phone': substitute.phone,
-            'qualifications': substitute.qualifications,
-            'verification_id': substitute.verification_id
         }
         substitute_list.append(substitute_info)
     return jsonify(substitutes=substitute_list)
@@ -136,7 +145,7 @@ def signup():
             school_name = request.json.get('school_name')
             course_name = request.json.get('course_name')
 
-            new_user = User(name=name, email=email, location=location, phone=phone, role=role, password=password)
+            new_user = create_user(name, email, location, phone, role, password)
             db.session.add(new_user)
             db.session.commit()
 
@@ -150,7 +159,7 @@ def signup():
             qualifications = request.json.get('qualifications')
             verification_id = request.json.get('verification_id')
 
-            new_user = User(name=name, email=email, location=location, phone=phone, role=role, password=password)
+            new_user = create_user(name, email, location, phone, role, password)
             db.session.add(new_user)
             db.session.commit()
 

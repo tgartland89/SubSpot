@@ -1,21 +1,21 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
-import { loginUser } from "./api";
+import React, { useState, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
+import { loginUser } from './api';
+import { AuthContext } from '../AuthContext';
+
 
 function LoginComponent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // eslint-disable-next-line 
-  const [userRole, setUserRole] = useState("");
+  const { login } = useContext(AuthContext); 
   const history = useHistory();
 
   const handleLogin = (event) => {
     event.preventDefault(); 
 
-  
     loginUser(email, password)
       .then((data) => {
-        setUserRole(data.role);
+        login(data); 
         if (data.role === "teacher") {
           history.push("/teacher-dashboard");
         } else if (data.role === "admin") {

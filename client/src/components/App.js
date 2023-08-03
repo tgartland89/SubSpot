@@ -8,6 +8,7 @@ import NavBar from "./NavBar";
 import NotFound from "./NotFound";
 import SubsDetails from "./SubDetails";
 import { loginUser } from "./api";
+import { useAuth } from '../AuthContext';
 
 function About() {
   return (
@@ -21,19 +22,21 @@ function About() {
 }
 
 function App() {
-  const [userRole, setUserRole] = useState(null);
+  const { user, login, logout } = useAuth();
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(true);
+  
 
   useEffect(() => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const email = urlSearchParams.get("email");
     const password = urlSearchParams.get("password");
+    
 
     if (email && password) {
       loginUser(email, password)
         .then((data) => {
-          setUserRole(data.role);
+          login(data);
           console.log("User role after login:", data.role); 
     
           window.history.replaceState({}, document.title, window.location.pathname);
@@ -44,12 +47,12 @@ function App() {
     } else {
       setIsLoading(false);
     }
-  }, []);
+  }, [login]);
   
   const handleLogout = () => {
     fetch("/logout", { method: "DELETE" })
       .then(() => {
-        setUserRole(null);
+        logout();
         window.location.href = '/'; 
       })
       .catch((error) => {
@@ -59,7 +62,7 @@ function App() {
   
   return (
     <div>
-      <NavBar userRole={userRole} onLogout={handleLogout} />
+      <NavBar userRole={user?.role} onLogout={handleLogout} />
       <Switch>
         <Route exact path="/" component={Home} />   
         <Route path="/login" component={LoginComponent} />

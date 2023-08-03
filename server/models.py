@@ -6,7 +6,7 @@ from config import db, bcrypt
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users' 
 
-    serialize_rules = ('-reviews', '-courses', '-password_hash')
+    serialize_rules = ('-reviews', '-courses', '-password_hash', '-email')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
@@ -16,15 +16,6 @@ class User(db.Model, SerializerMixin):
     role = db.Column(Enum('Teacher', 'Substitute', 'SiteAdmin'), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     profile_picture = db.Column(db.String(255))  
-
-    def __init__(self, name, email, location, phone, role, password, profile_picture=None):  
-        self.name = name
-        self.email = email
-        self.location = location
-        self.phone = phone
-        self.role = role
-        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-        self.profile_picture = profile_picture  
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)

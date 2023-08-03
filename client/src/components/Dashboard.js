@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getSubstitutes } from './api';
 
-const Dashboard = ({ userRole }) => {
+function Dashboard({ userRole }) {  
+  const [substitutes, setSubstitutes] = useState([]);
+
+  useEffect(() => {
+    getSubstitutes()
+      .then(response => setSubstitutes(response.substitutes))
+      .catch(error => console.error(error));
+  }, []);
+
   switch (userRole) {
     case "admin":
       return (
@@ -15,7 +24,14 @@ const Dashboard = ({ userRole }) => {
         <div>
           <h1>Welcome to Teacher Dashboard</h1>
           <p>Here you can view and request substitutes and add reviews.</p>
-        </div>
+  <ul>
+    {substitutes.map(sub => 
+      <li key={sub.id}>
+        <a href={`/substitute/${sub.id}`}>{sub.name}</a>
+      </li>
+    )}
+  </ul>
+</div>
       );
     case "substitute":
       return (
