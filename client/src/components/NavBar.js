@@ -1,12 +1,14 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 
 function NavBar() {
   const { user, logout } = useContext(AuthContext);
+  const history = useHistory();
 
   const handleLogout = () => {
-    logout(); // Clear the user session and redirect to the home page
+    logout(); // Clear the user session
+    history.push("/"); // Redirect to the home page
   };
 
   return (
