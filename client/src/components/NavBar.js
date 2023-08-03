@@ -7,8 +7,8 @@ function NavBar() {
   const history = useHistory();
 
   const handleLogout = () => {
-    logout(); // Clear the user session
-    history.push("/"); // Redirect to the home page
+    logout(); 
+    history.push("/"); 
   };
 
   return (

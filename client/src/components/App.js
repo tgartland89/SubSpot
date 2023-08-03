@@ -61,16 +61,9 @@ function App() {
         <Route path="/signup" component={SignUp} />
         <Route path="/about" component={About} />
         <Route path="/dashboard" render={() => <DashboardPage userRole={user?.role} />} />
-
-        {/* Teacher Dashboard */}
         <Route path="/teacher-dashboard" component={TeacherDashboard} />
-
-        {/* Substitute Dashboard */}
         <Route path="/substitute-dashboard" component={SubstituteDashboard} />
-
-        {/* Admin Dashboard */}
         <Route path="/admin-dashboard" component={AdminDashboard} />
-
         <Route path="/sub-details/:substituteId" component={SubsDetails} />
         <Route component={NotFound} />
       </Switch>
