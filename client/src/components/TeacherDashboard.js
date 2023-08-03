@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-
+import { Link } from 'react-router-dom';
 
 const TeacherDashboard = () => {
   const [substitutes, setSubstitutes] = useState([]);
 
   useEffect(() => {
-  
     fetchSubstitutes();
   }, []);
 
@@ -18,7 +17,6 @@ const TeacherDashboard = () => {
       const data = await response.json();
       setSubstitutes(data.substitutes);
     } catch (error) {
-   
       console.error('Error fetching substitutes:', error);
     }
   };
@@ -26,16 +24,17 @@ const TeacherDashboard = () => {
   return (
     <div>
       <h1>Teacher Dashboard</h1>
-      {substitutes.map(substitute => (
-        <div key={substitute.id}>
-          <h3>{substitute.name}</h3>
-          <p>Email: {substitute.email}</p>
-          <p>Location: {substitute.location}</p>
-          <p>Phone: {substitute.phone}</p>
-          <p>Qualifications: {substitute.qualifications}</p>
-          <p>Verification ID: {substitute.verification_id}</p>
-        </div>
-      ))}
+      <p>Welcome to Teacher Dashboard!</p>
+      <p>Here you can view and request substitutes and add reviews.</p>
+      <hr />
+      <h2>Available Substitutes:</h2>
+      <ul>
+        {substitutes.map((substitute) => (
+          <li key={substitute.id}>
+            <Link to={`/sub-details/${substitute.id}`}>{substitute.name}</Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

@@ -11,18 +11,22 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("/get_users");
-      if (!response.ok) {
+      const responseTeachers = await fetch("/get_teachers");
+      const responseSubstitutes = await fetch("/get_substitutes");
+
+      if (!responseTeachers.ok || !responseSubstitutes.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json();
-      setTeachers(data.teachers);
-      setSubstitutes(data.substitutes);
+
+      const dataTeachers = await responseTeachers.json();
+      const dataSubstitutes = await responseSubstitutes.json();
+
+      setTeachers(dataTeachers.teachers);
+      setSubstitutes(dataSubstitutes.substitutes);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
-
   const handleDeleteUser = (userId) => {
 
   };

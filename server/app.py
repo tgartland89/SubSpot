@@ -98,42 +98,17 @@ def get_user_role():
     else:
         return jsonify({"role": None})
 
-    
-@app.route('/teacher-dashboard')
-@login_required
-def teacher_dashboard():
-    frontend_build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend/build')
-    index_html = os.path.join(frontend_build_dir, 'index.html')
-    
-    if os.path.exists(index_html):
-        with open(index_html, 'r') as f:
-            return f.read()
-    else:
-        return "Teacher Dashboard not found."
+@app.route('/get_teachers', methods=['GET'])
+def get_teachers():
+    teachers = Teacher.query.all()
+    teachers_data = [{"id": teacher.id, "name": teacher.name, "email": teacher.email, "location": teacher.location, "phone": teacher.phone} for teacher in teachers]
+    return jsonify({"teachers": teachers_data})
 
-@app.route('/substitute-dashboard')
-@login_required
-def substitute_dashboard():
-    frontend_build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend/build')
-    index_html = os.path.join(frontend_build_dir, 'index.html')
-
-    if os.path.exists(index_html):
-        with open(index_html, 'r') as f:
-            return f.read()
-    else:
-        return "Substitute Dashboard not found."
-
-@app.route('/admin-dashboard')
-@login_required
-def admin_dashboard():
-    frontend_build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend/build')
-    index_html = os.path.join(frontend_build_dir, 'index.html')
-
-    if os.path.exists(index_html):
-        with open(index_html, 'r') as f:
-            return f.read()
-    else:
-        return "Admin Dashboard not found."
+@app.route('/get_substitutes', methods=['GET'])
+def get_substitutes():
+    substitutes = Substitute.query.all()
+    substitutes_data = [{"id": substitute.id, "name": substitute.name, "email": substitute.email, "location": substitute.location, "phone": substitute.phone, "qualifications": substitute.qualifications, "verification_id": substitute.verification_id} for substitute in substitutes]
+    return jsonify({"substitutes": substitutes_data})
 
 @app.route('/auth/signup', methods=['POST'])
 def signup():

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Switch, Route, } from "react-router-dom";
+import { Switch, Route,} from "react-router-dom";
 import Home from "./Home";
 import LoginComponent from "./Login";
 import SignUp from "./SignUp";

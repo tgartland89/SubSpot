@@ -6,7 +6,6 @@ const SubsDetails = () => {
   const [substituteDetails, setSubstituteDetails] = useState(null);
 
   useEffect(() => {
-  
     fetch(`/substitute/${substituteId}`)
       .then((response) => response.json())
       .then((data) => {
@@ -17,8 +16,35 @@ const SubsDetails = () => {
       });
   }, [substituteId]);
 
-  if (!substituteDetails) {
+  const sendRequest = () => {
+    if (!substituteDetails) {
+      console.error("Substitute details not available.");
+      return;
+    }
 
+    fetch('/make_request', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        substituteId: substituteId,
+        teacherName: '', 
+        teacherEmail: '', 
+       
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Request sent successfully:', data);
+     
+      })
+      .catch((error) => {
+        console.error('Error sending request:', error);
+      });
+  };
+
+  if (!substituteDetails) {
     return <div>Loading...</div>;
   }
 
@@ -31,7 +57,7 @@ const SubsDetails = () => {
       <p>Phone: {substituteDetails.phone}</p>
       <p>Qualifications: {substituteDetails.qualifications}</p>
       <p>Verification ID: {substituteDetails.verification_id}</p>
-      <button>Request</button>
+      <button onClick={sendRequest}>Request</button>
       <button>Review</button>
     </div>
   );

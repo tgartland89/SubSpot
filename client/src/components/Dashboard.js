@@ -23,7 +23,7 @@ function Dashboard({ userRole }) {
     case "teacher":
       return (
         <div>
-          <h1>Welcome to Teacher Dashboard</h1>
+          <h1>Welcome to Teacher Dashboard!</h1>
           <p>Here you can view and request substitutes and add reviews.</p>
   <ul>
     {substitutes.map(sub => 
