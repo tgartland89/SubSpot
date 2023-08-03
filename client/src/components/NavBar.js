@@ -28,7 +28,7 @@ function NavBar() {
             {user.role === "Substitute" && (
               <Link to="/substitute-dashboard">Substitute Dashboard</Link>
             )}
-            {user.role === "Admin" && (
+            {user.role === "SiteAdmin" && (
               <Link to="/admin-dashboard">Admin Dashboard</Link>
             )}
           </li>
