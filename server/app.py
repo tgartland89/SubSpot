@@ -88,6 +88,18 @@ def get_user_role():
     else:
         return jsonify({"role": None})
     
+@app.route('/teacher-dashboard')
+@login_required
+def teacher_dashboard():
+    frontend_build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend/build')
+    index_html = os.path.join(frontend_build_dir, 'index.html')
+    
+    if os.path.exists(index_html):
+        with open(index_html, 'r') as f:
+            return f.read()
+    else:
+        return "Teacher Dashboard not found."
+    
 @app.route('/get_substitutes', methods=['GET'])
 @login_required
 def get_substitutes():
