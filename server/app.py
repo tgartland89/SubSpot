@@ -97,12 +97,12 @@ def signup():
         name = request.json.get('name')
         email = request.json.get('email')
         password = request.json.get('password')
-        confirm_password = request.json.get('confirm_password')
+        confirm_password = request.json.get('confirm_password')  # Added confirm_password field
         location = request.json.get('location')
         phone = request.json.get('phone')
 
-        if password != confirm_password:
-            return redirect(url_for('signup'))
+        if password != confirm_password:  # Check if passwords match
+            return jsonify({"error": "Passwords do not match."}), 400
 
         if role == 'Teacher':
             school_name = request.json.get('school_name')
@@ -143,51 +143,6 @@ def signup_confirmation_message(role):
     else:
         return "You have successfully signed up!"
     
-@app.route('/teacher-dashboard', methods=['GET'])
-@login_required
-def teacher_dashboard():
-    if session['user_role'] != 'Teacher':
-        return jsonify({"error": "Access denied"})
-
-    substitutes = Substitute.query.all()
-    substitute_list = []
-    for substitute in substitutes:
-        substitute_details = {
-            "id": substitute.id,
-            "name": substitute.name,
-            "email": substitute.email,
-            "location": substitute.location,
-            "phone": substitute.phone,
-            "qualifications": substitute.qualifications,
-            "verification_id": substitute.verification_id,
-        }
-        substitute_list.append(substitute_details)
-
-    return jsonify({
-        "message": "Welcome to Teacher Dashboard. Here you can view and request substitutes and add reviews.",
-        "substitutes": substitute_list
-    })
-
-@app.route('/substitute/<int:substitute_id>', methods=['GET'])
-@login_required
-def get_substitute_details(substitute_id):
-    substitute = Substitute.query.get(substitute_id)
-
-    if not substitute:
-        return jsonify({"error": "Substitute not found."}), 404
-
-    substitute_details = {
-        "name": substitute.name,
-        "email": substitute.email,
-        "location": substitute.location,
-        "phone": substitute.phone,
-        "qualifications": substitute.qualifications,
-        "verification_id": substitute.verification_id,
-    }
-
-    return jsonify(substitute_details)
-
-
 @app.route('/create_site_admin', methods=['GET'])
 def create_site_admin():
     email = 'colly@example.com'
@@ -206,33 +161,6 @@ def create_site_admin():
     db.session.commit()
 
     return jsonify({"message": "SiteAdmin user created successfully."})
-
-@app.route('/admin-dashboard', methods=['GET'])
-@login_required
-def admin_dashboard():
-    if session['user_role'] != 'SiteAdmin':
-        return jsonify({"error": "Access denied"})
-    
-    site_admin = SiteAdmin.query.first()
-    if not site_admin:
-        return jsonify({"error": "No SiteAdmin found."})
-    admin_details = site_admin.to_dict()
-    return jsonify(admin_details)
-
-@app.route('/substitute-dashboard', methods=['GET'])
-@login_required
-def substitute_dashboard():
-    if session['user_role'] != 'Substitute':
-        return jsonify({"error": "Access denied"})
-
-    user_id = session['user_id']
-    substitute = Substitute.query.filter_by(user_id=user_id).first()
-
-    if not substitute:
-        return jsonify({"error": "Substitute not found."})
-    substitute_details = substitute.to_dict()
-
-    return jsonify(substitute_details)
 
 @app.route('/make_request', methods=['POST'])
 @login_required

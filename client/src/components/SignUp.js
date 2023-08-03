@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 function SignUp() {
   const [role, setRole] = useState("Teacher");
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,9 +26,15 @@ function SignUp() {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
+  
   const handleSubmit = (event) => {
     event.preventDefault();
-  
+
+    if (formData.password !== formData.confirm_password) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     fetch("/auth/signup", {
       method: "POST",
       headers: {
@@ -39,6 +46,8 @@ function SignUp() {
       .then((data) => {
         if (data.message) {
           setConfirmationMessage(data.message);
+        } else if (data.error) {
+          setError(data.error);
         } else {
           console.log("Error occurred during signup.");
         }
@@ -69,11 +78,16 @@ function SignUp() {
         <br />
 
         <label>Password:</label>
-        <input type="password" name="password" value={formData.password} onChange={handleChange} required />
+        <input type="password" name="password" value={formData.password} onChange={handleChange} required/>
         <br />
 
         <label>Confirm Password:</label>
-        <input type="password" name="confirm_password" value={formData.confirm_password} onChange={handleChange} required />
+        <input type="password" name="confirm_password" value={formData.confirm_password}onChange={handleChange}required/>
+        <br />
+
+        {formData.password !== formData.confirm_password && (
+          <span style={{ color: "red" }}>Passwords do not match.</span>
+        )}
         <br />
 
         <label>Location:</label>
@@ -108,9 +122,10 @@ function SignUp() {
           </>
         )}
 
-        <input type="submit" value="Sign Up" />
+     <input type="submit" value="Sign Up" />
       </form>
       {confirmationMessage && <p>{confirmationMessage}</p>}
+      {error && <p>{error}</p>}
     </div>
   );
 }

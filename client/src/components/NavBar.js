@@ -11,17 +11,17 @@ const NavBar = ({ userRole, onLogout }) => {
         <li>
           <Link to="/about">About</Link>
         </li>
-        {userRole === "Teacher" && (
+        {userRole === "teacher" && (
           <li>
             <Link to="/teacher-dashboard">Teacher Dashboard</Link>
           </li>
         )}
-        {userRole === "Substitute" && (
+        {userRole === "substitute" && (
           <li>
             <Link to="/substitute-dashboard">Substitute Dashboard</Link>
           </li>
         )}
-        {userRole === "SiteAdmin" && (
+        {userRole === "admin" && (
           <li>
             <Link to="/admin-dashboard">Admin Dashboard</Link>
           </li>
