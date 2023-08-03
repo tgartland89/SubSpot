@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 const AdminDashboard = () => {
+  console.log("Admin Dashboard rendered");
   const [teachers, setTeachers] = useState([]);
   const [substitutes, setSubstitutes] = useState([]);
 

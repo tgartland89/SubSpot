@@ -81,15 +81,13 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
-        if user and user.authenticate(password):
-            session['user_id'] = user.id
-            session['user_role'] = user.role
-            print("User role after login:", user.role) 
-            return jsonify({"role": user.role})
+        if user and bcrypt.check_password_hash(user.password_hash, password):
+         session['user_id'] = user.id
+         session['user_role'] = user.role
+         return jsonify({"role": user.role})
         return jsonify({"error": "Invalid email or password. Please try again."}), 401
     
 @app.route('/get_user_role', methods=['GET'])
-@login_required
 def get_user_role():
     if 'user_id' not in session:
         return jsonify({"role": None})
@@ -99,8 +97,9 @@ def get_user_role():
         return jsonify({"role": user.role}) 
     else:
         return jsonify({"role": None})
+
     
-@app.route('/api/teacher-dashboard')
+@app.route('/teacher-dashboard')
 @login_required
 def teacher_dashboard():
     frontend_build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend/build')
@@ -111,20 +110,31 @@ def teacher_dashboard():
             return f.read()
     else:
         return "Teacher Dashboard not found."
-    
-@app.route('/get_substitutes', methods=['GET'])
+
+@app.route('/substitute-dashboard')
 @login_required
-def get_substitutes():
-    substitutes = Substitute.query.all()
-    substitute_list = []
-    for substitute in substitutes:
-        substitute_info = {
-            'id': substitute.id,
-            'name': substitute.name,
-        }
-        substitute_list.append(substitute_info)
-    return jsonify(substitutes=substitute_list)
-    
+def substitute_dashboard():
+    frontend_build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend/build')
+    index_html = os.path.join(frontend_build_dir, 'index.html')
+
+    if os.path.exists(index_html):
+        with open(index_html, 'r') as f:
+            return f.read()
+    else:
+        return "Substitute Dashboard not found."
+
+@app.route('/admin-dashboard')
+@login_required
+def admin_dashboard():
+    frontend_build_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend/build')
+    index_html = os.path.join(frontend_build_dir, 'index.html')
+
+    if os.path.exists(index_html):
+        with open(index_html, 'r') as f:
+            return f.read()
+    else:
+        return "Admin Dashboard not found."
+
 @app.route('/auth/signup', methods=['POST'])
 def signup():
     if request.method == 'POST':

@@ -1,20 +1,12 @@
-import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { AuthContext } from '../AuthContext';
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../AuthContext";
 
-const NavBar = ({ onLogout }) => {
-  const { user, logout } = useContext(AuthContext); 
-  console.log("User: ", user);
-  
+function NavBar() {
+  const { user, logout } = useContext(AuthContext);
+
   const handleLogout = () => {
-    fetch("/logout", { method: "DELETE" })
-      .then(() => {
-        logout();
-        window.location.href = '/'; 
-      })
-      .catch((error) => {
-        console.error("Error occurred during logout:", error);
-      });
+    logout(); // Clear the user session and redirect to the home page
   };
 
   return (
@@ -26,19 +18,17 @@ const NavBar = ({ onLogout }) => {
         <li>
           <Link to="/about">About</Link>
         </li>
-        {user && user.role === "teacher" && (
+        {user && (
           <li>
-            <Link to="/teacher-dashboard">Teacher Dashboard</Link>
-          </li>
-        )}
-        {user && user.role === "substitute" && (
-          <li>
-            <Link to="/substitute-dashboard">Substitute Dashboard</Link>
-          </li>
-        )}
-        {user && user.role === "admin" && (
-          <li>
-            <Link to="/admin-dashboard">Admin Dashboard</Link>
+            {user.role === "Teacher" && (
+              <Link to="/teacher-dashboard">Teacher Dashboard</Link>
+            )}
+            {user.role === "Substitute" && (
+              <Link to="/substitute-dashboard">Substitute Dashboard</Link>
+            )}
+            {user.role === "Admin" && (
+              <Link to="/admin-dashboard">Admin Dashboard</Link>
+            )}
           </li>
         )}
         {user && (
@@ -49,6 +39,6 @@ const NavBar = ({ onLogout }) => {
       </ul>
     </nav>
   );
-};
+}
 
 export default NavBar;
