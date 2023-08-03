@@ -73,7 +73,6 @@ def login():
             session['user_id'] = user.id
             session['user_role'] = user.role
             return jsonify({"role": user.role})
-
         return jsonify({"error": "Invalid email or password. Please try again."}), 401
     
 @app.route('/get_user_role', methods=['GET'])
@@ -81,10 +80,8 @@ def login():
 def get_user_role():
     if 'user_id' not in session:
         return jsonify({"role": None})
-
     user_id = session['user_id']
     user = User.query.get(user_id)
-
     if user:
         return jsonify({"role": user.role}) 
     else:
@@ -97,11 +94,11 @@ def signup():
         name = request.json.get('name')
         email = request.json.get('email')
         password = request.json.get('password')
-        confirm_password = request.json.get('confirm_password')  # Added confirm_password field
+        confirm_password = request.json.get('confirm_password')  
         location = request.json.get('location')
         phone = request.json.get('phone')
 
-        if password != confirm_password:  # Check if passwords match
+        if password != confirm_password:  
             return jsonify({"error": "Passwords do not match."}), 400
 
         if role == 'Teacher':
@@ -130,7 +127,6 @@ def signup():
                                         qualifications=qualifications, verification_id=verification_id)
             db.session.add(new_substitute)
             db.session.commit()
-
             return jsonify({"message": signup_confirmation_message(role)})
 
     return "Sign Up Form"
@@ -156,10 +152,9 @@ def create_site_admin():
     user = User(name=name, email=email, location=location, phone=phone, role='SiteAdmin', password=password)
     db.session.add(user)
     site_admin = SiteAdmin(name=name, email=email, phone=phone)
+    
     db.session.add(site_admin)
-
     db.session.commit()
-
     return jsonify({"message": "SiteAdmin user created successfully."})
 
 @app.route('/make_request', methods=['POST'])
@@ -190,7 +185,6 @@ def make_request():
     )
     db.session.add(new_request)
     db.session.commit()
-
     return jsonify({"message": "Request sent successfully"})
 
 @app.route('/logout', methods=['DELETE'])

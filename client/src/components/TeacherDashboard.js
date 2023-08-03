@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SubsDetails from "./SubDetails";
+
 
 const TeacherDashboard = () => {
   const [substitutes, setSubstitutes] = useState([]);
