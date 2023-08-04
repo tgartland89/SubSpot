@@ -102,8 +102,8 @@ class Request(db.Model, SerializerMixin):
     __tablename__ = 'requests'
 
     Request_ID = db.Column(db.Integer, primary_key=True)
-    Substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'))
-    Teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
+    Substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)  # Not nullable
+    Teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)  # Not nullable
     Teacher_school = db.Column(db.String(120))
     Teacher_school_location = db.Column(db.String(120))
     Course_Being_covered = db.Column(db.String(120))
@@ -126,7 +126,7 @@ class Request(db.Model, SerializerMixin):
             'Message_sub_sent_to': self.Message_sub_sent_to,
             'Teacher_if_declined': self.Teacher_if_declined,
         }
-   
+
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'
 

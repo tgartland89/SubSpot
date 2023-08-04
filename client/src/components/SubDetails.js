@@ -57,8 +57,10 @@ const SubsDetails = () => {
       <p>Phone: {substituteDetails.phone}</p>
       <p>Qualifications: {substituteDetails.qualifications}</p>
       <p>Verification ID: {substituteDetails.verification_id}</p>
+      <div style={{ display: 'flex', gap: '8px' }}>
       <button onClick={sendRequest}>Request</button>
       <button>Review</button>
+    </div>
     </div>
   );
 };

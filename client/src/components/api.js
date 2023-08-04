@@ -31,3 +31,60 @@ export function getSubstitutes() {
     throw error;
   });
 }
+
+export function getIncomingRequests() {
+  return fetch('/get_incoming_requests', {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to fetch incoming requests.');
+    }
+    return response.json();
+  })
+  .catch(error => {
+    console.error('Network error:', error);
+    throw error;
+  });
+}
+
+export function confirmRequest(requestId) {
+  return fetch(`/confirm_request/${requestId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Failed to confirm request.");
+    }
+    return response.json();
+  })
+  .catch(error => {
+    console.error('Network error:', error);
+    throw error;
+  });
+}
+
+export function denyRequest(requestId) {
+  return fetch(`/deny_request/${requestId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Failed to deny request.");
+    }
+    return response.json();
+  })
+  .catch(error => {
+    console.error('Network error:', error);
+    throw error;
+  });
+}

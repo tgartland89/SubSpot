@@ -155,6 +155,46 @@ def get_incoming_requests():
 
     return jsonify({"incoming_requests": incoming_requests_data})
 
+@app.route('/confirm_request/<int:request_id>', methods=['POST'])
+def confirm_request(request_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Login required."}), 401
+
+    substitute_id = session['user_id']
+    substitute = Substitute.query.get(substitute_id)
+
+    if not substitute:
+        return jsonify({"error": "Substitute not found."}), 404
+    request = Request.query.get(request_id)
+
+    if not request or request.Substitute_user_id != substitute_id:
+        return jsonify({"error": "Request not found or not associated with the Substitute."}), 404
+    request.Confirmation = 'Accept'
+    db.session.commit()
+
+    return jsonify({"message": "Request confirmed successfully."})
+
+@app.route('/deny_request/<int:request_id>', methods=['POST'])
+def deny_request(request_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Login required."}), 401
+
+    substitute_id = session['user_id']
+    substitute = Substitute.query.get(substitute_id)
+
+    if not substitute:
+        return jsonify({"error": "Substitute not found."}), 404
+
+    request = Request.query.get(request_id)
+
+    if not request or request.Substitute_user_id != substitute_id:
+        return jsonify({"error": "Request not found or not associated with the Substitute."}), 404
+
+  
+    request.Confirmation = 'Decline'
+    db.session.commit()
+
+    return jsonify({"message": "Request denied successfully."})
 
 @app.route('/auth/signup', methods=['POST'])
 def signup():
