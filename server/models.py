@@ -1,9 +1,14 @@
-from datetime import datetime  
-
-from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy_serializer import SerializerMixin
 from config import db, bcrypt
+from enum import Enum as PyEnum
+
+
+class ConfirmationEnum(PyEnum):
+    ACCEPT = 'Accept'
+    DECLINE = 'Decline'
+
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users' 
@@ -38,10 +43,6 @@ class Teacher(db.Model, SerializerMixin):
     phone = db.Column(db.String(20))
     course_name = db.Column(db.String(120))
 
-    # New relationships for messaging and reviews
-    messages_sent = relationship('Message', backref='sender', lazy=True)
-    reviews = relationship('Review', backref='teacher', lazy=True)
-
     user = db.relationship('User', back_populates='teacher', uselist=False, lazy='joined')
 
     def to_dict(self):
@@ -67,10 +68,6 @@ class Substitute(db.Model, SerializerMixin):
     phone = db.Column(db.String(20))
     qualifications = db.Column(db.String(120))
     verification_id = db.Column(db.String(120))
-
-    # New relationships for messaging and reviews
-    messages_received = relationship('Message', backref='recipient', lazy=True)
-    reviews_received = relationship('Review', backref='substitute', lazy=True)
 
     def to_dict(self):
         return {
@@ -112,17 +109,18 @@ class Request(db.Model, SerializerMixin):
     __tablename__ = 'requests'
 
     Request_ID = db.Column(db.Integer, primary_key=True)
-    Substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)  # Not nullable
-    Teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)  # Not nullable
+    Substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)
+    Teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
     Teacher_school = db.Column(db.String(120))
     Teacher_school_location = db.Column(db.String(120))
     Course_Being_covered = db.Column(db.String(120))
-    Confirmation = db.Column(Enum('Accept', 'Decline'))
-    Message_sub_sent_to = db.Column(db.String(120))
-    Teacher_if_declined = db.Column(db.String(120))
+    Confirmation = db.Column(db.Enum(ConfirmationEnum), default=ConfirmationEnum.ACCEPT)
+    Message_sub_sent_to = db.Column(db.Integer, db.ForeignKey('substitutes.id'))
+    Teacher_if_declined = db.Column(db.Integer, db.ForeignKey('teachers.id'))
 
-    substitute = db.relationship('Substitute', backref='requests', foreign_keys=[Substitute_user_id])
-    teacher = db.relationship('Teacher', backref='requests', foreign_keys=[Teacher_id])
+    substitute = db.relationship('Substitute', foreign_keys=[Substitute_user_id], backref='requests_received')
+    teacher = db.relationship('Teacher', backref='requests_sent', foreign_keys=[Teacher_id])
+    message_sub = db.relationship('Substitute', foreign_keys=[Message_sub_sent_to])
 
     def to_dict(self):
         return {
@@ -132,11 +130,10 @@ class Request(db.Model, SerializerMixin):
             'Teacher_school': self.Teacher_school,
             'Teacher_school_location': self.Teacher_school_location,
             'Course_Being_covered': self.Course_Being_covered,
-            'Confirmation': self.Confirmation,
+            'Confirmation': self.Confirmation.value,  # Use .value to get the enum value as a string
             'Message_sub_sent_to': self.Message_sub_sent_to,
             'Teacher_if_declined': self.Teacher_if_declined,
         }
-
 class Course(db.Model, SerializerMixin):
     __tablename__ = 'courses'
 
@@ -160,19 +157,5 @@ class Review(db.Model, SerializerMixin):
     Review = db.Column(db.String(255))
     Correlating_Substitute_ID = db.Column(db.Integer, db.ForeignKey('substitutes.id'))
 
-    # Relationships with Teacher and Substitute models
     teacher = db.relationship('Teacher', backref='reviews')
     substitute = db.relationship('Substitute', backref='reviews')
-
-class Message(db.Model, SerializerMixin):
-    __tablename__ = 'messages'
-
-    id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, ForeignKey('teachers.id'))
-    recipient_id = db.Column(db.Integer, ForeignKey('substitutes.id'))
-    message_content = db.Column(db.String(500))
-    is_confirmed = db.Column(db.Boolean, default=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Use datetime here
-
-    sender = db.relationship('Teacher', backref='messages_sent', foreign_keys=[sender_id])
-    recipient = db.relationship('Substitute', backref='messages_received', foreign_keys=[recipient_id])
