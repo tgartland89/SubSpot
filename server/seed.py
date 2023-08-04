@@ -161,7 +161,20 @@ def create_requests(num_requests=10):
         substitute = random.choice(substitutes)
         create_single_request(substitute.user_id)
 
-def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=20):
+def create_fake_messages(teachers, substitutes, num_messages=20):
+    for _ in range(num_messages):
+        sender = random.choice(teachers)
+        recipient = random.choice(substitutes)
+        message = Message(
+            sender=sender,
+            recipient=recipient,
+            message_content=fake.text(),
+            is_confirmed=random.choice([True, False])
+        )
+        db.session.add(message)
+    db.session.commit()
+
+def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=20, num_messages=50):
     with app.app_context():
         print("Wiping old Data...")
         db.drop_all()
@@ -187,6 +200,11 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
         create_requests(num_requests)
         print("Complete")
 
+        print("Generating Messages...")
+        teachers = Teacher.query.all()
+        substitutes = Substitute.query.all()
+        create_fake_messages(teachers, substitutes, num_messages)
+        print("Complete")
 if __name__ == '__main__':
     seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=10)
     print("Database seeded successfully!")
