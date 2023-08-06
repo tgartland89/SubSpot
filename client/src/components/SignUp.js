@@ -56,16 +56,22 @@ function SignUp() {
         console.error("Error occurred during signup:", error);
       });
   };
-  
   return (
-    <div>
+    <div className="container">
       <h1>Sign Up</h1>
       <form onSubmit={handleSubmit}>
-        <label>Choose Role:</label>
-        <select name="role" value={role} onChange={handleRoleChange}>
-          <option value="Teacher">Teacher</option>
-          <option value="Substitute">Substitute</option>
-        </select>
+        <div className="form-group">
+          <label>Choose Role:</label>
+          <select
+            className="form-control"
+            name="role"
+            value={role}
+            onChange={handleRoleChange}
+          >
+            <option value="Teacher">Teacher</option>
+            <option value="Substitute">Substitute</option>
+          </select>
+        </div>
         <br />
         <br />
 
@@ -122,10 +128,10 @@ function SignUp() {
           </>
         )}
 
-     <input type="submit" value="Sign Up" />
-      </form>
-      {confirmationMessage && <p>{confirmationMessage}</p>}
-      {error && <p>{error}</p>}
+           <input type="submit" className="btn btn-primary" value="Sign Up" />
+           </form>
+            {confirmationMessage && <p>{confirmationMessage}</p>}
+            {error && <p className="text-danger">{error}</p>}
     </div>
   );
 }

@@ -7,38 +7,51 @@ function NavBar() {
   const history = useHistory();
 
   const handleLogout = () => {
-    logout(); 
-    history.push("/"); 
+    logout();
+    history.push("/");
   };
 
   return (
-    <nav>
-      <ul>
-        <li>
-          <Link to="/">Home</Link>
+    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+      <ul className="navbar-nav mr-auto">
+        <li className="nav-item">
+          <Link to="/" className="nav-link">
+            Home
+          </Link>
         </li>
-        <li>
-          <Link to="/about">About</Link>
+        <li className="nav-item">
+          <Link to="/about" className="nav-link">
+            About
+          </Link>
         </li>
         {user && (
-          <li>
+          <li className="nav-item">
             {user.role === "Teacher" && (
-              <Link to="/teacher-dashboard">Teacher Dashboard</Link>
+              <Link to="/teacher-dashboard" className="nav-link">
+                Teacher Dashboard
+              </Link>
             )}
             {user.role === "Substitute" && (
-              <Link to="/substitute-dashboard">Substitute Dashboard</Link>
+              <Link to="/substitute-dashboard" className="nav-link">
+                Substitute Dashboard
+              </Link>
             )}
             {user.role === "SiteAdmin" && (
-              <Link to="/admin-dashboard">Admin Dashboard</Link>
+              <Link to="/admin-dashboard" className="nav-link">
+                Admin Dashboard
+              </Link>
             )}
-          </li>
-        )}
-        {user && (
-          <li>
-            <button onClick={handleLogout}>Log Out</button>
           </li>
         )}
       </ul>
+      {user && (
+        <button
+          className="btn btn-outline-primary my-2 my-sm-0"
+          onClick={handleLogout}
+        >
+          Log Out
+        </button>
+      )}
     </nav>
   );
 }

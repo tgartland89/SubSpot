@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Switch, Route,} from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import Home from "./Home";
 import LoginComponent from "./Login";
 import SignUp from "./SignUp";
@@ -53,20 +53,22 @@ function App() {
   console.log("User Role:", user?.role);
 
   return (
-    <div>
+    <div className="container">
       <NavBar />
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/login" component={LoginComponent} />
-        <Route path="/signup" component={SignUp} />
-        <Route path="/about" component={About} />
-        <Route path="/dashboard" render={() => <DashboardPage userRole={user?.role} />} />
-        <Route path="/teacher-dashboard" component={TeacherDashboard} />
-        <Route path="/substitute-dashboard" component={SubstituteDashboard} />
-        <Route path="/admin-dashboard" component={AdminDashboard} />
-        <Route path="/sub-details/:substituteId" component={SubsDetails} />
-        <Route component={NotFound} />
-      </Switch>
+      <div className="content">
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/login" component={LoginComponent} />
+          <Route path="/signup" component={SignUp} />
+          <Route path="/about" component={About} />
+          <Route path="/dashboard" render={() => <DashboardPage userRole={user?.role} />} />
+          <Route path="/teacher-dashboard" component={TeacherDashboard} />
+          <Route path="/substitute-dashboard" component={SubstituteDashboard} />
+          <Route path="/admin-dashboard" component={AdminDashboard} />
+          <Route path="/sub-details/:substituteId" component={SubsDetails} />
+          <Route component={NotFound} />
+        </Switch>
+      </div>
     </div>
   );
 }
