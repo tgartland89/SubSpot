@@ -59,6 +59,7 @@ class Teacher(db.Model, SerializerMixin):
             'profile_picture': self.user.profile_picture,
         }
 
+
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes' 
 
@@ -86,6 +87,7 @@ class Substitute(db.Model, SerializerMixin):
 
     user = db.relationship('User', back_populates='substitute', uselist=False, lazy='joined')
 
+
 class SiteAdmin(db.Model, SerializerMixin):
     __tablename__ = 'site_admins'
 
@@ -106,6 +108,7 @@ class SiteAdmin(db.Model, SerializerMixin):
         }
 
     user = db.relationship('User', back_populates='site_admin', uselist=False, lazy='joined')
+
 
 class Request(db.Model, SerializerMixin):
     __tablename__ = 'requests'

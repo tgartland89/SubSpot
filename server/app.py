@@ -123,24 +123,25 @@ def get_substitute_details(substitute_id):
         return jsonify({"error": "Substitute not found."}), 404
 
 @app.route('/make_request', methods=['POST'])
-@app.route('/make_request', methods=['POST'])
 @login_required
 def make_request():
-    if session['user_role'] != 'Teacher':
+    if 'user_role' not in session or session['user_role'] != 'Teacher':
         return jsonify({"error": "Access denied"})
 
     data = request.json
     substitute_id = data.get('substituteId')
-    teacher_name = data.get('teacherName')  
-    teacher_email = data.get('teacherEmail') 
+    teacher_name = data.get('teacherName')
+    teacher_email = data.get('teacherEmail')
 
-    substitute = Substitute.query.get(substitute_id)
+   
+    req_session = sessionmaker(bind=db.engine)()
+
+    substitute = req_session.get(Substitute, substitute_id)
     teacher_id = session['user_id']
-    teacher = Teacher.query.get(teacher_id)
+    teacher = req_session.get(Teacher, teacher_id)
 
     if not substitute or not teacher:
         return jsonify({"error": "Substitute or Teacher not found."})
-    
 
     new_request = Request(
         Substitute_user_id=substitute.id,
@@ -151,8 +152,8 @@ def make_request():
         Confirmation=None,
         Message_sub_sent_to=substitute.name,
         Teacher_if_declined=None,
-        Teacher_name=teacher_name,  
-        Teacher_email=teacher_email  
+        Teacher_name=teacher_name,
+        Teacher_email=teacher_email
     )
     db.session.add(new_request)
     db.session.commit()
@@ -163,13 +164,10 @@ def make_request():
 def get_incoming_requests():
     if 'user_id' not in session:
         return jsonify({"error": "Login required."}), 401
-
-    substitute_id = session['user_id']
-
-    
     Session = sessionmaker(bind=db.engine)
     session = Session()
 
+    substitute_id = session['user_id']
     substitute = session.get(Substitute, substitute_id)
 
     if not substitute:

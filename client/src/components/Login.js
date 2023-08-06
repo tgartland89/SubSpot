@@ -6,6 +6,7 @@ import { AuthContext } from '../AuthContext';
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const { login } = useContext(AuthContext);
   const history = useHistory();
 
@@ -25,6 +26,7 @@ function Login() {
       })
       .catch((error) => {
         console.error("Error occurred during login:", error);
+        setErrorMessage("Invalid email or password. Please try again.");
       });
   };
 
@@ -50,6 +52,7 @@ function Login() {
           />
         </div>
         <button type="submit">Log In</button>
+        {errorMessage && <p>{errorMessage}</p>}
       </form>
     </div>
   );
