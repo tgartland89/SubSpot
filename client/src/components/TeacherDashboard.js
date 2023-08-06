@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { makeRequest } from './api'; 
 
 const TeacherDashboard = () => {
   const [substitutes, setSubstitutes] = useState([]);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     fetchSubstitutes();
@@ -21,8 +24,27 @@ const TeacherDashboard = () => {
     }
   };
 
+  const handleRequest = (substituteId, substituteName) => {
+    const teacherName = ''; 
+    const teacherEmail = ''; 
+
+    makeRequest(substituteId, teacherName, teacherEmail)
+      .then((data) => {
+        console.log('Request sent successfully:', data);
+        setSuccessMessage("Request sent successfully!");
+        setErrorMessage("");
+      })
+      .catch((error) => {
+        console.error('Error sending request:', error);
+        setErrorMessage("Failed to send the request. Please try again.");
+        setSuccessMessage("");
+      });
+  };
+
   return (
     <div>
+      {successMessage && <div className="success-message">{successMessage}</div>}
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
       <h1>Teacher Dashboard</h1>
       <p>Welcome to Teacher Dashboard!</p>
       <p>Here you can view and request substitutes and add reviews.</p>
@@ -32,6 +54,7 @@ const TeacherDashboard = () => {
         {substitutes.map((substitute) => (
           <li key={substitute.id}>
             <Link to={`/sub-details/${substitute.id}`}>{substitute.name}</Link>
+            <button onClick={() => handleRequest(substitute.id, substitute.name)}>Request</button>
           </li>
         ))}
       </ul>

@@ -88,3 +88,26 @@ export function denyRequest(requestId) {
     throw error;
   });
 }
+export function makeRequest(substituteId, teacherName, teacherEmail) {
+  return fetch('/make_request', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      substituteId,
+      teacherName,
+      teacherEmail,
+    }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to make a request.');
+    }
+    return response.json();
+  })
+  .catch(error => {
+    console.error('Network error:', error);
+    throw error;
+  });
+}

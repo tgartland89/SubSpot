@@ -121,6 +121,42 @@ def get_substitute_details(substitute_id):
     else:
         return jsonify({"error": "Substitute not found."}), 404
 
+@app.route('/make_request', methods=['POST'])
+@login_required
+def make_request():
+    if session['user_role'] != 'Teacher':
+        return jsonify({"error": "Access denied"})
+
+    data = request.json
+    substitute_id = data.get('substituteId')
+    teacher_name = data.get('teacherName')  # You can get teacher's name from the request data
+    teacher_email = data.get('teacherEmail')  # You can get teacher's email from the request data
+
+    # Fetch substitute and teacher objects from the database using their ids
+    substitute = Substitute.query.get(substitute_id)
+    teacher_id = session['user_id']
+    teacher = Teacher.query.get(teacher_id)
+
+    if not substitute or not teacher:
+        return jsonify({"error": "Substitute or Teacher not found."})
+    
+    # Create a new request and add it to the database
+    new_request = Request(
+        Substitute_user_id=substitute.id,
+        Teacher_id=teacher.id,
+        Teacher_school=teacher.school_name,
+        Teacher_school_location=teacher.location,
+        Course_Being_covered=teacher.course_name,
+        Confirmation=None,
+        Message_sub_sent_to=substitute.name,
+        Teacher_if_declined=None,
+        Teacher_name=teacher_name,  # You can store the teacher's name in the request
+        Teacher_email=teacher_email  # You can store the teacher's email in the request
+    )
+    db.session.add(new_request)
+    db.session.commit()
+    return jsonify({"message": "Request sent successfully"})
+
 @app.route('/get_incoming_requests', methods=['GET'])
 def get_incoming_requests():
     if 'user_id' not in session:
@@ -143,12 +179,15 @@ def get_incoming_requests():
             "course_being_covered": request.course_being_covered,
             "confirmation": request.confirmation,
             "message_sub_sent_to": request.message_sub_sent_to,
-            "teacher_if_declined": request.teacher_if_declined
+            "teacher_if_declined": request.teacher_if_declined,
+            "teacher_name": request.teacher_name,  # Include teacher's name in the response
+            "teacher_email": request.teacher_email  # Include teacher's email in the response
         }
         for request in incoming_requests
     ]
 
     return jsonify({"incoming_requests": incoming_requests_data})
+
 
 @app.route('/confirm_request/<int:request_id>', methods=['POST'])
 def confirm_request(request_id):
@@ -160,11 +199,13 @@ def confirm_request(request_id):
 
     if not substitute:
         return jsonify({"error": "Substitute not found."}), 404
+
     request = Request.query.get(request_id)
 
     if not request or request.Substitute_user_id != substitute_id:
         return jsonify({"error": "Request not found or not associated with the Substitute."}), 404
-    request.Confirmation = 'Accept'
+
+    request.confirmation = 'Accept'  # Set the request confirmation to 'Accept'
     db.session.commit()
 
     return jsonify({"message": "Request confirmed successfully."})
@@ -185,11 +226,11 @@ def deny_request(request_id):
     if not request or request.Substitute_user_id != substitute_id:
         return jsonify({"error": "Request not found or not associated with the Substitute."}), 404
 
-  
-    request.Confirmation = 'Decline'
+    request.confirmation = 'Decline'  # Set the request confirmation to 'Decline'
     db.session.commit()
 
     return jsonify({"message": "Request denied successfully."})
+
 
 @app.route('/auth/signup', methods=['POST'])
 def signup():
@@ -260,40 +301,6 @@ def create_site_admin():
     db.session.add(site_admin)
     db.session.commit()
     return jsonify({"message": "SiteAdmin user created successfully."})
-
-@app.route('/make_request', methods=['POST'])
-@login_required
-def make_request():
-    if session['user_role'] != 'Teacher':
-        return jsonify({"error": "Access denied"})
-
-    data = request.json
-    substitute_id = data.get('substituteId')
-    teacher_name = data.get('teacherName')  
-    teacher_email = data.get('teacherEmail')  
-    
-    substitute = db.session.get(Substitute, substitute_id)
-    teacher_id = session['user_id']
-    teacher = db.session.get(Teacher, teacher_id)
-
-    if not substitute or not teacher:
-        return jsonify({"error": "Substitute or Teacher not found."})
-    
-    new_request = Request(
-        Substitute_user_id=substitute.id,
-        Teacher_id=teacher.id,
-        Teacher_school=teacher.school_name,
-        Teacher_school_location=teacher.location,
-        Course_Being_covered=teacher.course_name,
-        Confirmation=None,
-        Message_sub_sent_to=substitute.name,
-        Teacher_if_declined=None,
-        Teacher_name=teacher_name,  
-        Teacher_email=teacher_email  
-    )
-    db.session.add(new_request)
-    db.session.commit()
-    return jsonify({"message": "Request sent successfully"})
 
 @app.route('/logout', methods=['DELETE'])
 def logout():

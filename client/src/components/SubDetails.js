@@ -4,6 +4,8 @@ import { useParams } from "react-router-dom";
 const SubsDetails = () => {
   const { substituteId } = useParams();
   const [substituteDetails, setSubstituteDetails] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     fetch(`/substitute/${substituteId}`)
@@ -21,10 +23,10 @@ const SubsDetails = () => {
       console.error("Substitute details not available.");
       return;
     }
-  
+
     const teacherName = ''; 
     const teacherEmail = ''; 
-  
+
     fetch('/make_request', {
       method: 'POST',
       headers: {
@@ -39,31 +41,37 @@ const SubsDetails = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log('Request sent successfully:', data);
-       
+        setSuccessMessage("Request sent successfully!");
+        setErrorMessage("");
       })
       .catch((error) => {
         console.error('Error sending request:', error);
-
+        setErrorMessage("Failed to send the request. Please try again.");
+        setSuccessMessage("");
       });
   };
 
-  if (!substituteDetails) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
-      <h1>Substitute Details</h1>
-      <h2>Name: {substituteDetails.name}</h2>
-      <p>Email: {substituteDetails.email}</p>
-      <p>Location: {substituteDetails.location}</p>
-      <p>Phone: {substituteDetails.phone}</p>
-      <p>Qualifications: {substituteDetails.qualifications}</p>
-      <p>Verification ID: {substituteDetails.verification_id}</p>
-      <div style={{ display: 'flex', gap: '8px' }}>
-      <button onClick={sendRequest}>Request</button>
-      <button>Review</button>
-    </div>
+      {successMessage && <div className="success-message">{successMessage}</div>}
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
+      {substituteDetails ? (
+        <div>
+          <h1>Substitute Details</h1>
+          <h2>Name: {substituteDetails.name}</h2>
+          <p>Email: {substituteDetails.email}</p>
+          <p>Location: {substituteDetails.location}</p>
+          <p>Phone: {substituteDetails.phone}</p>
+          <p>Qualifications: {substituteDetails.qualifications}</p>
+          <p>Verification ID: {substituteDetails.verification_id}</p>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={sendRequest}>Request</button>
+            <button>Review</button>
+          </div>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 };

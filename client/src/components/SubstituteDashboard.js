@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getIncomingRequests, confirmRequest, denyRequest } from './api';
+import { getIncomingRequests, confirmRequest, denyRequest } from "./api";
 
 const SubstituteDashboard = () => {
   const [incomingRequests, setIncomingRequests] = useState([]);
@@ -63,3 +63,4 @@ const SubstituteDashboard = () => {
 };
 
 export default SubstituteDashboard;
+
