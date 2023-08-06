@@ -20,12 +20,7 @@ db.init_app(app)
 bcrypt.init_app(app)
 
 def create_user(name, email, location, phone, role, password, profile_picture=None):  
-    user = User()
-    user.name = name
-    user.email = email
-    user.location = location
-    user.phone = phone
-    user.role = role
+    user = User(name=name, email=email, location=location, phone=phone, role=role, password=password)
     user.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
     user.profile_picture = profile_picture
 
@@ -273,7 +268,9 @@ def make_request():
         return jsonify({"error": "Access denied"})
 
     data = request.json
-    substitute_id = data.get('substitute_id')
+    substitute_id = data.get('substituteId')
+    teacher_name = data.get('teacherName')  
+    teacher_email = data.get('teacherEmail')  
     
     substitute = db.session.get(Substitute, substitute_id)
     teacher_id = session['user_id']
@@ -290,7 +287,9 @@ def make_request():
         Course_Being_covered=teacher.course_name,
         Confirmation=None,
         Message_sub_sent_to=substitute.name,
-        Teacher_if_declined=None
+        Teacher_if_declined=None,
+        Teacher_name=teacher_name,  
+        Teacher_email=teacher_email  
     )
     db.session.add(new_request)
     db.session.commit()

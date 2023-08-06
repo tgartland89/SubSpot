@@ -21,7 +21,10 @@ const SubsDetails = () => {
       console.error("Substitute details not available.");
       return;
     }
-
+  
+    const teacherName = ''; 
+    const teacherEmail = ''; 
+  
     fetch('/make_request', {
       method: 'POST',
       headers: {
@@ -29,18 +32,18 @@ const SubsDetails = () => {
       },
       body: JSON.stringify({
         substituteId: substituteId,
-        teacherName: '', 
-        teacherEmail: '', 
-       
+        teacherName: teacherName,
+        teacherEmail: teacherEmail,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log('Request sent successfully:', data);
-     
+       
       })
       .catch((error) => {
         console.error('Error sending request:', error);
+
       });
   };
 
