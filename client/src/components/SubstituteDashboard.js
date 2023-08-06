@@ -20,10 +20,11 @@ const SubstituteDashboard = () => {
   const handleConfirmRequest = (requestId) => {
     confirmRequest(requestId)
       .then(() => {
-        const updatedRequests = incomingRequests.map((request) =>
-          request.id === requestId ? { ...request, confirmation: "Accept" } : request
+        setIncomingRequests((prevRequests) =>
+          prevRequests.map((request) =>
+            request.id === requestId ? { ...request, confirmation: "Accept" } : request
+          )
         );
-        setIncomingRequests(updatedRequests);
       })
       .catch((error) => console.error("Error confirming request:", error));
   };
@@ -31,10 +32,11 @@ const SubstituteDashboard = () => {
   const handleDenyRequest = (requestId) => {
     denyRequest(requestId)
       .then(() => {
-        const updatedRequests = incomingRequests.map((request) =>
-          request.id === requestId ? { ...request, confirmation: "Decline" } : request
+        setIncomingRequests((prevRequests) =>
+          prevRequests.map((request) =>
+            request.id === requestId ? { ...request, confirmation: "Decline" } : request
+          )
         );
-        setIncomingRequests(updatedRequests);
       })
       .catch((error) => console.error("Error denying request:", error));
   };
@@ -63,4 +65,3 @@ const SubstituteDashboard = () => {
 };
 
 export default SubstituteDashboard;
-

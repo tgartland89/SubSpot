@@ -53,7 +53,7 @@ function App() {
   console.log("User Role:", user?.role);
 
   return (
-    <div className="container warm-blue-bg"> {/* Add the warm-blue-bg class here */}
+    <div className="container warm-blue-bg"> 
       <NavBar />
       <div className="content">
         <Switch>
@@ -62,7 +62,7 @@ function App() {
           <Route path="/signup" component={SignUp} />
           <Route path="/about" component={About} />
           <Route path="/dashboard" render={() => <DashboardPage userRole={user?.role} />} />
-          <Route path="/teacher-dashboard" component={TeacherDashboard} />
+          <Route path="/teacher-dashboard" render={() => <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} />} />
           <Route path="/substitute-dashboard" component={SubstituteDashboard} />
           <Route path="/admin-dashboard" component={AdminDashboard} />
           <Route path="/sub-details/:substituteId" component={SubsDetails} />

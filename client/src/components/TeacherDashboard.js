@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { makeRequest } from './api'; 
 
-const TeacherDashboard = () => {
+const TeacherDashboard = ({ userName, userEmail }) => {
   const [substitutes, setSubstitutes] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -24,9 +24,10 @@ const TeacherDashboard = () => {
     }
   };
 
-  const handleRequest = (substituteId, substituteName) => {
-    const teacherName = ''; 
-    const teacherEmail = ''; 
+// eslint-disable-next-line
+   const handleRequest = (substituteId, substituteName) => {
+    const teacherName = userName; 
+    const teacherEmail = userEmail; 
 
     makeRequest(substituteId, teacherName, teacherEmail)
       .then((data) => {

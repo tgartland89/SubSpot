@@ -12,7 +12,7 @@ function NavBar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light golden-rod-bg"> {/* Add the golden-rod-bg class here */}
+    <nav className="navbar navbar-expand-lg navbar-light golden-rod-bg"> 
       <ul className="navbar-nav mr-auto">
         <li className="nav-item">
           <Link to="/" className="nav-link">

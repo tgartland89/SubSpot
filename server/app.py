@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from faker import Faker 
 from flask_cors import CORS
 from functools import wraps
+from sqlalchemy.orm import sessionmaker
 
 fake = Faker()
 
@@ -122,6 +123,7 @@ def get_substitute_details(substitute_id):
         return jsonify({"error": "Substitute not found."}), 404
 
 @app.route('/make_request', methods=['POST'])
+@app.route('/make_request', methods=['POST'])
 @login_required
 def make_request():
     if session['user_role'] != 'Teacher':
@@ -129,10 +131,9 @@ def make_request():
 
     data = request.json
     substitute_id = data.get('substituteId')
-    teacher_name = data.get('teacherName')  # You can get teacher's name from the request data
-    teacher_email = data.get('teacherEmail')  # You can get teacher's email from the request data
+    teacher_name = data.get('teacherName')  
+    teacher_email = data.get('teacherEmail') 
 
-    # Fetch substitute and teacher objects from the database using their ids
     substitute = Substitute.query.get(substitute_id)
     teacher_id = session['user_id']
     teacher = Teacher.query.get(teacher_id)
@@ -140,7 +141,7 @@ def make_request():
     if not substitute or not teacher:
         return jsonify({"error": "Substitute or Teacher not found."})
     
-    # Create a new request and add it to the database
+
     new_request = Request(
         Substitute_user_id=substitute.id,
         Teacher_id=teacher.id,
@@ -150,12 +151,13 @@ def make_request():
         Confirmation=None,
         Message_sub_sent_to=substitute.name,
         Teacher_if_declined=None,
-        Teacher_name=teacher_name,  # You can store the teacher's name in the request
-        Teacher_email=teacher_email  # You can store the teacher's email in the request
+        Teacher_name=teacher_name,  
+        Teacher_email=teacher_email  
     )
     db.session.add(new_request)
     db.session.commit()
     return jsonify({"message": "Request sent successfully"})
+
 
 @app.route('/get_incoming_requests', methods=['GET'])
 def get_incoming_requests():
@@ -163,7 +165,12 @@ def get_incoming_requests():
         return jsonify({"error": "Login required."}), 401
 
     substitute_id = session['user_id']
-    substitute = Substitute.query.get(substitute_id)
+
+    
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+
+    substitute = session.get(Substitute, substitute_id)
 
     if not substitute:
         return jsonify({"error": "Substitute not found."}), 404
@@ -180,8 +187,8 @@ def get_incoming_requests():
             "confirmation": request.confirmation,
             "message_sub_sent_to": request.message_sub_sent_to,
             "teacher_if_declined": request.teacher_if_declined,
-            "teacher_name": request.teacher_name,  # Include teacher's name in the response
-            "teacher_email": request.teacher_email  # Include teacher's email in the response
+            "teacher_name": request.teacher_name,  
+            "teacher_email": request.teacher_email 
         }
         for request in incoming_requests
     ]
@@ -205,7 +212,7 @@ def confirm_request(request_id):
     if not request or request.Substitute_user_id != substitute_id:
         return jsonify({"error": "Request not found or not associated with the Substitute."}), 404
 
-    request.confirmation = 'Accept'  # Set the request confirmation to 'Accept'
+    request.confirmation = 'Accept' 
     db.session.commit()
 
     return jsonify({"message": "Request confirmed successfully."})
@@ -226,7 +233,7 @@ def deny_request(request_id):
     if not request or request.Substitute_user_id != substitute_id:
         return jsonify({"error": "Request not found or not associated with the Substitute."}), 404
 
-    request.confirmation = 'Decline'  # Set the request confirmation to 'Decline'
+    request.confirmation = 'Decline'  
     db.session.commit()
 
     return jsonify({"message": "Request denied successfully."})
