@@ -53,7 +53,7 @@ function App() {
   console.log("User Role:", user?.role);
 
   return (
-    <div className="container">
+    <div className="container warm-blue-bg"> {/* Add the warm-blue-bg class here */}
       <NavBar />
       <div className="content">
         <Switch>

@@ -46,15 +46,13 @@ const TeacherDashboard = () => {
       {successMessage && <div className="success-message">{successMessage}</div>}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <h1>Teacher Dashboard</h1>
-      <p>Welcome to Teacher Dashboard!</p>
       <p>Here you can view and request substitutes and add reviews.</p>
       <hr />
       <h2>Available Substitutes:</h2>
       <ul>
         {substitutes.map((substitute) => (
           <li key={substitute.id}>
-            <Link to={`/sub-details/${substitute.id}`}>{substitute.name}</Link>
-            <button onClick={() => handleRequest(substitute.id, substitute.name)}>Request</button>
+            <Link to={`/sub-details/${substitute.id}`} className="dark-purple-link mr-2">{substitute.name}</Link>
           </li>
         ))}
       </ul>

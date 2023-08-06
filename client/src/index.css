@@ -1,7 +1,7 @@
 :root {
   --bg: #282c34;
   --header: #fff;
-  --link: #61dafb;
+  --link: #401250;
   --text: hsla(0, 0%, 100%, 0.88);
 }
 .success-message {
@@ -20,4 +20,14 @@
   border: 1px solid #f5c6cb;
   border-radius: 5px;
   margin-bottom: 10px;
+}
+.warm-blue-bg {
+  background-color: #6FA8DC; 
+}
+
+.golden-rod-bg {
+  background-color: goldenrod; 
+}
+.dark-purple-link {
+  color: #6A0DAD; 
 }
