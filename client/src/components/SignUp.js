@@ -14,7 +14,6 @@ function SignUp() {
     course_name: "",
     qualifications: "",
     verification_id: "",
-    school_location: "", // Add school_location field to the formData
   });
 
   const [confirmationMessage, setConfirmationMessage] = useState("")
@@ -27,7 +26,6 @@ function SignUp() {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
-  
   
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -99,7 +97,7 @@ function SignUp() {
         <br />
 
         <label>Location:</label>
-        <input type="text" name="school_location" value={formData.school_location} onChange={handleChange} required />
+        <input type="text" name="location" value={formData.location} onChange={handleChange} required />
         <br />
 
         <label>Phone:</label>

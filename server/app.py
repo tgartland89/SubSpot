@@ -79,6 +79,7 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if user and bcrypt.check_password_hash(user.password_hash, password):
+         print (user.id)
          session['user_id'] = user.id
          session['user_role'] = user.role
          return jsonify({"role": user.role})
@@ -136,13 +137,17 @@ def make_request():
     teacher_name = data.get('teacherName')  
     teacher_email = data.get('teacherEmail') 
 
-    substitute = Substitute.query.get(substitute_id)
-    teacher_id = session['user_id']
-    teacher = Teacher.query.get(teacher_id)
+    substitute = Substitute.query.filter(Substitute.id == substitute_id).first()
+    print (substitute_id)
+    teacher_id = session.get('user_id')
+    print (teacher_id)
+    teacher = Teacher.query.filter(Teacher.user_id == teacher_id).first() 
+    print (substitute)
+    print (teacher) 
 
     if not substitute or not teacher:
         return jsonify({"error": "Substitute or Teacher not found."})
-    
+    print (teacher.user.school_name)
 
     new_request = Request(
         Substitute_user_id=substitute.id,
