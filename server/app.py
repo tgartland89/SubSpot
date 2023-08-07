@@ -20,6 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 bcrypt.init_app(app)
 
+
 def create_user(name, email, location, phone, role, password, profile_picture=None):  
     user = User(name=name, email=email, location=location, phone=phone, role=role, password=password)
     user.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -106,6 +107,8 @@ def get_substitutes():
     substitutes_data = [{"id": substitute.id, "name": substitute.name, "email": substitute.email, "location": substitute.location, "phone": substitute.phone, "qualifications": substitute.qualifications, "verification_id": substitute.verification_id} for substitute in substitutes]
     return jsonify({"substitutes": substitutes_data})
 
+
+
 @app.route('/substitute/<int:substitute_id>', methods=['GET'])
 def get_substitute_details(substitute_id):
     substitute = db.session.get(Substitute, substitute_id)
@@ -125,23 +128,21 @@ def get_substitute_details(substitute_id):
 @app.route('/make_request', methods=['POST'])
 @login_required
 def make_request():
-    if 'user_role' not in session or session['user_role'] != 'Teacher':
+    if session['user_role'] != 'Teacher':
         return jsonify({"error": "Access denied"})
 
     data = request.json
     substitute_id = data.get('substituteId')
-    teacher_name = data.get('teacherName')
-    teacher_email = data.get('teacherEmail')
+    teacher_name = data.get('teacherName')  
+    teacher_email = data.get('teacherEmail') 
 
-   
-    req_session = sessionmaker(bind=db.engine)()
-
-    substitute = req_session.get(Substitute, substitute_id)
+    substitute = Substitute.query.get(substitute_id)
     teacher_id = session['user_id']
-    teacher = req_session.get(Teacher, teacher_id)
+    teacher = Teacher.query.get(teacher_id)
 
     if not substitute or not teacher:
         return jsonify({"error": "Substitute or Teacher not found."})
+    
 
     new_request = Request(
         Substitute_user_id=substitute.id,
@@ -152,8 +153,8 @@ def make_request():
         Confirmation=None,
         Message_sub_sent_to=substitute.name,
         Teacher_if_declined=None,
-        Teacher_name=teacher_name,
-        Teacher_email=teacher_email
+        Teacher_name=teacher_name,  
+        Teacher_email=teacher_email  
     )
     db.session.add(new_request)
     db.session.commit()
@@ -164,10 +165,13 @@ def make_request():
 def get_incoming_requests():
     if 'user_id' not in session:
         return jsonify({"error": "Login required."}), 401
+
+    substitute_id = session['user_id']
+
+    
     Session = sessionmaker(bind=db.engine)
     session = Session()
 
-    substitute_id = session['user_id']
     substitute = session.get(Substitute, substitute_id)
 
     if not substitute:

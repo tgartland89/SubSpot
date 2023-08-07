@@ -28,7 +28,7 @@ function App() {
   const { user, login } = useAuth();
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(true);
-
+  const [teacherId, setTeacherId] = useState(null); 
   useEffect(() => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const email = urlSearchParams.get("email");
@@ -40,6 +40,8 @@ function App() {
           login(data);
           console.log("User role after login:", data.role);
 
+          
+          setTeacherId(data.teacherId); 
           window.history.replaceState({}, document.title, window.location.pathname);
         })
         .catch((error) => {
@@ -62,7 +64,7 @@ function App() {
           <Route path="/signup" component={SignUp} />
           <Route path="/about" component={About} />
           <Route path="/dashboard" render={() => <DashboardPage userRole={user?.role} />} />
-          <Route path="/teacher-dashboard" render={() => <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} />} />
+          <Route path="/teacher-dashboard" render={() => ( <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} teacherId={teacherId}/>)}/>
           <Route path="/substitute-dashboard" component={SubstituteDashboard} />
           <Route path="/admin-dashboard" component={AdminDashboard} />
           <Route path="/sub-details/:substituteId" component={SubsDetails} />

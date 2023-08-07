@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { makeRequest } from './api'; 
 
-const TeacherDashboard = ({ userName, userEmail }) => {
+const TeacherDashboard = ({ userName, userEmail, teacherId }) => {
   const [substitutes, setSubstitutes] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -24,12 +24,12 @@ const TeacherDashboard = ({ userName, userEmail }) => {
     }
   };
 
-// eslint-disable-next-line
-   const handleRequest = (substituteId, substituteName) => {
-    const teacherName = userName; 
-    const teacherEmail = userEmail; 
+  // eslint-disable-next-line
+  const handleRequest = (substituteId, substituteName) => {
+    const teacherName = userName;
+    const teacherEmail = userEmail;
 
-    makeRequest(substituteId, teacherName, teacherEmail)
+    makeRequest(substituteId, teacherId, teacherName, teacherEmail) 
       .then((data) => {
         console.log('Request sent successfully:', data);
         setSuccessMessage("Request sent successfully!");

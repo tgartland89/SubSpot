@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-const SubsDetails = () => {
+const SubDetails = () => {
   const { substituteId } = useParams();
   const [substituteDetails, setSubstituteDetails] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -76,4 +76,4 @@ const SubsDetails = () => {
   );
 };
 
-export default SubsDetails;
+export default SubDetails;
