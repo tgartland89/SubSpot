@@ -29,7 +29,7 @@ const TeacherDashboard = ({ userName, userEmail, teacherId }) => {
     const teacherName = userName;
     const teacherEmail = userEmail;
 
-    makeRequest(substituteId, teacherId, teacherName, teacherEmail) 
+    makeRequest(substituteId, teacherName, teacherEmail)
       .then((data) => {
         console.log('Request sent successfully:', data);
         setSuccessMessage("Request sent successfully!");

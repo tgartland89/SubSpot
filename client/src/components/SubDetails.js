@@ -23,6 +23,7 @@ const SubDetails = () => {
       console.error("Substitute details not available.");
       return;
     }
+  
     const teacherName = prompt("Enter your name:");
     const teacherEmail = prompt("Enter your email:");
   
@@ -31,25 +32,25 @@ const SubDetails = () => {
       return;
     }
   
-    fetch('/make_request', {
-      method: 'POST',
+    fetch("/make_request", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        substituteId: substituteId,
+        substituteUserId: substituteId, // Using the correct variable here
         teacherName: teacherName,
         teacherEmail: teacherEmail,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log('Request sent successfully:', data);
+        console.log("Request sent successfully:", data);
         setSuccessMessage("Request sent successfully!");
         setErrorMessage("");
       })
       .catch((error) => {
-        console.error('Error sending request:', error);
+        console.error("Error sending request:", error);
         setErrorMessage("Failed to send the request. Please try again.");
         setSuccessMessage("");
       });

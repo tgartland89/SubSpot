@@ -130,18 +130,21 @@ def make_request():
         return jsonify({"error": "Access denied"})
 
     data = request.json
-    substitute_id = data.get('substituteId')
-    teacher_email = data.get('teacherEmail')
+    substitute_user_id = data.get('substituteUserId')
+    teacher_id = session.get('user_id')  # Instead of getting teacherId
 
-    substitute = Substitute.query.filter(Substitute.id == substitute_id).first()
-    teacher_id = session.get('user_id')
+    substitute = Substitute.query.filter(Substitute.id == substitute_user_id).first()
+
+    if not substitute:
+        return jsonify({"error": "Substitute not found."})
+
     teacher = Teacher.query.filter(Teacher.user_id == teacher_id).first()
 
-    if not substitute or not teacher:
-        return jsonify({"error": "Substitute or Teacher not found."})
+    if not teacher:
+        return jsonify({"error": "Teacher not found."})
 
     new_request = Request(
-        Substitute_user_id=substitute.id,
+        Substitute_user_id=substitute_user_id,
         Teacher_id=teacher.id,
         school_name=teacher.user.school_name,
         Teacher_school_location=teacher.location,
@@ -150,6 +153,7 @@ def make_request():
         Message_sub_sent_to=substitute.name,
         Teacher_if_declined=None,
     )
+
     db.session.add(new_request)
     db.session.commit()
     return jsonify({"message": "Request sent successfully"})
