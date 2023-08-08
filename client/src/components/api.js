@@ -88,6 +88,7 @@ export function denyRequest(requestId) {
     throw error;
   });
 }
+
 export function makeRequest(substituteId, teacherName, teacherEmail) {
   return fetch('/make_request', {
     method: "POST",
@@ -111,6 +112,7 @@ export function makeRequest(substituteId, teacherName, teacherEmail) {
       throw error;
     });
 }
+
 export function signUpTeacher(formData) {
   return fetch("/auth/signup-teacher", {
     method: "POST",
@@ -150,4 +152,3 @@ export function signUpSubstitute(formData) {
       throw error;
     });
 }
-

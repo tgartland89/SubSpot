@@ -16,8 +16,8 @@ class User(db.Model, SerializerMixin):
     role = db.Column(Enum('Teacher', 'Substitute', 'SiteAdmin'), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     profile_picture = db.Column(db.String(255))
-    school_name = db.Column(db.String(120))  # Add teacher_school attribute here
-    school_location = db.Column(db.String(120))  # Add school_location attribute here
+    school_name = db.Column(db.String(120))  
+    school_location = db.Column(db.String(120))  
 
     def __init__(self, name, email, location, phone, role, password, profile_picture=None, school_name=None, school_location=None):
         self.name = name
@@ -27,11 +27,8 @@ class User(db.Model, SerializerMixin):
         self.role = role
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         self.profile_picture = profile_picture
-        self.school_name = school_name  # Set the teacher_school attribute
-        self.school_location = school_location  # Set the school_location attribute
-
-    # ... (rest of the class code remains the same)
-
+        self.school_name = school_name  
+        self.school_location = school_location  
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
@@ -39,7 +36,6 @@ class User(db.Model, SerializerMixin):
     teacher = db.relationship('Teacher', back_populates='user', uselist=False, lazy='joined')
     substitute = db.relationship('Substitute', back_populates='user', uselist=False, lazy='joined')
     site_admin = db.relationship('SiteAdmin', back_populates='user', uselist=False, lazy='joined')
-
 
 class Teacher(db.Model, SerializerMixin):
     __tablename__ = 'teachers'
@@ -51,8 +47,8 @@ class Teacher(db.Model, SerializerMixin):
     location = db.Column(db.String(120))
     phone = db.Column(db.String(20))
     course_name = db.Column(db.String(120))
-    school_name = db.Column(db.String(120))  # Add teacher_school attribute here
-    school_location = db.Column(db.String(120))  # Add school_location attribute here
+    school_name = db.Column(db.String(120)) 
+    school_location = db.Column(db.String(120)) 
 
     user = db.relationship('User', back_populates='teacher', uselist=False, lazy='joined')
     requests = db.relationship('Request', back_populates='teacher')
@@ -66,17 +62,11 @@ class Teacher(db.Model, SerializerMixin):
             'location': self.location,
             'phone': self.phone,
             'course_name': self.course_name,
-            'school_name': self.school_name,  # Include the teacher_school attribute in the dictionary
-            'school_location': self.school_location,  # Include the school_location attribute in the dictionary
+            'school_name': self.school_name,  
+            'school_location': self.school_location,  
             'profile_picture': self.user.profile_picture,
         }
-
-
-
-    # ... (rest of the class code remains the same)
-
-
-
+    
 class Substitute(db.Model, SerializerMixin):
     __tablename__ = 'substitutes' 
 
@@ -105,7 +95,6 @@ class Substitute(db.Model, SerializerMixin):
         }
 
     user = db.relationship('User', back_populates='substitute', uselist=False, lazy='joined')
-
 
 class SiteAdmin(db.Model, SerializerMixin):
     __tablename__ = 'site_admins'
@@ -136,10 +125,9 @@ class Request(db.Model):
     Substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)
     Teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
     Course_Being_covered = db.Column(db.String(120))
-    Confirmation = db.Column(db.String(10))  # 'Accept' or 'Decline'
+    Confirmation = db.Column(db.String(10)) 
     Message_sub_sent_to = db.Column(db.String(120))
     Teacher_if_declined = db.Column(db.String(120))
-    # Add school_name and Teacher_school_location attributes
     school_name = db.Column(db.String(120))
     Teacher_school_location = db.Column(db.String(120))
 

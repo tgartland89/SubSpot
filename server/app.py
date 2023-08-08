@@ -20,7 +20,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 bcrypt.init_app(app)
 
-
 def create_user(name, email, location, phone, role, password, profile_picture=None):  
     user = User(name=name, email=email, location=location, phone=phone, role=role, password=password)
     user.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -108,8 +107,6 @@ def get_substitutes():
     substitutes_data = [{"id": substitute.id, "name": substitute.name, "email": substitute.email, "location": substitute.location, "phone": substitute.phone, "qualifications": substitute.qualifications, "verification_id": substitute.verification_id} for substitute in substitutes]
     return jsonify({"substitutes": substitutes_data})
 
-
-
 @app.route('/substitute/<int:substitute_id>', methods=['GET'])
 def get_substitute_details(substitute_id):
     substitute = db.session.get(Substitute, substitute_id)
@@ -157,9 +154,6 @@ def make_request():
     db.session.commit()
     return jsonify({"message": "Request sent successfully"})
 
-
-
-
 @app.route('/get_incoming_requests', methods=['GET'])
 def get_incoming_requests():
     if 'user_id' not in session:
@@ -167,7 +161,6 @@ def get_incoming_requests():
 
     substitute_id = session['user_id']
 
-    
     Session = sessionmaker(bind=db.engine)
     session = Session()
 
@@ -195,7 +188,6 @@ def get_incoming_requests():
     ]
 
     return jsonify({"incoming_requests": incoming_requests_data})
-
 
 @app.route('/confirm_request/<int:request_id>', methods=['POST'])
 def confirm_request(request_id):
@@ -239,16 +231,15 @@ def deny_request(request_id):
 
     return jsonify({"message": "Request denied successfully."})
 
-
 @app.route('/auth/signup', methods=['POST'])
 def signup():
     if request.method == 'POST':
         role = request.json.get('role')
 
         if role == 'Teacher':
-            return signup_teacher()  # Directly call the signup_teacher function
+            return signup_teacher()  
         elif role == 'Substitute':
-            return signup_substitute()  # Directly call the signup_substitute function
+            return signup_substitute()  
 
     return "Sign Up Form"
 
@@ -261,7 +252,7 @@ def signup_teacher():
     location = request.json.get('location')
     phone = request.json.get('phone')
     school_name = request.json.get('school_name')
-    school_location = request.json.get('school_location')  # Get the school_location from the request data
+    school_location = request.json.get('school_location')  
     course_name = request.json.get('course_name')
 
     if password != confirm_password:

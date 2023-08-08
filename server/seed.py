@@ -30,7 +30,7 @@ def generate_random_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
 def create_teacher(user):
-    school_name = fake.company()  # Generate a random teacher school name
+    school_name = fake.company()  
     teacher = Teacher(
         user_id=user.id,
         name=user.name,
@@ -38,7 +38,7 @@ def create_teacher(user):
         location=user.location,
         phone=user.phone,
         course_name=fake.job(),
-        school_name=school_name,  # Set the teacher_school attribute
+        school_name=school_name,  
     )
     db.session.add(teacher)
 
@@ -102,16 +102,16 @@ def create_courses_and_reviews(num_courses=10, num_reviews=30):
 
         course_review_pairs.add((teacher, substitute))
 
-        school_name = fake.company()  # Generate a random teacher school name
-        school_location = fake.address()  # Generate a random school location
+        school_name = fake.company()  
+        school_location = fake.address()  
 
         course = Course(
             Correlating_teacher_ID=teacher.user_id,
             Correlating_substitute_ID=substitute.user_id,
             Course_name=fake.job(),
             Course_status=random.choice(['Available', 'Unavailable']),
-            Course_school_name=school_name,  # Set the teacher_school attribute
-            Course_location=school_location,  # Set the school_location attribute
+            Course_school_name=school_name,  
+            Course_location=school_location,  
         )
         db.session.add(course)
 
@@ -140,8 +140,8 @@ def create_single_request(substitute_id):
         return
 
     teacher = random.choice(teachers)
-    school_name = getattr(teacher, 'teacher_school', 'Unknown School')  # Use 'Unknown School' if teacher_school is None
-    school_location = getattr(teacher, 'school_location', 'Unknown Location')  # Use 'Unknown Location' if school_location is None
+    school_name = getattr(teacher, 'teacher_school', 'Unknown School')  
+    school_location = getattr(teacher, 'school_location', 'Unknown Location')  
 
     request = Request(
         Substitute_user_id=substitute_id,
@@ -186,7 +186,6 @@ def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num
         print("Complete")
 
         print("Generating SiteAdmin...")
-        # This line will create the SiteAdmin user
         email = 'colly@example.com'
         password = 'Disney4Life!'
         user = create_user(email, password, 'SiteAdmin')

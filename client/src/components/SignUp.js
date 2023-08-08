@@ -39,10 +39,7 @@ function SignUp() {
       return;
     }
   
-    // Set the correct role in formData before making the API request
     formData.role = role;
-  
-    // Use the appropriate API endpoint based on the selected role
     const apiEndpoint =
       role === "Teacher" ? "/auth/signup-teacher" : "/auth/signup-substitute";
   
@@ -68,8 +65,6 @@ function SignUp() {
       });
   };
   
-  
-
   return (
     <div className="container">
       <h1>Sign Up</h1>
@@ -187,7 +182,6 @@ function SignUp() {
     <br />
   </>
 )}
-
         {role === "Substitute" && (
           <>
             <label>Qualifications:</label>

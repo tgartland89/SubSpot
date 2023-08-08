@@ -23,12 +23,9 @@ const SubDetails = () => {
       console.error("Substitute details not available.");
       return;
     }
-  
-    // Prompt the teacher to enter their name and email
     const teacherName = prompt("Enter your name:");
     const teacherEmail = prompt("Enter your email:");
   
-    // Check if the teacher entered valid name and email
     if (!teacherName || !teacherEmail) {
       console.error("Invalid name or email.");
       return;
