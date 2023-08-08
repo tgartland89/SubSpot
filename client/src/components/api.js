@@ -100,14 +100,54 @@ export function makeRequest(substituteId, teacherName, teacherEmail) {
       teacherEmail,
     }),
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Failed to make a request.');
-    }
-    return response.json();
-  })
-  .catch(error => {
-    console.error('Network error:', error);
-    throw error;
-  });
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to make a request.');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Network error:', error);
+      throw error;
+    });
 }
+export function signUpTeacher(formData) {
+  return fetch("/auth/signup-teacher", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formData),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to sign up as a teacher.");
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Network error:', error);
+      throw error;
+    });
+}
+
+export function signUpSubstitute(formData) {
+  return fetch("/auth/signup-substitute", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formData),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to sign up as a substitute. Status: " + response.status);
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      console.error("Network error:", error);
+      throw error;
+    });
+}
+

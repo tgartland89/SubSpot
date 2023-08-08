@@ -30,13 +30,15 @@ def generate_random_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
 def create_teacher(user):
+    school_name = fake.company()  # Generate a random teacher school name
     teacher = Teacher(
         user_id=user.id,
         name=user.name,
         email=user.email,
         location=user.location,
         phone=user.phone,
-        course_name=fake.job()  
+        course_name=fake.job(),
+        school_name=school_name,  # Set the teacher_school attribute
     )
     db.session.add(teacher)
 
@@ -100,13 +102,16 @@ def create_courses_and_reviews(num_courses=10, num_reviews=30):
 
         course_review_pairs.add((teacher, substitute))
 
+        school_name = fake.company()  # Generate a random teacher school name
+        school_location = fake.address()  # Generate a random school location
+
         course = Course(
             Correlating_teacher_ID=teacher.user_id,
             Correlating_substitute_ID=substitute.user_id,
             Course_name=fake.job(),
             Course_status=random.choice(['Available', 'Unavailable']),
-            Course_school_name=fake.company(),
-            Course_location=fake.address(),
+            Course_school_name=school_name,  # Set the teacher_school attribute
+            Course_location=school_location,  # Set the school_location attribute
         )
         db.session.add(course)
 
@@ -135,11 +140,14 @@ def create_single_request(substitute_id):
         return
 
     teacher = random.choice(teachers)
+    school_name = getattr(teacher, 'teacher_school', 'Unknown School')  # Use 'Unknown School' if teacher_school is None
+    school_location = getattr(teacher, 'school_location', 'Unknown Location')  # Use 'Unknown Location' if school_location is None
+
     request = Request(
         Substitute_user_id=substitute_id,
         Teacher_id=teacher.id,
-        Teacher_school=fake.company(),
-        Teacher_school_location=fake.address(),
+        school_name=school_name,
+        Teacher_school_location=school_location,
         Course_Being_covered=fake.job(),
         Confirmation=random.choice(['Accept', 'Decline']),
         Message_sub_sent_to=fake.email(),
@@ -147,6 +155,7 @@ def create_single_request(substitute_id):
     )
     db.session.add(request)
     db.session.commit()
+
 
 def create_requests(num_requests=10):
     substitutes = Substitute.query.all()

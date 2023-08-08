@@ -134,36 +134,30 @@ def make_request():
 
     data = request.json
     substitute_id = data.get('substituteId')
-    teacher_name = data.get('teacherName')  
-    teacher_email = data.get('teacherEmail') 
+    teacher_email = data.get('teacherEmail')
 
     substitute = Substitute.query.filter(Substitute.id == substitute_id).first()
-    print (substitute_id)
     teacher_id = session.get('user_id')
-    print (teacher_id)
-    teacher = Teacher.query.filter(Teacher.user_id == teacher_id).first() 
-    print (substitute)
-    print (teacher) 
+    teacher = Teacher.query.filter(Teacher.user_id == teacher_id).first()
 
     if not substitute or not teacher:
         return jsonify({"error": "Substitute or Teacher not found."})
-    print (teacher.user.school_name)
 
     new_request = Request(
         Substitute_user_id=substitute.id,
         Teacher_id=teacher.id,
-        Teacher_school=teacher.school_name,
+        school_name=teacher.user.school_name,
         Teacher_school_location=teacher.location,
         Course_Being_covered=teacher.course_name,
         Confirmation=None,
         Message_sub_sent_to=substitute.name,
         Teacher_if_declined=None,
-        Teacher_name=teacher_name,  
-        Teacher_email=teacher_email  
     )
     db.session.add(new_request)
     db.session.commit()
     return jsonify({"message": "Request sent successfully"})
+
+
 
 
 @app.route('/get_incoming_requests', methods=['GET'])
@@ -250,45 +244,64 @@ def deny_request(request_id):
 def signup():
     if request.method == 'POST':
         role = request.json.get('role')
-        name = request.json.get('name')
-        email = request.json.get('email')
-        password = request.json.get('password')
-        confirm_password = request.json.get('confirm_password')  
-        location = request.json.get('location')
-        phone = request.json.get('phone')
-
-        if password != confirm_password:  
-            return jsonify({"error": "Passwords do not match."}), 400
 
         if role == 'Teacher':
-            school_name = request.json.get('school_name')
-            course_name = request.json.get('course_name')
-
-            new_user = create_user(name, email, location, phone, role, password)
-            db.session.add(new_user)
-            db.session.commit()
-
-            new_teacher = Teacher(user=new_user, name=name, email=email, location=location, phone=phone, course_name=course_name)
-            db.session.add(new_teacher)
-            db.session.commit()
-
-            return jsonify(message=signup_confirmation_message(role))
-
+            return signup_teacher()  # Directly call the signup_teacher function
         elif role == 'Substitute':
-            qualifications = request.json.get('qualifications')
-            verification_id = request.json.get('verification_id')
-
-            new_user = create_user(name, email, location, phone, role, password)
-            db.session.add(new_user)
-            db.session.commit()
-
-            new_substitute = Substitute(user=new_user, name=name, email=email, location=location, phone=phone,
-                                        qualifications=qualifications, verification_id=verification_id)
-            db.session.add(new_substitute)
-            db.session.commit()
-            return jsonify({"message": signup_confirmation_message(role)})
+            return signup_substitute()  # Directly call the signup_substitute function
 
     return "Sign Up Form"
+
+@app.route('/auth/signup-teacher', methods=['POST'])
+def signup_teacher():
+    name = request.json.get('name')
+    email = request.json.get('email')
+    password = request.json.get('password')
+    confirm_password = request.json.get('confirm_password')
+    location = request.json.get('location')
+    phone = request.json.get('phone')
+    school_name = request.json.get('school_name')
+    school_location = request.json.get('school_location')  # Get the school_location from the request data
+    course_name = request.json.get('course_name')
+
+    if password != confirm_password:
+        return jsonify({"error": "Passwords do not match."}), 400
+
+    new_user = create_user(name, email, location, phone, 'Teacher', password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    new_teacher = Teacher(user=new_user, name=name, email=email, location=location, phone=phone,
+                          school_name=school_name, school_location=school_location, course_name=course_name)
+    db.session.add(new_teacher)
+    db.session.commit()
+
+    return jsonify(message=signup_confirmation_message('Teacher'))
+
+@app.route('/auth/signup-substitute', methods=['POST'])
+def signup_substitute():
+    name = request.json.get('name')
+    email = request.json.get('email')
+    password = request.json.get('password')
+    confirm_password = request.json.get('confirm_password')
+    location = request.json.get('location')
+    phone = request.json.get('phone')
+    qualifications = request.json.get('qualifications')
+    verification_id = request.json.get('verification_id')
+
+    if password != confirm_password:
+        return jsonify({"error": "Passwords do not match."}), 400
+
+    new_user = create_user(name, email, location, phone, 'Substitute', password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    new_substitute = Substitute(user=new_user, name=name, email=email, location=location, phone=phone,
+                                qualifications=qualifications, verification_id=verification_id)
+    db.session.add(new_substitute)
+    db.session.commit()
+
+    return jsonify(message=signup_confirmation_message('Substitute'))
 
 def signup_confirmation_message(role):
     if role == 'Teacher':

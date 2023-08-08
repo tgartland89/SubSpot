@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+
+
 function SignUp() {
   const [role, setRole] = useState("Teacher");
   const [error, setError] = useState("");
@@ -10,13 +12,15 @@ function SignUp() {
     confirm_password: "",
     location: "",
     phone: "",
+    // Fields specific to Teacher
     school_name: "",
     course_name: "",
+    // Fields specific to Substitute
     qualifications: "",
     verification_id: "",
   });
 
-  const [confirmationMessage, setConfirmationMessage] = useState("")
+  const [confirmationMessage, setConfirmationMessage] = useState("");
 
   const handleRoleChange = (event) => {
     setRole(event.target.value);
@@ -26,21 +30,28 @@ function SignUp() {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
-  
+
   const handleSubmit = (event) => {
     event.preventDefault();
-
+  
     if (formData.password !== formData.confirm_password) {
       setError("Passwords do not match.");
       return;
     }
-
-    fetch("/auth/signup", {
+  
+    // Set the correct role in formData before making the API request
+    formData.role = role;
+  
+    // Use the appropriate API endpoint based on the selected role
+    const apiEndpoint =
+      role === "Teacher" ? "/auth/signup-teacher" : "/auth/signup-substitute";
+  
+    fetch(apiEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...formData, role }),
+      body: JSON.stringify(formData),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -56,6 +67,9 @@ function SignUp() {
         console.error("Error occurred during signup:", error);
       });
   };
+  
+  
+
   return (
     <div className="container">
       <h1>Sign Up</h1>
@@ -76,19 +90,43 @@ function SignUp() {
         <br />
 
         <label>Name:</label>
-        <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
         <br />
 
         <label>Email:</label>
-        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
         <br />
 
         <label>Password:</label>
-        <input type="password" name="password" value={formData.password} onChange={handleChange} required/>
+        <input
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
         <br />
 
         <label>Confirm Password:</label>
-        <input type="password" name="confirm_password" value={formData.confirm_password}onChange={handleChange}required/>
+        <input
+          type="password"
+          name="confirm_password"
+          value={formData.confirm_password}
+          onChange={handleChange}
+          required
+        />
         <br />
 
         {formData.password !== formData.confirm_password && (
@@ -97,41 +135,87 @@ function SignUp() {
         <br />
 
         <label>Location:</label>
-        <input type="text" name="location" value={formData.location} onChange={handleChange} required />
+        <input
+          type="text"
+          name="location"
+          value={formData.location}
+          onChange={handleChange}
+          required
+        />
         <br />
 
         <label>Phone:</label>
-        <input type="text" name="phone" value={formData.phone} onChange={handleChange} required />
+        <input
+          type="text"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          required
+        />
         <br />
 
         {role === "Teacher" && (
-          <>
-            <label>School Name:</label>
-            <input type="text" name="school_name" value={formData.school_name} onChange={handleChange} required />
-            <br />
+  <>
+    <label>School Name:</label>
+    <input
+      type="text"
+      name="school_name"
+      value={formData.school_name}
+      onChange={handleChange}
+      required
+    />
+    <br />
 
-            <label>Course Name:</label>
-            <input type="text" name="course_name" value={formData.course_name} onChange={handleChange} required />
-            <br />
-          </>
-        )}
+    <label>School Location:</label>
+    <input
+      type="text"
+      name="school_location"
+      value={formData.school_location}
+      onChange={handleChange}
+      required
+    />
+    <br />
+
+    <label>Course Name:</label>
+    <input
+      type="text"
+      name="course_name"
+      value={formData.course_name}
+      onChange={handleChange}
+      required
+    />
+    <br />
+  </>
+)}
 
         {role === "Substitute" && (
           <>
             <label>Qualifications:</label>
-            <input type="text" name="qualifications" value={formData.qualifications} onChange={handleChange} required />
+            <input
+              type="text"
+              name="qualifications"
+              value={formData.qualifications}
+              onChange={handleChange}
+              required
+            />
             <br />
 
             <label>Verification ID:</label>
-            <input type="text" name="verification_id" value={formData.verification_id} onChange={handleChange} required />
+            <input
+              type="text"
+              name="verification_id"
+              value={formData.verification_id}
+              onChange={handleChange}
+              required
+            />
             <br />
           </>
         )}
 
-           <input type="submit" className="btn btn-primary" value="Sign Up" />
-           </form>
-            {confirmationMessage && <p>{confirmationMessage}</p>}
-            {error && <p className="text-danger">{error}</p>}
+        <input type="submit" className="btn btn-primary" value="Sign Up" />
+      </form>
+      {confirmationMessage && <p>{confirmationMessage}</p>}
+      {error && <p className="text-danger">{error}</p>}
     </div>
   );
 }

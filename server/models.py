@@ -15,16 +15,23 @@ class User(db.Model, SerializerMixin):
     phone = db.Column(db.String(20))
     role = db.Column(Enum('Teacher', 'Substitute', 'SiteAdmin'), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    profile_picture = db.Column(db.String(255))  
+    profile_picture = db.Column(db.String(255))
+    school_name = db.Column(db.String(120))  # Add teacher_school attribute here
+    school_location = db.Column(db.String(120))  # Add school_location attribute here
 
-    def __init__(self, name, email, location, phone, role, password, profile_picture=None):  
+    def __init__(self, name, email, location, phone, role, password, profile_picture=None, school_name=None, school_location=None):
         self.name = name
         self.email = email
         self.location = location
         self.phone = phone
         self.role = role
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-        self.profile_picture = profile_picture  
+        self.profile_picture = profile_picture
+        self.school_name = school_name  # Set the teacher_school attribute
+        self.school_location = school_location  # Set the school_location attribute
+
+    # ... (rest of the class code remains the same)
+
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
@@ -44,8 +51,11 @@ class Teacher(db.Model, SerializerMixin):
     location = db.Column(db.String(120))
     phone = db.Column(db.String(20))
     course_name = db.Column(db.String(120))
+    school_name = db.Column(db.String(120))  # Add teacher_school attribute here
+    school_location = db.Column(db.String(120))  # Add school_location attribute here
 
     user = db.relationship('User', back_populates='teacher', uselist=False, lazy='joined')
+    requests = db.relationship('Request', back_populates='teacher')
 
     def to_dict(self):
         return {
@@ -56,8 +66,15 @@ class Teacher(db.Model, SerializerMixin):
             'location': self.location,
             'phone': self.phone,
             'course_name': self.course_name,
+            'school_name': self.school_name,  # Include the teacher_school attribute in the dictionary
+            'school_location': self.school_location,  # Include the school_location attribute in the dictionary
             'profile_picture': self.user.profile_picture,
         }
+
+
+
+    # ... (rest of the class code remains the same)
+
 
 
 class Substitute(db.Model, SerializerMixin):
@@ -71,6 +88,8 @@ class Substitute(db.Model, SerializerMixin):
     phone = db.Column(db.String(20))
     qualifications = db.Column(db.String(120))
     verification_id = db.Column(db.String(120))
+
+    requests = db.relationship('Request', back_populates='substitute')
 
     def to_dict(self):
         return {
@@ -110,28 +129,39 @@ class SiteAdmin(db.Model, SerializerMixin):
     user = db.relationship('User', back_populates='site_admin', uselist=False, lazy='joined')
 
 
-class Request(db.Model, SerializerMixin):
+class Request(db.Model):
     __tablename__ = 'requests'
 
-    Request_ID = db.Column(db.Integer, primary_key=True)
-    Substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'))
-    Teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
-    Teacher_school = db.Column(db.String(120))
-    Teacher_school_location = db.Column(db.String(120))
+    id = db.Column(db.Integer, primary_key=True)
+    Substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)
+    Teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
     Course_Being_covered = db.Column(db.String(120))
-    Confirmation = db.Column(Enum('Accept', 'Decline'))
+    Confirmation = db.Column(db.String(10))  # 'Accept' or 'Decline'
     Message_sub_sent_to = db.Column(db.String(120))
     Teacher_if_declined = db.Column(db.String(120))
+    # Add school_name and Teacher_school_location attributes
+    school_name = db.Column(db.String(120))
+    Teacher_school_location = db.Column(db.String(120))
 
-    substitute = db.relationship('Substitute', backref='requests', foreign_keys=[Substitute_user_id])
-    teacher = db.relationship('Teacher', backref='requests', foreign_keys=[Teacher_id])
+    substitute = db.relationship('Substitute', back_populates='requests')
+    teacher = db.relationship('Teacher', back_populates='requests')
+
+    def __init__(self, Substitute_user_id, Teacher_id, school_name, Teacher_school_location, Course_Being_covered, Confirmation, Message_sub_sent_to, Teacher_if_declined):
+        self.Substitute_user_id = Substitute_user_id
+        self.Teacher_id = Teacher_id
+        self.school_name = school_name
+        self.Teacher_school_location = Teacher_school_location
+        self.Course_Being_covered = Course_Being_covered
+        self.Confirmation = Confirmation
+        self.Message_sub_sent_to = Message_sub_sent_to
+        self.Teacher_if_declined = Teacher_if_declined
 
     def to_dict(self):
         return {
-            'Request_ID': self.Request_ID,
+            'id': self.id,
             'Substitute_user_id': self.Substitute_user_id,
-            'Teacher_name': self.teacher.name if self.teacher else None,
-            'Teacher_school': self.Teacher_school,
+            'Teacher_id': self.Teacher_id,
+            'school_name': self.school_name,
             'Teacher_school_location': self.Teacher_school_location,
             'Course_Being_covered': self.Course_Being_covered,
             'Confirmation': self.Confirmation,
