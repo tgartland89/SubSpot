@@ -71,7 +71,7 @@
   flex-direction: column;
   align-items: center;
   background-color: #a0a0c5;
-  color: rgb(133, 96, 2); 
+  color: rgb(17, 121, 12); 
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
@@ -111,3 +111,27 @@
 .invalid {
   color: red;
 }
+/* Container for images */
+.image-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; 
+  margin-top: 4px; 
+}
+
+/* Style for individual images */
+.teacher-image,
+.substitute-image {
+  max-width: 30%; 
+}
+
+/* Position the teacher image to the left */
+.teacher-image {
+  order: -1; 
+}
+
+/* Position the substitute image to the right */
+.substitute-image {
+  order: 1; 
+}
+

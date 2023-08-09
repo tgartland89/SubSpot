@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 
-
-
 function SignUp() {
   const [role, setRole] = useState("Teacher");
   const [error, setError] = useState("");
