@@ -25,6 +25,8 @@ function About() {
 }
 
 function App() {
+   // eslint-disable-next-line
+  const [userData, setUserData] = useState({ role: '', teacher_user_id: null });
   const { user, login } = useAuth();
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(true);

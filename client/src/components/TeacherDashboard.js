@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { makeRequest } from './api'; 
 
-const TeacherDashboard = ({ userName, userEmail, teacherId }) => {
-  console.log("Teacher ID in TeacherDashboard:", teacherId); // Add this line
+const TeacherDashboard = ({ userName, userEmail, teacherId, teacherUserId }) => { 
+  console.log("Teacher ID in TeacherDashboard:", teacherId); 
 
   const [substitutes, setSubstitutes] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");

@@ -99,3 +99,15 @@
   margin-top: 10px;
   background-color: #ffffff;
 }
+.password-validation {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.valid {
+  color: green;
+}
+
+.invalid {
+  color: red;
+}

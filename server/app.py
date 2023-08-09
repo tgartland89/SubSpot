@@ -81,6 +81,8 @@ def login():
          print (user.id)
          session['user_id'] = user.id
          session['user_role'] = user.role
+         if user.role == 'teacher':
+              session['teacher_user_id'] = user.id
          return jsonify({"role": user.role})
         return jsonify({"error": "Invalid email or password. Please try again."}), 401
     

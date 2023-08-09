@@ -30,12 +30,18 @@ function SignUp() {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
-
   const handleSubmit = (event) => {
     event.preventDefault();
   
     if (formData.password !== formData.confirm_password) {
       setError("Passwords do not match.");
+      return;
+    }
+  
+    if (!isStrongPassword(formData.password)) {
+      setError(
+        "Password is not strong enough. Please include an uppercase and lowercase letter, a digit, a special character, and a length between 8 and 20 characters."
+      );
       return;
     }
   
@@ -64,6 +70,33 @@ function SignUp() {
         console.error("Error occurred during signup:", error);
       });
   };
+
+  
+
+// Helper function to check password complexity
+const isStrongPassword = (password) => {
+  // Define your complexity rules here
+  const minLength = 8;
+  const maxLength = 20; // New requirement: Maximum length of 20 characters
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasDigit = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  // Check all complexity rules
+  if (
+    password.length >= minLength &&
+    password.length <= maxLength &&
+    hasUppercase &&
+    hasLowercase &&
+    hasDigit &&
+    hasSpecialChar
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
   
   return (
     <div className="container">
@@ -106,13 +139,25 @@ function SignUp() {
 
         <label>Password:</label>
         <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-        <br />
+        type="password"
+        name="password"
+        value={formData.password}
+        onChange={handleChange}
+   required
+/>
+
+{formData.password && (
+  <div className="password-validation">
+    {isStrongPassword(formData.password) ? (
+      <span className="valid">Password is strong!</span>
+    ) : (
+      <span className="invalid">
+        Password is not strong enough. Please include an uppercase and lowercase letter, a digit, a special character, and a length between 8 and 20 characters.
+      </span>
+    )}
+  </div>
+)}
+<br />
 
         <label>Confirm Password:</label>
         <input
