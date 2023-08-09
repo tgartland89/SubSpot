@@ -1,9 +1,44 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { Link } from "react-router-dom";
 import teacherImage from "../assets/teacher_computer_class.jpg";
 import substituteImage from "../assets/substitute_1.jpg";
 
 function Home() {
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.5,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("fade-in");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, options);
+
+    const teacherImageElement = document.querySelector(".teacher-image");
+    const substituteImageElement = document.querySelector(".substitute-image");
+
+    if (teacherImageElement) {
+      if (!localStorage.getItem("teacherImageAnimated")) {
+        observer.observe(teacherImageElement);
+      }
+    }
+    if (substituteImageElement) {
+      if (!localStorage.getItem("substituteImageAnimated")) {
+        observer.observe(substituteImageElement);
+      }
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <div>
       <h1>Welcome to SubSpot!</h1>

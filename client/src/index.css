@@ -111,27 +111,46 @@
 .invalid {
   color: red;
 }
-/* Container for images */
+
 .image-container {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; 
-  margin-top: 4px; 
+  align-items: flex-start;
+  margin-top: 4px;
 }
 
-/* Style for individual images */
+
 .teacher-image,
 .substitute-image {
-  max-width: 30%; 
+  max-width: 30%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  border-radius: 10px; 
 }
 
-/* Position the teacher image to the left */
+
 .teacher-image {
-  order: -1; 
+  background-color: #d55656;
+  color: white;
 }
 
-/* Position the substitute image to the right */
 .substitute-image {
-  order: 1; 
+  background-color: #d55656;
+  color: white;
 }
 
+
+.teacher-image.fade-in,
+.substitute-image.fade-in {
+  opacity: 1;
+}
+
+
+.teacher-image {
+  order: -1;
+}
+
+
+.substitute-image {
+  order: 1;
+}
