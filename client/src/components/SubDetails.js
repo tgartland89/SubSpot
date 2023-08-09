@@ -38,11 +38,12 @@ const SubDetails = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        substituteUserId: substituteId, // Using the correct variable here
+        substitute_user_id: substituteId, // Use substituteUserId instead of substituteId
         teacherName: teacherName,
         teacherEmail: teacherEmail,
       }),
     })
+    
       .then((response) => response.json())
       .then((data) => {
         console.log("Request sent successfully:", data);

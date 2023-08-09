@@ -1,8 +1,8 @@
 """Create tables
 
-Revision ID: 4322f88f517f
+Revision ID: e8d5d83e8cfd
 Revises: 
-Create Date: 2023-08-08 05:38:13.252302
+Create Date: 2023-08-08 19:25:02.241683
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4322f88f517f'
+revision = 'e8d5d83e8cfd'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,6 +35,9 @@ def upgrade():
     op.create_table('site_admins',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=120), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_site_admins_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -42,6 +45,12 @@ def upgrade():
     op.create_table('substitutes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=120), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('location', sa.String(length=120), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
+    sa.Column('qualifications', sa.String(length=120), nullable=True),
+    sa.Column('verification_id', sa.String(length=120), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_substitutes_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -49,6 +58,13 @@ def upgrade():
     op.create_table('teachers',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=120), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('location', sa.String(length=120), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
+    sa.Column('course_name', sa.String(length=120), nullable=True),
+    sa.Column('school_name', sa.String(length=120), nullable=True),
+    sa.Column('school_location', sa.String(length=120), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_teachers_user_id_users')),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -56,27 +72,27 @@ def upgrade():
     op.create_table('courses',
     sa.Column('Course_ID', sa.Integer(), nullable=False),
     sa.Column('Course_name', sa.String(length=120), nullable=True),
-    sa.Column('Correlating_teacher_ID', sa.Integer(), nullable=True),
-    sa.Column('Correlating_substitute_ID', sa.Integer(), nullable=True),
+    sa.Column('Correlating_teacher_user_id', sa.Integer(), nullable=True),
+    sa.Column('Correlating_substitute_user_id', sa.Integer(), nullable=True),
     sa.Column('Course_status', sa.Enum('Available', 'Unavailable'), nullable=True),
     sa.Column('Course_school_name', sa.String(length=120), nullable=True),
     sa.Column('Course_location', sa.String(length=120), nullable=True),
-    sa.ForeignKeyConstraint(['Correlating_substitute_ID'], ['substitutes.id'], name=op.f('fk_courses_Correlating_substitute_ID_substitutes')),
-    sa.ForeignKeyConstraint(['Correlating_teacher_ID'], ['teachers.id'], name=op.f('fk_courses_Correlating_teacher_ID_teachers')),
+    sa.ForeignKeyConstraint(['Correlating_substitute_user_id'], ['substitutes.id'], name=op.f('fk_courses_Correlating_substitute_user_id_substitutes')),
+    sa.ForeignKeyConstraint(['Correlating_teacher_user_id'], ['teachers.id'], name=op.f('fk_courses_Correlating_teacher_user_id_teachers')),
     sa.PrimaryKeyConstraint('Course_ID')
     )
     op.create_table('requests',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('Substitute_user_id', sa.Integer(), nullable=False),
-    sa.Column('Teacher_id', sa.Integer(), nullable=False),
+    sa.Column('substitute_user_id', sa.Integer(), nullable=False),
+    sa.Column('teacher_user_id', sa.Integer(), nullable=False),
     sa.Column('Course_Being_covered', sa.String(length=120), nullable=True),
     sa.Column('Confirmation', sa.String(length=10), nullable=True),
     sa.Column('Message_sub_sent_to', sa.String(length=120), nullable=True),
     sa.Column('Teacher_if_declined', sa.String(length=120), nullable=True),
     sa.Column('school_name', sa.String(length=120), nullable=True),
     sa.Column('Teacher_school_location', sa.String(length=120), nullable=True),
-    sa.ForeignKeyConstraint(['Substitute_user_id'], ['substitutes.id'], name=op.f('fk_requests_Substitute_user_id_substitutes')),
-    sa.ForeignKeyConstraint(['Teacher_id'], ['teachers.id'], name=op.f('fk_requests_Teacher_id_teachers')),
+    sa.ForeignKeyConstraint(['substitute_user_id'], ['substitutes.id'], name=op.f('fk_requests_substitute_user_id_substitutes')),
+    sa.ForeignKeyConstraint(['teacher_user_id'], ['teachers.id'], name=op.f('fk_requests_teacher_user_id_teachers')),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('reviews',

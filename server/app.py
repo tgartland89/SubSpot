@@ -104,15 +104,15 @@ def get_teachers():
 @app.route('/get_substitutes', methods=['GET'])
 def get_substitutes():
     substitutes = Substitute.query.all()
-    substitutes_data = [{"id": substitute.id, "name": substitute.name, "email": substitute.email, "location": substitute.location, "phone": substitute.phone, "qualifications": substitute.qualifications, "verification_id": substitute.verification_id} for substitute in substitutes]
+    substitutes_data = [{"user_id": substitute.user_id, "name": substitute.name, "email": substitute.email, "location": substitute.location, "phone": substitute.phone, "qualifications": substitute.qualifications, "verification_id": substitute.verification_id} for substitute in substitutes]
     return jsonify({"substitutes": substitutes_data})
 
 @app.route('/substitute/<int:substitute_id>', methods=['GET'])
 def get_substitute_details(substitute_id):
-    substitute = db.session.get(Substitute, substitute_id)
+    substitute = Substitute.query.filter_by(user_id=substitute_id).first()
     if substitute:
         return jsonify({
-            "id": substitute.id,
+            "user_id": substitute.user_id,
             "name": substitute.name,
             "email": substitute.email,
             "location": substitute.location,
@@ -123,6 +123,7 @@ def get_substitute_details(substitute_id):
     else:
         return jsonify({"error": "Substitute not found."}), 404
 
+
 @app.route('/make_request', methods=['POST'])
 @login_required
 def make_request():
@@ -132,6 +133,7 @@ def make_request():
     data = request.json
     substitute_user_id = data.get('substituteUserId')
     teacher_id = session.get('user_id')  # Instead of getting teacherId
+    print("Teacher ID from session:", teacher_id)
 
     substitute = Substitute.query.filter(Substitute.id == substitute_user_id).first()
 
@@ -144,8 +146,8 @@ def make_request():
         return jsonify({"error": "Teacher not found."})
 
     new_request = Request(
-        Substitute_user_id=substitute_user_id,
-        Teacher_id=teacher.id,
+        substitute_user_id=substitute_user_id,
+        teacher_user_id=teacher.id,
         school_name=teacher.user.school_name,
         Teacher_school_location=teacher.location,
         Course_Being_covered=teacher.course_name,

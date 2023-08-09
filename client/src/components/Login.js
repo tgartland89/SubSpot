@@ -14,20 +14,20 @@ function Login() {
     event.preventDefault();
 
     loginUser(email, password)
-      .then((data) => {
-        login(data);
-        if (data.role === "Teacher") {
-          history.push("/teacher-dashboard");
-        } else if (data.role === "Substitute") {
-          history.push("/substitute-dashboard");
-        } else if (data.role === "Admin") {
-          history.push("/admin-dashboard");
-        }
-      })
-      .catch((error) => {
-        console.error("Error occurred during login:", error);
-        setErrorMessage("Invalid email or password. Please try again.");
-      });
+    .then((data) => {
+      login(data);
+      if (data.role === "Teacher") {
+        history.push(`/teacher-dashboard/${data.user_id}`); // Update the path here
+      } else if (data.role === "Substitute") {
+        history.push(`/substitute-dashboard/${data.user_id}`); // Update the path here
+      } else if (data.role === "Admin") {
+        history.push("/admin-dashboard");
+      }
+    })
+    .catch((error) => {
+      console.error("Error occurred during login:", error);
+      setErrorMessage("Invalid email or password. Please try again.");
+    });
   };
 
   return (

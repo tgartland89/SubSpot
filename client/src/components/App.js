@@ -33,15 +33,14 @@ function App() {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const email = urlSearchParams.get("email");
     const password = urlSearchParams.get("password");
-
+  
     if (email && password) {
       loginUser(email, password)
         .then((data) => {
+          console.log("API Response Data:", data); // Check the structure of the data object
           login(data);
           console.log("User role after login:", data.role);
-
-          
-          setTeacherId(data.teacherId); 
+          setTeacherId(data.teacherId);
           window.history.replaceState({}, document.title, window.location.pathname);
         })
         .catch((error) => {
@@ -51,6 +50,7 @@ function App() {
       setIsLoading(false);
     }
   }, [login]);
+  
 
   console.log("User Role:", user?.role);
 
@@ -64,7 +64,11 @@ function App() {
           <Route path="/signup" component={SignUp} />
           <Route path="/about" component={About} />
           <Route path="/dashboard" render={() => <DashboardPage userRole={user?.role} />} />
-          <Route path="/teacher-dashboard" render={() => ( <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} teacherId={teacherId}/>)}/>
+          <Route path="/teacher-dashboard" render={() => {
+          console.log("Passed teacherId to TeacherDashboard:", teacherId); // Add this line
+         return <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} teacherId={teacherId} />;
+}}/>
+
           <Route path="/substitute-dashboard" component={SubstituteDashboard} />
           <Route path="/admin-dashboard" component={AdminDashboard} />
           <Route path="/sub-details/:substituteId" component={SubsDetails} />

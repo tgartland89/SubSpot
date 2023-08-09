@@ -38,7 +38,8 @@ def create_teacher(user):
         location=user.location,
         phone=user.phone,
         course_name=fake.job(),
-        school_name=school_name,  
+        school_name=school_name,
+        school_location=fake.address(),  # Add school_location attribute
     )
     db.session.add(teacher)
 
@@ -49,7 +50,7 @@ def create_substitute(user):
         email=user.email,
         location=user.location,
         phone=user.phone,
-        qualifications=fake.text(),  
+        qualifications=fake.text(),
         verification_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     )
     db.session.add(substitute)
@@ -102,33 +103,18 @@ def create_courses_and_reviews(num_courses=10, num_reviews=30):
 
         course_review_pairs.add((teacher, substitute))
 
-        school_name = fake.company()  
-        school_location = fake.address()  
+        school_name = fake.company()
+        school_location = fake.address()
 
         course = Course(
-            Correlating_teacher_ID=teacher.user_id,
-            Correlating_substitute_ID=substitute.user_id,
+            Correlating_teacher_user_id=teacher.user_id,
+            Correlating_substitute_user_id=substitute.user_id,
             Course_name=fake.job(),
             Course_status=random.choice(['Available', 'Unavailable']),
-            Course_school_name=school_name,  
-            Course_location=school_location,  
+            Course_school_name=school_name,
+            Course_location=school_location,
         )
         db.session.add(course)
-
-    db.session.commit()
-
-    courses = Course.query.all()
-
-    for _ in range(num_reviews):
-        course = random.choice(courses)
-
-        review = Review(
-            Teacher_Id=course.Correlating_teacher_ID,
-            Rating=random.randint(1, 5),
-            Review=fake.text(),
-            Correlating_Substitute_ID=course.Correlating_substitute_ID,
-        )
-        db.session.add(review)
 
     db.session.commit()
 
@@ -140,12 +126,12 @@ def create_single_request(substitute_id):
         return
 
     teacher = random.choice(teachers)
-    school_name = getattr(teacher, 'teacher_school', 'Unknown School')  
-    school_location = getattr(teacher, 'school_location', 'Unknown Location')  
+    school_name = getattr(teacher, 'school_name', 'Unknown School')  # Update attribute name
+    school_location = getattr(teacher, 'school_location', 'Unknown Location')  # Update attribute name
 
     request = Request(
-        Substitute_user_id=substitute_id,
-        Teacher_id=teacher.id,
+        substitute_user_id=substitute_id,  # Update attribute name
+        teacher_user_id=teacher.user_id,  # Update attribute name
         school_name=school_name,
         Teacher_school_location=school_location,
         Course_Being_covered=fake.job(),

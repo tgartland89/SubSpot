@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { makeRequest } from './api'; 
 
 const TeacherDashboard = ({ userName, userEmail, teacherId }) => {
+  console.log("Teacher ID in TeacherDashboard:", teacherId); // Add this line
+
   const [substitutes, setSubstitutes] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -51,9 +53,10 @@ const TeacherDashboard = ({ userName, userEmail, teacherId }) => {
       <hr />
       <h2>Available Substitutes:</h2>
       <ul>
-        {substitutes.map((substitute) => (
-          <li key={substitute.id}>
-            <Link to={`/sub-details/${substitute.id}`} className="dark-purple-link mr-2">{substitute.name}</Link>
+      {substitutes.map((substitute) => (
+         <li key={substitute.user_id}>
+        <Link to={`/sub-details/${substitute.user_id}`} className="dark-purple-link mr-2">
+        {substitute.name} </Link>
           </li>
         ))}
       </ul>
