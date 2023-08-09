@@ -52,14 +52,17 @@ const TeacherDashboard = ({ userName, userEmail, teacherId }) => {
       <p>Here you can view and request substitutes and add reviews.</p>
       <hr />
       <h2>Available Substitutes:</h2>
-      <ul>
-      {substitutes.map((substitute) => (
-         <li key={substitute.user_id}>
-        <Link to={`/sub-details/${substitute.user_id}`} className="dark-purple-link mr-2">
-        {substitute.name} </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="substitutes-box"> {/* New container */}
+        <ul>
+          {substitutes.map((substitute) => (
+            <li key={substitute.user_id}>
+              <Link to={`/sub-details/${substitute.user_id}`} className="dark-purple-link mr-2">
+                {substitute.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

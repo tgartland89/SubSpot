@@ -38,7 +38,7 @@ const SubDetails = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        substitute_user_id: substituteId, // Use substituteUserId instead of substituteId
+        substitute_user_id: substituteId, 
         teacherName: teacherName,
         teacherEmail: teacherEmail,
       }),
@@ -58,18 +58,30 @@ const SubDetails = () => {
   };
   
   return (
-    <div>
+    <div className="sub-details-box">
       {successMessage && <div className="success-message">{successMessage}</div>}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       {substituteDetails ? (
         <div>
           <h1>Substitute Details</h1>
-          <h2>Name: {substituteDetails.name}</h2>
-          <p>Email: {substituteDetails.email}</p>
-          <p>Location: {substituteDetails.location}</p>
-          <p>Phone: {substituteDetails.phone}</p>
-          <p>Qualifications: {substituteDetails.qualifications}</p>
-          <p>Verification ID: {substituteDetails.verification_id}</p>
+          <div className="details-box">
+            <h2>Name: {substituteDetails.name}</h2>
+          </div>
+          <div className="details-box">
+            <p>Email: {substituteDetails.email}</p>
+          </div>
+          <div className="details-box">
+            <p>Location: {substituteDetails.location}</p>
+          </div>
+          <div className="details-box">
+            <p>Phone: {substituteDetails.phone}</p>
+          </div>
+          <div className="details-box">
+            <p>Qualifications: {substituteDetails.qualifications}</p>
+          </div>
+          <div className="details-box">
+            <p>Verification ID: {substituteDetails.verification_id}</p>
+          </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={sendRequest}>Request</button>
             <button>Review</button>

@@ -17,9 +17,9 @@ function Login() {
     .then((data) => {
       login(data);
       if (data.role === "Teacher") {
-        history.push(`/teacher-dashboard/${data.user_id}`); // Update the path here
+        history.push(`/teacher-dashboard/${data.user_id}`); 
       } else if (data.role === "Substitute") {
-        history.push(`/substitute-dashboard/${data.user_id}`); // Update the path here
+        history.push(`/substitute-dashboard/${data.user_id}`); 
       } else if (data.role === "Admin") {
         history.push("/admin-dashboard");
       }

@@ -132,7 +132,7 @@ def make_request():
 
     data = request.json
     substitute_user_id = data.get('substituteUserId')
-    teacher_id = session.get('user_id')  # Instead of getting teacherId
+    teacher_id = session.get('user_id')  
     print("Teacher ID from session:", teacher_id)
 
     substitute = Substitute.query.filter(Substitute.id == substitute_user_id).first()

@@ -39,7 +39,7 @@ def create_teacher(user):
         phone=user.phone,
         course_name=fake.job(),
         school_name=school_name,
-        school_location=fake.address(),  # Add school_location attribute
+        school_location=fake.address(),  
     )
     db.session.add(teacher)
 
@@ -130,8 +130,8 @@ def create_single_request(substitute_id):
     school_location = getattr(teacher, 'school_location', 'Unknown Location')  # Update attribute name
 
     request = Request(
-        substitute_user_id=substitute_id,  # Update attribute name
-        teacher_user_id=teacher.user_id,  # Update attribute name
+        substitute_user_id=substitute_id,  
+        teacher_user_id=teacher.user_id,  
         school_name=school_name,
         Teacher_school_location=school_location,
         Course_Being_covered=fake.job(),

@@ -37,7 +37,7 @@ function App() {
     if (email && password) {
       loginUser(email, password)
         .then((data) => {
-          console.log("API Response Data:", data); // Check the structure of the data object
+          console.log("API Response Data:", data); 
           login(data);
           console.log("User role after login:", data.role);
           setTeacherId(data.teacherId);
@@ -66,9 +66,7 @@ function App() {
           <Route path="/dashboard" render={() => <DashboardPage userRole={user?.role} />} />
           <Route path="/teacher-dashboard" render={() => {
           console.log("Passed teacherId to TeacherDashboard:", teacherId); // Add this line
-         return <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} teacherId={teacherId} />;
-}}/>
-
+         return <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} teacherId={teacherId} />;}}/>
           <Route path="/substitute-dashboard" component={SubstituteDashboard} />
           <Route path="/admin-dashboard" component={AdminDashboard} />
           <Route path="/sub-details/:substituteId" component={SubsDetails} />
