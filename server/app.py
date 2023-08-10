@@ -137,10 +137,10 @@ def make_request():
     teacher_id = session.get('user_id')  
     print("Teacher ID from session:", teacher_id)
 
-    substitute = Substitute.query.filter(Substitute.id == substitute_user_id).first()
+    substitute = Substitute.query.filter_by(id=substitute_user_id).first()
 
     if not substitute:
-        return jsonify({"error": "Substitute not found."})
+         return jsonify({"error": "Substitute not found."}), 404
 
     teacher = Teacher.query.filter(Teacher.user_id == teacher_id).first()
 
@@ -148,14 +148,14 @@ def make_request():
         return jsonify({"error": "Teacher not found."})
 
     new_request = Request(
-        substitute_user_id=substitute_user_id,
-        teacher_user_id=teacher.id,
-        school_name=teacher.user.school_name,
-        Teacher_school_location=teacher.location,
+        substitute_user_id=substitute.user.id,
+        teacher_user_id=teacher.user.id,
         Course_Being_covered=teacher.course_name,
         Confirmation=None,
-        Message_sub_sent_to=substitute.name,
+        Message_sub_sent_to=substitute.email,
         Teacher_if_declined=None,
+        school_name=teacher.school_name,
+        Teacher_school_location=teacher.school_location,   
     )
 
     db.session.add(new_request)

@@ -38,7 +38,7 @@ const SubDetails = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        substitute_user_id: substituteId, 
+        substituteUserId: substituteId,  
         teacherName: teacherName,
         teacherEmail: teacherEmail,
       }),

@@ -161,3 +161,9 @@
 .substitute-image {
   order: 1;
 }
+.apple-bullet {
+  width: 1em; 
+  height: 1em; 
+  vertical-align: middle;
+  margin-right: 0.5em; 
+}

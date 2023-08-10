@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import teacherImage from "../assets/teacher_computer_class.jpg";
 import substituteImage from "../assets/substitute_1.jpg";
+import appleImage from "../assets/green_apple.jpg";
+
 
 function Home() {
   useEffect(() => {
@@ -55,14 +57,16 @@ function Home() {
         <div className="signup-about-box right-box">
           <div>
             <h2 className="underlined-heading">Sign Up</h2>
-            <p>Join us and create an account!</p>
+            <p>
+            <img src={appleImage} alt="Apple Bullet" className="apple-bullet" />Join us and create an account!</p>
             <Link to="/signup" className="dark-purple-link">
               Sign Up
             </Link>
           </div>
           <div>
             <h2 className="underlined-heading">About</h2>
-            <p>Learn more about SubSpot.</p>
+            <p>
+            <img src={appleImage} alt="Apple Bullet" className="apple-bullet" />Learn more about SubSpot.</p>
             <Link to="/about" className="dark-purple-link">
               About
             </Link>

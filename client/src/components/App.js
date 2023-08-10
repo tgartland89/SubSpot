@@ -16,14 +16,28 @@ import AdminDashboard from "./AdminDashboard";
 function About() {
   return (
     <div>
-      <h1>About SubSpot</h1>
-      <p>
-        SubSpot is a site built by the son of a fourth-grade teacher who was looking for alternatives to find substitute teachers quickly and efficiently.
-      </p>
-    </div>
+    <h2 className="underlined-heading">About SubSpot</h2>
+  <p>
+    SubSpot is the visionary brainchild of Thomas Gartland, a distinguished alumnus of Flatiron's intensive 15-week Full Stack Software Boot Camp. Born into a lineage of educators, with a fourth-grade teacher as his own mother, Thomas's journey in creating SubSpot was deeply influenced by the need for efficient solutions in the education sector.
+  </p>
+  <p>
+    Armed with insights from his mother's experiences and his extensive software development training, Thomas set out to revolutionize the way substitute teachers are discovered and engaged. His mission was to craft a platform that would not only streamline the process for educators but also pave the way for a more collaborative and empowered teaching community.
+  </p>
+  <p>
+    Drawing inspiration from the likes of "Lyft" and "Uber," Thomas envisioned SubSpot as more than just a tool; it's a catalyst for transformative change in education. Beyond the convenience it offers, SubSpot is a testament to the fusion of technology and empathy, addressing a critical need while fostering a sense of support and unity among educators.
+  </p>
+  <p>
+    Thomas Gartland's aspiration isn't limited to financial success; it's rooted in a commitment to enhancing the educational experience. By bridging the gap between educators and substitute teachers, SubSpot creates an ecosystem where seamless transitions are the norm, contributing to a cohesive and efficient learning environment.
+  </p>
+  <p>
+    As SubSpot continues to unfold, it stands as a beacon of innovation, testament to the potential of a single individual's vision to drive transformative impact. Thomas's journey, from boot camp graduate to education tech visionary, embodies the power of determination and passion in shaping the future of education. With SubSpot, educators can look forward to a brighter future, where finding substitutes is as simple as a few clicks.
+  </p>
+  <p>
+    SubSpot isn't just a platform; it's a testament to the potential of human ingenuity, the marriage of technology and education, and the ripple effect of positive change that emerges when a community of educators come together with a shared goal.
+  </p>
+</div>
   );
 }
-
 function App() {
    // eslint-disable-next-line
   const [userData, setUserData] = useState({ role: '', teacher_user_id: null });
