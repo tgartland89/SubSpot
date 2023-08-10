@@ -27,36 +27,58 @@ const AdminDashboard = () => {
       console.error("Error fetching users:", error);
     }
   };
-  const handleDeleteUser = (userId) => {
-
+  const handleDeleteUser = async (userId) => {
+    try {
+      const response = await fetch(`/delete_user/${userId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        fetchUsers();
+      } else {
+        throw new Error("Failed to delete user.");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
   };
+  
 
   return (
-    <div>
+    <div className="admin-dashboard">
       <h1>Admin Dashboard</h1>
-      <div>
+      <div className="teacher-section">
         <h2>Teachers</h2>
         {teachers.map((teacher) => (
-          <div key={teacher.id}>
+          <div className="teacher-card" key={teacher.id}>
             <h3>{teacher.name}</h3>
             <p>Email: {teacher.email}</p>
             <p>Location: {teacher.location}</p>
             <p>Phone: {teacher.phone}</p>
-            <button onClick={() => handleDeleteUser(teacher.id)}>Delete</button>
+            <button
+              className="delete-button"
+              onClick={() => handleDeleteUser(teacher.id)}
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>
-      <div>
+      <div className="substitute-section">
         <h2>Substitutes</h2>
         {substitutes.map((substitute) => (
-          <div key={substitute.id}>
+          <div className="substitute-card" key={substitute.id}>
             <h3>{substitute.name}</h3>
             <p>Email: {substitute.email}</p>
             <p>Location: {substitute.location}</p>
             <p>Phone: {substitute.phone}</p>
             <p>Qualifications: {substitute.qualifications}</p>
             <p>Verification ID: {substitute.verification_id}</p>
-            <button onClick={() => handleDeleteUser(substitute.id)}>Delete</button>
+            <button
+              className="delete-button"
+              onClick={() => handleDeleteUser(substitute.id)}
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>

@@ -30,7 +30,6 @@ def create_user(name, email, location, phone, role, password, profile_picture=No
 @app.route('/')
 def home():
     if 'user_id' in session:
-        substitutes = Substitute.query.all()
         home_page_content = "Welcome to SubSpot! Find substitutes quickly for your teaching needs."
     else:
         home_page_content = "Welcome to SubSpot! Find substitutes quickly for your teaching needs."
@@ -125,7 +124,6 @@ def get_substitute_details(substitute_id):
     else:
         return jsonify({"error": "Substitute not found."}), 404
 
-
 @app.route('/make_request', methods=['POST'])
 @login_required
 def make_request():
@@ -149,7 +147,7 @@ def make_request():
 
     new_request = Request(
         substitute_user_id=substitute.user.id,
-        teacher_user_id=teacher.user.id,
+        teacher_user_id=teacher.id,
         Course_Being_covered=teacher.course_name,
         Confirmation=None,
         Message_sub_sent_to=substitute.email,
@@ -161,83 +159,6 @@ def make_request():
     db.session.add(new_request)
     db.session.commit()
     return jsonify({"message": "Request sent successfully"})
-
-@app.route('/get_incoming_requests', methods=['GET'])
-def get_incoming_requests():
-    if 'user_id' not in session:
-        return jsonify({"error": "Login required."}), 401
-
-    substitute_id = session['user_id']
-
-    Session = sessionmaker(bind=db.engine)
-    session = Session()
-
-    substitute = session.get(Substitute, substitute_id)
-
-    if not substitute:
-        return jsonify({"error": "Substitute not found."}), 404
-
-    incoming_requests = Request.query.filter_by(Substitute_user_id=substitute.id).all()
-
-    incoming_requests_data = [
-        {
-            "id": request.id,
-            "teacher_name": request.teacher.name,
-            "teacher_email": request.teacher.email,
-            "teacher_location": request.teacher.location,
-            "course_being_covered": request.course_being_covered,
-            "confirmation": request.confirmation,
-            "message_sub_sent_to": request.message_sub_sent_to,
-            "teacher_if_declined": request.teacher_if_declined,
-            "teacher_name": request.teacher_name,  
-            "teacher_email": request.teacher_email 
-        }
-        for request in incoming_requests
-    ]
-
-    return jsonify({"incoming_requests": incoming_requests_data})
-
-@app.route('/confirm_request/<int:request_id>', methods=['POST'])
-def confirm_request(request_id):
-    if 'user_id' not in session:
-        return jsonify({"error": "Login required."}), 401
-
-    substitute_id = session['user_id']
-    substitute = Substitute.query.get(substitute_id)
-
-    if not substitute:
-        return jsonify({"error": "Substitute not found."}), 404
-
-    request = Request.query.get(request_id)
-
-    if not request or request.Substitute_user_id != substitute_id:
-        return jsonify({"error": "Request not found or not associated with the Substitute."}), 404
-
-    request.confirmation = 'Accept' 
-    db.session.commit()
-
-    return jsonify({"message": "Request confirmed successfully."})
-
-@app.route('/deny_request/<int:request_id>', methods=['POST'])
-def deny_request(request_id):
-    if 'user_id' not in session:
-        return jsonify({"error": "Login required."}), 401
-
-    substitute_id = session['user_id']
-    substitute = Substitute.query.get(substitute_id)
-
-    if not substitute:
-        return jsonify({"error": "Substitute not found."}), 404
-
-    request = Request.query.get(request_id)
-
-    if not request or request.Substitute_user_id != substitute_id:
-        return jsonify({"error": "Request not found or not associated with the Substitute."}), 404
-
-    request.confirmation = 'Decline'  
-    db.session.commit()
-
-    return jsonify({"message": "Request denied successfully."})
 
 @app.route('/auth/signup', methods=['POST'])
 def signup():
@@ -302,6 +223,26 @@ def signup_substitute():
 
     return jsonify(message=signup_confirmation_message('Substitute'))
 
+@app.route('/update_user_to_substitute/<int:user_id>', methods=['POST'])
+def update_user_to_substitute(user_id):
+    user = User.query.get(user_id)
+    if user:
+        user.role = 'Substitute'
+        db.session.commit()
+
+        new_substitute = Substitute(
+            user_id=user.id,
+            qualifications=request.json['qualifications'],
+            verification_id=request.json['verification_id']
+        )
+        db.session.add(new_substitute)
+        db.session.commit()
+
+        return jsonify({"message": "User updated to substitute successfully."})
+    else:
+        return jsonify({"error": "User not found."}), 404
+
+
 def signup_confirmation_message(role):
     if role == 'Teacher':
         return "You have successfully signed up as a Teacher!"
@@ -327,6 +268,28 @@ def create_site_admin():
     db.session.add(site_admin)
     db.session.commit()
     return jsonify({"message": "SiteAdmin user created successfully."})
+
+@app.route('/delete_user/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+
+   
+    if user.role == 'Teacher':
+        teacher = Teacher.query.filter_by(user_id=user_id).first()
+        if teacher:
+            db.session.delete(teacher)
+    elif user.role == 'Substitute':
+        substitute = Substitute.query.filter_by(user_id=user_id).first()
+        if substitute:
+            db.session.delete(substitute)
+
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"message": "User deleted successfully."})
 
 @app.route('/logout', methods=['DELETE'])
 def logout():

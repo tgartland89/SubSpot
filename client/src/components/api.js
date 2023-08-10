@@ -10,9 +10,6 @@ export const loginUser = (email, password) => {
       throw new Error("Failed to log in. Please check your credentials and try again.");
     }
     return response.json();
-  }).then((data) => {
-    console.log("Received teacherId from API:", data.teacherId);
-    return data;
   });
 };
 
@@ -91,31 +88,29 @@ export function denyRequest(requestId) {
     throw error;
   });
 }
-
-export function makeRequest(substituteUserId, teacherName, teacherEmail) {
+export function makeRequest(substituteId, teacherName, teacherEmail) {
   return fetch('/make_request', {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      substituteUserId,
+      substituteId,
       teacherName,
       teacherEmail,
     }),
   })
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error('Failed to make a request.');
-    }
-    return response.json();
-  })
-  .catch(error => {
-    console.error('Network error:', error);
-    throw error;
-  });
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to make a request.');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Network error:', error);
+      throw error;
+    });
 }
-
 export function signUpTeacher(formData) {
   return fetch("/auth/signup-teacher", {
     method: "POST",

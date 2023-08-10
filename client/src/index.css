@@ -226,3 +226,79 @@ label[for="verification_id"] {
   padding: 0;
   margin: 0;
 }
+
+.teacher-card,
+.substitute-card {
+  border: 1px solid #ccc;
+  background-color: #d55656;
+  padding: 15px;
+  margin: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  
+}
+
+.teacher-card h3,
+.substitute-card h3 {
+  margin-top: 0;
+}
+
+.teacher-card p,
+.substitute-card p {
+  margin: 5px 0;
+}
+
+.delete-button {
+  background-color: #524647;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #635052;
+}
+
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.form-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.password-validation {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.valid {
+  color: green;
+}
+
+.invalid {
+  color: red;
+}

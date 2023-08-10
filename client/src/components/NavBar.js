@@ -19,11 +19,6 @@ function NavBar() {
             Home
           </Link>
         </li>
-        <li className="nav-item">
-          <Link to="/about" className="nav-link">
-            About
-          </Link>
-        </li>
         {user && (
           <li className="nav-item">
             {user.role === "Teacher" && (

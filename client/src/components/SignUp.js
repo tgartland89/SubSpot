@@ -111,7 +111,7 @@ return (
     <h1>Sign Up</h1>
     <form onSubmit={handleSubmit}>
       <div className="form-group">
-        <label>Choose Role:</label>
+        <label className="form-label">Choose Role:</label>
         <select
           className="form-control"
           name="role"
@@ -122,10 +122,9 @@ return (
           <option value="Substitute">Substitute</option>
         </select>
       </div>
-      <br />
-      <br />
+
       <div className="form-group">
-        <label>Name:</label>
+        <label className="form-label">Name:</label>
         <div>
           <input
             type="text"
@@ -133,60 +132,64 @@ return (
             value={formData.name}
             onChange={handleChange}
             required
+            className="form-control"
           />
           <small className="form-text text-muted">First and Last Name</small>
         </div>
       </div>
-      <br />
+
       <div className="form-group">
-        <label>Email:</label>
+        <label className="form-label">Email:</label>
         <input
           type="email"
           name="email"
           value={formData.email}
           onChange={handleChange}
           required
+          className="form-control"
         />
       </div>
-      <br />
-     <div className="form-group">
-      <label>Password:</label>
-      <input
-       type="password"
-       name="password"
-       value={formData.password}
-       onChange={handleChange}
-       required
-  /> {formData.password && (
-    <div className="password-validation">
-      {isStrongPassword(formData.password) ? (
-        <span className="valid">Password is strong!</span>
-      ) : (
-        <span className="invalid">
-          Password is not strong enough. Please include an uppercase and lowercase letter, a digit, a special character, and a length between 8 and 20 characters.
-        </span>
-      )}
-    </div>
-  )}
-</div>
-<br />
-<div className="form-group">
-        <label>Confirm Password:</label>
+
+      <div className="form-group">
+        <label className="form-label">Password:</label>
+        <input
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          className="form-control"
+        />
+        {formData.password && (
+          <div className="password-validation">
+            {isStrongPassword(formData.password) ? (
+              <span className="valid">Password is strong!</span>
+            ) : (
+              <span className="invalid">
+                Password is not strong enough. Please include an uppercase and lowercase letter, a digit, a special character, and a length between 8 and 20 characters.
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Confirm Password:</label>
         <input
           type="password"
           name="confirm_password"
           value={formData.confirm_password}
           onChange={handleChange}
           required
+          className="form-control"
         />
-        <br />
-    {formData.password !== formData.confirm_password && (
-          <span style={{ color: "red" }}>Passwords do not match.</span>
+        {formData.password !== formData.confirm_password && (
+          <span className="invalid">Passwords do not match.</span>
         )}
-         </div>
-        <br />
-        <div className="form-group">
-        <label>Location:</label>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Location:</label>
         <div>
           <input
             type="text"
@@ -194,84 +197,99 @@ return (
             value={formData.location}
             onChange={handleChange}
             required
+            className="form-control"
           />
           <small className="form-text text-muted">City, State, Zip code</small>
         </div>
       </div>
-      <br />
+
       <div className="form-group">
-        <label>Phone:</label>
+        <label className="form-label">Phone:</label>
         <input
           type="text"
           name="phone"
           value={formData.phone}
           onChange={handleChange}
           required
+          className="form-control"
         />
       </div>
       <br />
-      {role === "Teacher" && (<>
-    <label>School Name:</label>
-    <input
-      type="text"
-      name="school_name"
-      value={formData.school_name}
-      onChange={handleChange}
-      required
-    />
-    <br />
-    
-    <label>School Address:</label>
-    <input
-      type="text"
-      name="school_location"
-      value={formData.school_location}
-      onChange={handleChange}
-      required
-    />
-    <br />
 
-    <label>Course Name:</label>
-    <input
-      type="text"
-      name="course_name"
-      value={formData.course_name}
-      onChange={handleChange}
-      required
-    />
-    <br />
-  </>
-)}
+  {role === "Teacher" && (
+        <>
+          <div className="form-group">
+            <label className="form-label">School Name:</label>
+            <input
+              type="text"
+              name="school_name"
+              value={formData.school_name}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
 
-{role === "Substitute" && (
-  <>
-    <label>Qualifications:</label>
-    <input
-      type="text"
-      name="qualifications"
-      value={formData.qualifications}
-      onChange={handleChange}
-      required
-    />
-    <br />
+          <div className="form-group">
+            <label className="form-label">School Address:</label>
+            <input
+              type="text"
+              name="school_location"
+              value={formData.school_location}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
 
-    <label>Verification ID:</label>
-    <input
-      type="text"
-      name="verification_id"
-      value={formData.verification_id}
-      onChange={handleChange}
-      required
-    />
-    <br />
-  </>
-)}
-<input type="submit" className="btn btn-primary" value="Sign Up" />
+          <div className="form-group">
+            <label className="form-label">Course Name:</label>
+            <input
+              type="text"
+              name="course_name"
+              value={formData.course_name}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
+        </>
+      )}
+
+      {role === "Substitute" && (
+        <>
+          <div className="form-group">
+            <label className="form-label">Qualifications:</label>
+            <input
+              type="text"
+              name="qualifications"
+              value={formData.qualifications}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Verification ID:</label>
+            <input
+              type="text"
+              name="verification_id"
+              value={formData.verification_id}
+              onChange={handleChange}
+              required
+              className="form-control"
+            />
+          </div>
+        </>
+      )}
+    <input type="submit" className="btn btn-primary" value="Sign Up" />
     </form>
+
     {confirmationMessage && <p>{confirmationMessage}</p>}
     {error && <p className="text-danger">{error}</p>}
   </div>
-  );
+);
 }
 
 export default SignUp;

@@ -126,8 +126,8 @@ def create_single_request(substitute_id):
         return
 
     teacher = random.choice(teachers)
-    school_name = getattr(teacher, 'school_name', 'Unknown School')  # Update attribute name
-    school_location = getattr(teacher, 'school_location', 'Unknown Location')  # Update attribute name
+    school_name = getattr(teacher, 'school_name', 'Unknown School')  
+    school_location = getattr(teacher, 'school_location', 'Unknown Location')  
 
     request = Request(
         substitute_user_id=substitute_id,  

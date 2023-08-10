@@ -26,32 +26,33 @@ const SubDetails = () => {
   
     const teacherName = prompt("Enter your name:");
     const teacherEmail = prompt("Enter your email:");
-  
+
     if (!teacherName || !teacherEmail) {
       console.error("Invalid name or email.");
       return;
     }
-  
-    fetch("/make_request", {
-      method: "POST",
+    const selectedCourseId = 123
+    fetch('/make_request', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        substituteUserId: substituteId,  
+        substituteId: substituteId,
         teacherName: teacherName,
         teacherEmail: teacherEmail,
+        courseId: selectedCourseId, 
       }),
     })
     
       .then((response) => response.json())
       .then((data) => {
-        console.log("Request sent successfully:", data);
+        console.log('Request sent successfully:', data);
         setSuccessMessage("Request sent successfully!");
         setErrorMessage("");
       })
       .catch((error) => {
-        console.error("Error sending request:", error);
+        console.error('Error sending request:', error);
         setErrorMessage("Failed to send the request. Please try again.");
         setSuccessMessage("");
       });
