@@ -58,7 +58,7 @@ const SubDetails = () => {
   };
   
   return (
-    <div className="sub-details-box">
+    <div className="sub-details-box light-blue-bg">
       {successMessage && <div className="success-message">{successMessage}</div>}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       {substituteDetails ? (

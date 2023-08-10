@@ -24,6 +24,10 @@
 .warm-blue-bg {
   background-color: #6FA8DC; 
 }
+.light-blue-bg {
+  background-color: #4e84b6; 
+}
+
 
 .golden-rod-bg {
   background-color: goldenrod; 
@@ -33,10 +37,13 @@
 }
 .custom-navbar {
   border-radius: 15px; 
+  position: relative;
+  z-index: 1;
 }
 .dark-purple-link {
   color: #240e91; 
   font-weight: bold; 
+  margin-right: 10px;
 }
 
 .login-container {
@@ -69,7 +76,7 @@
   border-radius: 5px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #d55656;
-  color: rgb(0, 0, 0); 
+  color: rgb(82, 82, 82); 
   margin: 0 auto;
   max-width: 400px;
   margin-bottom: 20px;
@@ -92,16 +99,16 @@
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: #f7f7f7;
+  background-color: #4e84b6;
   margin-top: 20px;
 }
 
 .details-box {
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 1px;
   border-radius: 10px;
   margin-top: 10px;
-  background-color: #ffffff;
+  background-color: #b17e7e;
 }
 
 .password-validation {
@@ -123,7 +130,7 @@
   border-radius: 5px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #d55656;
-  color: rgb(0, 0, 0);
+  color: rgb(82, 82, 82); 
   margin: 0 auto;
   max-width: 400px;
   margin-bottom: 20px;
@@ -165,5 +172,57 @@
   width: 1em; 
   height: 1em; 
   vertical-align: middle;
-  margin-right: 0.5em; 
+  margin-right: 0.5em;
+  background-color: #d55656;
+  border-radius: 50%; 
+  display: inline-block; 
+} 
+
+
+.signup-container {
+  padding: 20px;
+  margin: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.signup-container label {
+  margin-bottom: 5px; 
+}
+
+.signup-container small {
+  margin-top: -5px; 
+}
+
+label[for="school_name"],
+label[for="school_location"],
+label[for="course_name"],
+label[for="qualifications"],
+label[for="verification_id"] {
+  padding-bottom:  10px; 
+}
+
+.about-image {
+  max-width: 70px; 
+  border-radius: 50%; 
+  position: absolute; 
+  top: 10px; 
+  right: 60px;
+  z-index: 1; 
+}
+
+.image-container {
+  position: absolute; 
+  top: 5px; 
+  right: 1px; 
+}
+
+.substitutes-box ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }

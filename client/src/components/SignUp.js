@@ -11,7 +11,6 @@ function SignUp() {
     location: "",
     phone: "",
     school_name: "",
-    school_location: "",
     course_name: "",
     qualifications: "",
     verification_id: "",
@@ -19,7 +18,10 @@ function SignUp() {
 
   const [confirmationMessage, setConfirmationMessage] = useState("");
 
-  const resetFormData = () => {
+  const handleRoleChange = (event) => {
+    const newRole = event.target.value;
+    setRole(newRole);
+
     setFormData({
       name: "",
       email: "",
@@ -28,26 +30,21 @@ function SignUp() {
       location: "",
       phone: "",
       school_name: "",
-      school_location: "",
+      school_location: "", 
       course_name: "",
       qualifications: "",
       verification_id: "",
     });
   };
-
-  const handleRoleChange = (event) => {
-    setRole(event.target.value);
-    resetFormData();
-  };
+  
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
-
   const handleSubmit = (event) => {
     event.preventDefault();
-
+  
     if (formData.password !== formData.confirm_password) {
       setError("Passwords do not match.");
       return;
@@ -86,8 +83,8 @@ function SignUp() {
       });
   };
 
+const isStrongPassword = (password) => {
 
-  const isStrongPassword = (password) => {
   const minLength = 8;
   const maxLength = 20; 
   const hasUppercase = /[A-Z]/.test(password);
@@ -125,133 +122,152 @@ return (
           <option value="Substitute">Substitute</option>
         </select>
       </div>
-
-      <label>Name:</label>
-      <input
-        type="text"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        required
-      />
-
-      <label>Email:</label>
-      <input
-        type="email"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-        required
-      />
-
+      <br />
+      <br />
+      <div className="form-group">
+        <label>Name:</label>
+        <div>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+          <small className="form-text text-muted">First and Last Name</small>
+        </div>
+      </div>
+      <br />
+      <div className="form-group">
+        <label>Email:</label>
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <br />
+     <div className="form-group">
       <label>Password:</label>
       <input
-        type="password"
-        name="password"
-        value={formData.password}
-        onChange={handleChange}
-        required
-      />
-
-      {formData.password && (
-        <div className="password-validation">
-          {isStrongPassword(formData.password) ? (
-            <span className="valid">Password is strong!</span>
-          ) : (
-            <span className="invalid">
-              Password is not strong enough. Please include an uppercase and lowercase letter, a digit, a special character, and a length between 8 and 20 characters.
-            </span>
-          )}
+       type="password"
+       name="password"
+       value={formData.password}
+       onChange={handleChange}
+       required
+  /> {formData.password && (
+    <div className="password-validation">
+      {isStrongPassword(formData.password) ? (
+        <span className="valid">Password is strong!</span>
+      ) : (
+        <span className="invalid">
+          Password is not strong enough. Please include an uppercase and lowercase letter, a digit, a special character, and a length between 8 and 20 characters.
+        </span>
+      )}
+    </div>
+  )}
+</div>
+<br />
+<div className="form-group">
+        <label>Confirm Password:</label>
+        <input
+          type="password"
+          name="confirm_password"
+          value={formData.confirm_password}
+          onChange={handleChange}
+          required
+        />
+        <br />
+    {formData.password !== formData.confirm_password && (
+          <span style={{ color: "red" }}>Passwords do not match.</span>
+        )}
+         </div>
+        <br />
+        <div className="form-group">
+        <label>Location:</label>
+        <div>
+          <input
+            type="text"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            required
+          />
+          <small className="form-text text-muted">City, State, Zip code</small>
         </div>
-      )}
+      </div>
+      <br />
+      <div className="form-group">
+        <label>Phone:</label>
+        <input
+          type="text"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <br />
+      {role === "Teacher" && (<>
+    <label>School Name:</label>
+    <input
+      type="text"
+      name="school_name"
+      value={formData.school_name}
+      onChange={handleChange}
+      required
+    />
+    <br />
+    
+    <label>School Address:</label>
+    <input
+      type="text"
+      name="school_location"
+      value={formData.school_location}
+      onChange={handleChange}
+      required
+    />
+    <br />
 
-      <label>Confirm Password:</label>
-      <input
-        type="password"
-        name="confirm_password"
-        value={formData.confirm_password}
-        onChange={handleChange}
-        required
-      />
+    <label>Course Name:</label>
+    <input
+      type="text"
+      name="course_name"
+      value={formData.course_name}
+      onChange={handleChange}
+      required
+    />
+    <br />
+  </>
+)}
 
-      {formData.password !== formData.confirm_password && (
-        <span style={{ color: "red" }}>Passwords do not match.</span>
-      )}
+{role === "Substitute" && (
+  <>
+    <label>Qualifications:</label>
+    <input
+      type="text"
+      name="qualifications"
+      value={formData.qualifications}
+      onChange={handleChange}
+      required
+    />
+    <br />
 
-      <label>Location:</label>
-      <input
-        type="text"
-        name="location"
-        value={formData.location}
-        onChange={handleChange}
-        required
-      />
-
-      <label>Phone:</label>
-      <input
-        type="text"
-        name="phone"
-        value={formData.phone}
-        onChange={handleChange}
-        required
-      />
-
-      {role === "Teacher" && (
-        <>
-          <label>School Name:</label>
-          <input
-            type="text"
-            name="school_name"
-            value={formData.school_name}
-            onChange={handleChange}
-            required
-          />
-
-          <label>School Location:</label>
-          <input
-            type="text"
-            name="school_location"
-            value={formData.school_location}
-            onChange={handleChange}
-            required
-          />
-
-          <label>Course Name:</label>
-          <input
-            type="text"
-            name="course_name"
-            value={formData.course_name}
-            onChange={handleChange}
-            required
-          />
-        </>
-      )}
-
-      {role === "Substitute" && (
-        <>
-          <label>Qualifications:</label>
-          <input
-            type="text"
-            name="qualifications"
-            value={formData.qualifications}
-            onChange={handleChange}
-            required
-          />
-
-          <label>Verification ID:</label>
-          <input
-            type="text"
-            name="verification_id"
-            value={formData.verification_id}
-            onChange={handleChange}
-            required
-          />
-        </>
-      )}
-
-      <input type="submit" className="btn btn-primary" value="Sign Up" />
+    <label>Verification ID:</label>
+    <input
+      type="text"
+      name="verification_id"
+      value={formData.verification_id}
+      onChange={handleChange}
+      required
+    />
+    <br />
+  </>
+)}
+<input type="submit" className="btn btn-primary" value="Sign Up" />
     </form>
-
     {confirmationMessage && <p>{confirmationMessage}</p>}
     {error && <p className="text-danger">{error}</p>}
   </div>

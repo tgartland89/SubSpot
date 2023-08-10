@@ -12,6 +12,7 @@ import { useAuth } from "../AuthContext";
 import TeacherDashboard from "./TeacherDashboard";
 import SubstituteDashboard from "./SubstituteDashboard";
 import AdminDashboard from "./AdminDashboard";
+import momandmeImage from "../assets/mom_and_me.JPG"
 
 function About() {
   return (
@@ -35,7 +36,14 @@ function About() {
   <p>
     SubSpot isn't just a platform; it's a testament to the potential of human ingenuity, the marriage of technology and education, and the ripple effect of positive change that emerges when a community of educators come together with a shared goal.
   </p>
-</div>
+ <div className="image-container">
+        <img
+          src={momandmeImage}
+          alt="Mom and Me"
+          className="about-image"
+        />
+      </div>
+    </div>
   );
 }
 function App() {
