@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import teacherImage from "../assets/teacher_computer_class.jpg";
 import substituteImage from "../assets/substitute_1.jpg";
@@ -23,15 +23,11 @@ function Home() {
     const teacherImageElement = document.querySelector(".teacher-image");
     const substituteImageElement = document.querySelector(".substitute-image");
 
-    if (teacherImageElement) {
-      if (!localStorage.getItem("teacherImageAnimated")) {
-        observer.observe(teacherImageElement);
-      }
+    if (teacherImageElement && !localStorage.getItem("teacherImageAnimated")) {
+      observer.observe(teacherImageElement);
     }
-    if (substituteImageElement) {
-      if (!localStorage.getItem("substituteImageAnimated")) {
-        observer.observe(substituteImageElement);
-      }
+    if (substituteImageElement && !localStorage.getItem("substituteImageAnimated")) {
+      observer.observe(substituteImageElement);
     }
 
     return () => {
@@ -44,22 +40,8 @@ function Home() {
       <h1>Welcome to SubSpot!</h1>
       <p>Find substitutes quickly for your teaching needs.</p>
       <div className="login-container">
-        <div className="signup-about-box right-box"> 
-          <div>
-            <h2>Sign Up</h2>
-            <Link to="/signup" className="dark-purple-link">Sign Up</Link>
-          </div>
-          <div>
-            <h2>About</h2>
-            <Link to="/about" className="dark-purple-link">About</Link>
-          </div>
-        </div>
-        <div className="image-container">
-          <img src={teacherImage} alt="Teacher" className="teacher-image" />
-          <img src={substituteImage} alt="Substitute" className="substitute-image" />
-        </div>
         <div className="login-box left-box">
-          <h2>Log In</h2>
+          <h2 className="underlined-heading">Log In</h2>
           <form>
             <label>Email:</label>
             <input type="email" name="email" required /><br />
@@ -69,6 +51,26 @@ function Home() {
 
             <input type="submit" value="Log In" />
           </form>
+        </div>
+        <div className="signup-about-box right-box">
+          <div>
+            <h2 className="underlined-heading">Sign Up</h2>
+            <p>Join us and create an account!</p>
+            <Link to="/signup" className="dark-purple-link">
+              Sign Up
+            </Link>
+          </div>
+          <div>
+            <h2 className="underlined-heading">About</h2>
+            <p>Learn more about SubSpot.</p>
+            <Link to="/about" className="dark-purple-link">
+              About
+            </Link>
+          </div>
+        </div>
+        <div className="image-container">
+          <img src={teacherImage} alt="Teacher" className="teacher-image" />
+          <img src={substituteImage} alt="Substitute" className="substitute-image" />
         </div>
       </div>
     </div>
