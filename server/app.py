@@ -1,7 +1,7 @@
 import os
 from flask import Flask, make_response, request, redirect, url_for, session, jsonify, g
 from config import db, bcrypt
-from models import User, Teacher, Substitute, SiteAdmin, Request
+from models import User, Teacher, Substitute, Request
 from flask_migrate import Migrate
 from faker import Faker 
 from flask_cors import CORS
@@ -20,12 +20,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 bcrypt.init_app(app)
 
-def create_user(name, email, location, phone, role, password, profile_picture=None):  
-    user = User(name=name, email=email, location=location, phone=phone, role=role, password=password)
+def create_user(name, email, location, phone, role, password, profile_picture=None):
+    user = User(name=name, email=email, location=location, phone=phone, role=role)
     user.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
     user.profile_picture = profile_picture
 
     return user
+
 
 @app.route('/')
 def home():

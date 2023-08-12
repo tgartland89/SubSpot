@@ -1,191 +1,72 @@
-from sqlalchemy import Column, Integer, String, Enum, ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy_serializer import SerializerMixin
-from config import db, bcrypt
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from config import db
 
-class User(db.Model, SerializerMixin):
-    __tablename__ = 'users'
-    
-    serialize_rules = ('-reviews', '-courses', '-password_hash')
-
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    location = db.Column(db.String(120))
-    phone = db.Column(db.String(20))
-    role = db.Column(Enum('Teacher', 'Substitute', 'SiteAdmin'), nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    profile_picture = db.Column(db.String(255))
-    school_name = db.Column(db.String(120))
-    school_location = db.Column(db.String(120))
+    location = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    role = db.Column(db.String(20), nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    profile_picture = db.Column(db.String(200))
 
-    def __init__(self, name, email, location, phone, role, password, **kwargs):
-        self.name = name
-        self.email = email
-        self.location = location
-        self.phone = phone
-        self.role = role
-        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-        self.profile_picture = kwargs.get('profile_picture')
-        self.school_name = kwargs.get('school_name')
-        self.school_location = kwargs.get('school_location')
+    def __repr__(self):
+        return f"User('{self.name}', '{self.email}', '{self.role}')"
 
-    def authenticate(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password)
-
-    teacher = db.relationship('Teacher', back_populates='user', uselist=False, lazy='joined')
-    substitute = db.relationship('Substitute', back_populates='user', uselist=False, lazy='joined')
-    site_admin = db.relationship('SiteAdmin', back_populates='user', uselist=False, lazy='joined')
-
-class Teacher(db.Model, SerializerMixin):
-    __tablename__ = 'teachers'
-
+class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
-    name = db.Column(db.String(120))
-    email = db.Column(db.String(120))
-    location = db.Column(db.String(120))
-    phone = db.Column(db.String(20))
-    course_name = db.Column(db.String(120))
-    school_name = db.Column(db.String(120))
-    school_location = db.Column(db.String(120))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    school_name = db.Column(db.String(100), nullable=False)
+    school_location = db.Column(db.String(100), nullable=False)
+    course_name = db.Column(db.String(100), nullable=False)
+    user = db.relationship('User', backref=db.backref('teacher', uselist=False))
 
-    user = db.relationship('User', back_populates='teacher', uselist=False, lazy='joined')
-    requests = db.relationship('Request', back_populates='teacher')
-    courses = db.relationship('Course', back_populates='teacher')
+    def __repr__(self):
+        return f"Teacher('{self.name}', '{self.school_name}', '{self.course_name}')"
 
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'name': self.name,
-            'email': self.email,
-            'location': self.location,
-            'phone': self.phone,
-            'course_name': self.course_name,
-            'school_name': self.school_name,
-            'school_location': self.school_location,
-            'profile_picture': self.user.profile_picture,
-        }
-    
-class Substitute(db.Model, SerializerMixin):
-    __tablename__ = 'substitutes'
-
+class Substitute(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
-    name = db.Column(db.String(120))
-    email = db.Column(db.String(120))
-    location = db.Column(db.String(120))
-    phone = db.Column(db.String(20))
-    qualifications = db.Column(db.String(120))
-    verification_id = db.Column(db.String(120))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    qualifications = db.Column(db.String(200))
+    verification_id = db.Column(db.String(50))
+    user = db.relationship('User', backref=db.backref('substitute', uselist=False))
 
-    requests = db.relationship('Request', back_populates='substitute')
-    courses = db.relationship('Course', back_populates='substitute')
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'name': self.name,
-            'email': self.email,
-            'location': self.location,
-            'phone': self.phone,
-            'qualifications': self.qualifications,
-            'verification_id': self.verification_id,
-            'profile_picture': self.user.profile_picture,
-        }
-
-    user = db.relationship('User', back_populates='substitute', uselist=False, lazy='joined')
-
-class SiteAdmin(db.Model, SerializerMixin):
-    __tablename__ = 'site_admins'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
-    name = db.Column(db.String(120))
-    email = db.Column(db.String(120))
-    phone = db.Column(db.String(20))
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'name': self.name,
-            'email': self.email,
-            'phone': self.phone,
-            'profile_picture': self.user.profile_picture,
-        }
-
-    user = db.relationship('User', back_populates='site_admin', uselist=False, lazy='joined')
+    def __repr__(self):
+        return f"Substitute('{self.name}', '{self.qualifications}')"
 
 class Request(db.Model):
-    __tablename__ = 'requests'
-
     id = db.Column(db.Integer, primary_key=True)
-    substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'), nullable=False)
-    teacher_user_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
-    Course_Being_covered = db.Column(db.String(120))
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.Course_ID'))  # Add this foreign key
-    Confirmation = db.Column(db.String(10))
-    Message_sub_sent_to = db.Column(db.String(120))
-    Teacher_if_declined = db.Column(db.String(120))
-    school_name = db.Column(db.String(120))
-    Teacher_school_location = db.Column(db.String(120))
+    substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitute.id'), nullable=False)
+    teacher_user_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
+    course_being_covered = db.Column(db.String(100), nullable=False)
+    confirmation = db.Column(db.Boolean)
+    message_sub_sent_to = db.Column(db.String(120))
+    teacher_if_declined = db.Column(db.Boolean)
+    school_name = db.Column(db.String(100), nullable=False)
+    teacher_school_location = db.Column(db.String(100), nullable=False)
+    substitute = db.relationship('Substitute', backref='requests')
+    teacher = db.relationship('Teacher', backref='requests')
 
-    substitute = db.relationship('Substitute', back_populates='requests')
-    teacher = db.relationship('Teacher', back_populates='requests')
-    course = db.relationship('Course', back_populates='request')
-
-    def __init__(self, substitute_user_id, teacher_user_id, school_name, Teacher_school_location, Course_Being_covered, Confirmation, Message_sub_sent_to, Teacher_if_declined):
-        self.substitute_user_id = substitute_user_id
-        self.teacher_user_id = teacher_user_id
-        self.school_name = school_name
-        self.Teacher_school_location = Teacher_school_location
-        self.Course_Being_covered = Course_Being_covered
-        self.Confirmation = Confirmation
-        self.Message_sub_sent_to = Message_sub_sent_to
-        self.Teacher_if_declined = Teacher_if_declined
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'substitute_user_id': self.substitute_user_id,
-            'teacher_user_id': self.teacher_user_id,
-            'school_name': self.school_name,
-            'Teacher_school_location': self.Teacher_school_location,
-            'Course_Being_covered': self.Course_Being_covered,
-            'course_id': self.course_id,
-            'Confirmation': self.Confirmation,
-            'Message_sub_sent_to': self.Message_sub_sent_to,
-            'Teacher_if_declined': self.Teacher_if_declined,
-        }
-
-class Course(db.Model, SerializerMixin):
-    __tablename__ = 'courses'
-
-    Course_ID = db.Column(db.Integer, primary_key=True)
-    Course_name = db.Column(db.String(120))
-    Correlating_teacher_user_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
-    Correlating_substitute_user_id = db.Column(db.Integer, db.ForeignKey('substitutes.id'))
-    Course_status = db.Column(Enum('Available', 'Unavailable'))
-    Course_school_name = db.Column(db.String(120))
-    Course_location = db.Column(db.String(120))
+    def __repr__(self):
+        return f"Request('{self.course_being_covered}', '{self.school_name}', '{self.confirmation}')"
     
-    teacher = db.relationship('Teacher', back_populates='courses')
-    substitute = db.relationship('Substitute', back_populates='courses')
-    request = db.relationship('Request', back_populates='course')
-
-
-class Review(db.Model, SerializerMixin):
-    __tablename__ = 'reviews'
-
-    Review_ID = db.Column(db.Integer, primary_key=True)
-    Teacher_Id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
-    Rating = db.Column(db.Integer)
-    Review = db.Column(db.String(255))
-    Correlating_Substitute_ID = db.Column(db.Integer, db.ForeignKey('substitutes.id'))
-
-    teacher = db.relationship('Teacher', backref='reviews')
-    substitute = db.relationship('Substitute', backref='reviews')
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    reviewer_teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
+    substitute_id = db.Column(db.Integer, db.ForeignKey('substitute.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"Review('{self.rating}', '{self.comment}')"

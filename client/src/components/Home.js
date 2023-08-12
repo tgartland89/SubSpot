@@ -45,10 +45,10 @@ function Home() {
         <div className="login-box left-box">
           <h2 className="underlined-heading">Log In</h2>
           <form>
-            <label>Email:</label>
+          <label className="bold-label">Email:</label>
             <input type="email" name="email" required /><br />
 
-            <label>Password:</label>
+            <label className="bold-label">Password:</label>
             <input type="password" name="password" required /><br />
 
             <input type="submit" value="Log In" />

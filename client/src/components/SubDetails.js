@@ -18,7 +18,7 @@ const SubDetails = () => {
       });
   }, [substituteId]);
 
-  const sendRequest = () => {
+  const sendRequest = async () => {
     if (!substituteDetails) {
       console.error("Substitute details not available.");
       return;
@@ -26,37 +26,42 @@ const SubDetails = () => {
   
     const teacherName = prompt("Enter your name:");
     const teacherEmail = prompt("Enter your email:");
-
+  
     if (!teacherName || !teacherEmail) {
       console.error("Invalid name or email.");
       return;
     }
-    const selectedCourseId = 123
-    fetch('/make_request', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        substituteId: substituteId,
-        teacherName: teacherName,
-        teacherEmail: teacherEmail,
-        courseId: selectedCourseId, 
-      }),
-    })
-    
-      .then((response) => response.json())
-      .then((data) => {
+  
+    try {
+      const response = await fetch('/make_request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          substituteUserId: substituteDetails.user_id, // Use the correct key for the substitute user ID
+          teacherName: teacherName,
+          teacherEmail: teacherEmail,
+        }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
         console.log('Request sent successfully:', data);
         setSuccessMessage("Request sent successfully!");
         setErrorMessage("");
-      })
-      .catch((error) => {
-        console.error('Error sending request:', error);
+      } else {
+        console.error('Error sending request:', response.statusText);
         setErrorMessage("Failed to send the request. Please try again.");
         setSuccessMessage("");
-      });
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+      setErrorMessage("Failed to send the request. Please try again.");
+      setSuccessMessage("");
+    }
   };
+  
   
   return (
     <div className="sub-details-box light-blue-bg">

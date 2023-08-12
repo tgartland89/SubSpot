@@ -1,187 +1,112 @@
-from app import app, db  
-from models import User, Teacher, Substitute, SiteAdmin, Course, Review, Request
+import os
 from faker import Faker
-import random
-import requests
-import string
+from app import app, db, bcrypt, User, Teacher, Substitute
+from models import Review, Request
 
 fake = Faker()
 
-def fetch_random_image():
-    try:
-        response = requests.get('https://source.unsplash.com/featured/?profile_pic')
-        response.raise_for_status()
-        return response.url
-    except requests.exceptions.RequestException as e:
-        print('Error fetching random image:', e)
-        return None
+def create_fake_admin():
+    email = 'C.Chase@sample.com'
+    password = 'Disney4Life!'
+    name = 'Colleen Chase'
+    location = 'Aurora, CO'
+    phone = '303-867-5309'
+    existing_admin = User.query.filter_by(email=email).first()
 
-def create_user(email, password, role):
-    name = fake.name()
-    location = fake.city()
-    phone = fake.phone_number()
-    profile_picture = fetch_random_image()
-    user = User(name=name, email=email, location=location, phone=phone, password=password, role=role, profile_picture=profile_picture)
-    db.session.add(user)
-    db.session.commit()
-    return user
+    if not existing_admin:
+        admin = User(name=name, email=email, location=location, phone=phone, role='SiteAdmin')
+        admin.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')  
+        db.session.add(admin)
+        db.session.commit()
 
-def generate_random_password():
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+        print("Fake admin 'Colleen Chase' created successfully.")
 
-def create_teacher(user):
-    school_name = fake.company()  
-    teacher = Teacher(
-        user_id=user.id,
-        name=user.name,
-        email=user.email,
-        location=user.location,
-        phone=user.phone,
-        course_name=fake.job(),
-        school_name=school_name,
-        school_location=fake.address(),  
-    )
-    db.session.add(teacher)
-
-def create_substitute(user):
-    substitute = Substitute(
-        user_id=user.id,
-        name=user.name,
-        email=user.email,
-        location=user.location,
-        phone=user.phone,
-        qualifications=fake.text(),
-        verification_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-    )
-    db.session.add(substitute)
-
-def create_site_admin(user):
-    site_admin = SiteAdmin(
-        user_id=user.id,
-        name=user.name,
-        email=user.email,
-        phone=user.phone
-    )
-    db.session.add(site_admin)
-
-def create_users_and_roles(num_teachers=10, num_subs=5, num_admins=2):
-    for _ in range(num_teachers):
+def create_fake_teachers(count=5):
+    for _ in range(count):
+        name = fake.name()
         email = fake.email()
-        password = generate_random_password()
-        user = create_user(email, password, 'Teacher')
-        create_teacher(user)
-
-    for _ in range(num_subs):
-        email = fake.email()
-        password = generate_random_password()
-        user = create_user(email, password, 'Substitute')
-        create_substitute(user)
-
-    for _ in range(num_admins):
-        email = fake.email()
-        password = generate_random_password()
-        user = create_user(email, password, 'SiteAdmin')
-        create_site_admin(user)
-
-def create_courses_and_reviews(num_courses=10, num_reviews=30):
-    teachers = Teacher.query.all()
-    substitutes = Substitute.query.all()
-
-    if not teachers or not substitutes:
-        print("No teachers or substitutes found in the database. Skipping course and review generation.")
-        return
-
-    course_review_pairs = set()
-
-    for _ in range(num_courses):
-        teacher = random.choice(teachers)
-        substitute = random.choice(substitutes)
-
-        while (teacher, substitute) in course_review_pairs:
-            teacher = random.choice(teachers)
-            substitute = random.choice(substitutes)
-
-        course_review_pairs.add((teacher, substitute))
-
+        location = fake.city()
+        phone = fake.phone_number()
         school_name = fake.company()
-        school_location = fake.address()
+        school_location = fake.city()
+        course_name = fake.random_element(['Math', 'Science', 'History', 'English'])
+        password = 'password'  
 
-        course = Course(
-            Correlating_teacher_user_id=teacher.user_id,
-            Correlating_substitute_user_id=substitute.user_id,
-            Course_name=fake.job(),
-            Course_status=random.choice(['Available', 'Unavailable']),
-            Course_school_name=school_name,
-            Course_location=school_location,
-        )
-        db.session.add(course)
+        user = User(name=name, email=email, location=location, phone=phone, role='Teacher')
+        user.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')  
+        db.session.add(user)
+        db.session.commit()
 
-    db.session.commit()
+        teacher = Teacher(user=user, name=name, email=email, location=location, phone=phone,
+                          school_name=school_name, school_location=school_location, course_name=course_name)
+        db.session.add(teacher)
+        db.session.commit()
 
-def create_single_request(substitute_id):
+def create_fake_substitutes(count=5):
+    for _ in range(count):
+        name = fake.name()
+        email = fake.email()
+        location = fake.city()
+        phone = fake.phone_number()
+        qualifications = fake.sentence(nb_words=6)
+        verification_id = fake.random_int(min=1000, max=9999)
+        password = 'password'  
+
+        user = User(name=name, email=email, location=location, phone=phone, role='Substitute')
+        user.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')  
+        db.session.add(user)
+        db.session.commit()
+
+        substitute = Substitute(user=user, name=name, email=email, location=location, phone=phone,
+                                qualifications=qualifications, verification_id=verification_id)
+        db.session.add(substitute)
+        db.session.commit()
+
+def create_fake_requests(count=20):
     teachers = Teacher.query.all()
-
-    if not teachers:
-        print("No teachers found in the database. Skipping request generation.")
-        return
-
-    teacher = random.choice(teachers)
-    school_name = getattr(teacher, 'school_name', 'Unknown School')  
-    school_location = getattr(teacher, 'school_location', 'Unknown Location')  
-
-    request = Request(
-        substitute_user_id=substitute_id,  
-        teacher_user_id=teacher.user_id,  
-        school_name=school_name,
-        Teacher_school_location=school_location,
-        Course_Being_covered=fake.job(),
-        Confirmation=random.choice(['Accept', 'Decline']),
-        Message_sub_sent_to=fake.email(),
-        Teacher_if_declined=fake.text(),
-    )
-    db.session.add(request)
-    db.session.commit()
-
-
-def create_requests(num_requests=10):
     substitutes = Substitute.query.all()
 
-    if not substitutes:
-        print("No substitutes found in the database. Skipping request generation.")
-        return
+    for _ in range(count):
+        teacher = fake.random_element(teachers)
+        substitute = fake.random_element(substitutes)
+        course_being_covered = fake.random_element(['Math', 'Science', 'History', 'English'])
+        confirmation = fake.boolean()
+        message_sub_sent_to = fake.sentence()
+        teacher_if_declined = fake.boolean()
+        school_name = fake.company()
+        teacher_school_location = fake.city()
 
-    num_requests = min(num_requests, len(substitutes))
+        request = Request(substitute_user_id=substitute.user.id, teacher_user_id=teacher.user.id,
+                          course_being_covered=course_being_covered, confirmation=confirmation,
+                          message_sub_sent_to=message_sub_sent_to, teacher_if_declined=teacher_if_declined,
+                          school_name=school_name, teacher_school_location=teacher_school_location)
+        db.session.add(request)
+        db.session.commit()
 
-    for _ in range(num_requests):
-        substitute = random.choice(substitutes)
-        create_single_request(substitute.user_id)
+def create_fake_reviews(count=10):
+    teachers = Teacher.query.all()
+    substitutes = Substitute.query.all()
 
-def seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=20):
+    for _ in range(count):
+        reviewer_teacher = fake.random_element(teachers)
+        substitute = fake.random_element(substitutes)
+        rating = fake.random_int(min=1, max=5)
+        comment = fake.paragraph()
+
+        review = Review(reviewer_teacher_id=reviewer_teacher.id, substitute_id=substitute.id,
+                        rating=rating, comment=comment)
+        db.session.add(review)
+        db.session.commit()
+        
+if __name__ == '__main__':
     with app.app_context():
-        print("Wiping old Data...")
         db.drop_all()
         db.create_all()
-        print("Complete")
 
-        print("Generating Users and Roles...")
-        create_users_and_roles(num_teachers, num_subs, num_admins)
-        print("Complete")
+        create_fake_admin()
+        create_fake_teachers()
+        create_fake_substitutes()
+        create_fake_reviews()
+        create_fake_requests()
 
-        print("Generating Courses and Reviews...")
-        create_courses_and_reviews(num_courses, num_reviews)
-        print("Complete")
-
-        print("Generating SiteAdmin...")
-        email = 'colly@example.com'
-        password = 'Disney4Life!'
-        user = create_user(email, password, 'SiteAdmin')
-        create_site_admin(user)
-        print("Complete")
-
-        print("Generating Requests...")
-        create_requests(num_requests)
-        print("Complete")
-
-if __name__ == '__main__':
-    seed_database(num_teachers=10, num_subs=5, num_admins=2, num_courses=10, num_reviews=30, num_requests=10)
-    print("Database seeded successfully!")
+        print("Fake data generated successfully.")
