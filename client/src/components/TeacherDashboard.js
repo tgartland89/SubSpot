@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link} from 'react-router-dom';
 import { makeRequest } from './api'; 
 
 const TeacherDashboard = ({ userName, userEmail }) => { 
-  const { teacherId } = useParams()
+  const teacherId = sessionStorage.getItem('teacher_user_id');
   console.log("Teacher ID in TeacherDashboard:", teacherId); 
 
   const [substitutes, setSubstitutes] = useState([]);
@@ -27,24 +27,23 @@ const TeacherDashboard = ({ userName, userEmail }) => {
     }
   };
 
-  // eslint-disable-next-line
-  const handleRequest = (substituteId, substituteName) => {
-    const teacherName = userName;
-    const teacherEmail = userEmail;
+ // eslint-disable-next-line
+ const handleRequest = (substituteId, substituteName) => {
+  const teacherName = userName;
+  const teacherEmail = userEmail;
 
-    makeRequest(substituteId, teacherName, teacherEmail)
-      .then((data) => {
-        console.log('Request sent successfully:', data);
-        setSuccessMessage("Request sent successfully!");
-        setErrorMessage("");
-      })
-      .catch((error) => {
-        console.error('Error sending request:', error);
-        setErrorMessage("Failed to send the request. Please try again.");
-        setSuccessMessage("");
-      });
-  };
-
+  makeRequest(substituteId, teacherName, teacherEmail, teacherId)
+    .then((data) => {
+      console.log('Request sent successfully:', data);
+      setSuccessMessage("Request sent successfully!");
+      setErrorMessage("");
+    })
+    .catch((error) => {
+      console.error('Error sending request:', error);
+      setErrorMessage("Failed to send the request. Please try again.");
+      setSuccessMessage("");
+    });
+};
   return (
     <div>
       {successMessage && <div className="success-message">{successMessage}</div>}

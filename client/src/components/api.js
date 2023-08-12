@@ -88,16 +88,17 @@ export function denyRequest(requestId) {
     throw error;
   });
 }
-export function makeRequest(substituteId, teacherName, teacherEmail) {
+export function makeRequest(substituteId, teacherName, teacherEmail, teacherId) {
   return fetch('/make_request', {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      substituteId,
-      teacherName,
-      teacherEmail,
+      substituteUserId: substituteId,
+      teacherName: teacherName,
+      teacherEmail: teacherEmail,
+      teacherId: teacher_user_id, // Add this line
     }),
   })
     .then((response) => {
@@ -111,6 +112,7 @@ export function makeRequest(substituteId, teacherName, teacherEmail) {
       throw error;
     });
 }
+
 export function signUpTeacher(formData) {
   return fetch("/auth/signup-teacher", {
     method: "POST",

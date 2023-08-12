@@ -39,11 +39,12 @@ const SubDetails = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          substituteUserId: substituteDetails.user_id, // Use the correct key for the substitute user ID
+          substituteUserId: substituteDetails.user_id,
           teacherName: teacherName,
           teacherEmail: teacherEmail,
         }),
       });
+  
   
       if (response.ok) {
         const data = await response.json();

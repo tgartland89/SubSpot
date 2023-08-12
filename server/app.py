@@ -1,6 +1,6 @@
 import os
 from flask import Flask, make_response, request, redirect, url_for, session, jsonify, g
-from config import db, bcrypt
+from config import db, bcrypt  
 from models import User, Teacher, Substitute, Request
 from flask_migrate import Migrate
 from faker import Faker 
@@ -20,6 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 bcrypt.init_app(app)
 
+# creating user
 def create_user(name, email, location, phone, role, password, profile_picture=None):
     user = User(name=name, email=email, location=location, phone=phone, role=role)
     user.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -27,7 +28,7 @@ def create_user(name, email, location, phone, role, password, profile_picture=No
 
     return user
 
-
+# route for Home
 @app.route('/')
 def home():
     if 'user_id' in session:
@@ -43,14 +44,17 @@ def home():
     response.headers['Content-Type'] = 'text/html'
     return response
 
+# route to the about page
 @app.route('/about')
 def about():
     about_content = "SubSpot is a site built by the son of a fourth grade teacher who was looking for alternatives to find substitute teachers quickly and efficiently."
     return about_content
 
+# login route
 def is_logged_in():
     return 'user_id' in session
 
+# login route
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -59,6 +63,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# login route
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
@@ -78,14 +83,15 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if user and bcrypt.check_password_hash(user.password_hash, password):
-         print (user.id)
          session['user_id'] = user.id
          session['user_role'] = user.role
-         if user.role == 'teacher':
-              session['teacher_user_id'] = user.id
+         session['user_name'] = user.name
+         session['user_email'] = user.email 
+         session['teacher_user_id'] = user.id  
          return jsonify({"role": user.role})
         return jsonify({"error": "Invalid email or password. Please try again."}), 401
-    
+
+# rote to get user_role
 @app.route('/get_user_role', methods=['GET'])
 def get_user_role():
     if 'user_id' not in session:
@@ -97,18 +103,21 @@ def get_user_role():
     else:
         return jsonify({"role": None})
 
+# rote to get teachers
 @app.route('/get_teachers', methods=['GET'])
 def get_teachers():
     teachers = Teacher.query.all()
     teachers_data = [{"id": teacher.id, "name": teacher.name, "email": teacher.email, "location": teacher.location, "phone": teacher.phone} for teacher in teachers]
     return jsonify({"teachers": teachers_data})
 
+# rote to get substitutes 
 @app.route('/get_substitutes', methods=['GET'])
 def get_substitutes():
     substitutes = Substitute.query.all()
     substitutes_data = [{"user_id": substitute.user_id, "name": substitute.name, "email": substitute.email, "location": substitute.location, "phone": substitute.phone, "qualifications": substitute.qualifications, "verification_id": substitute.verification_id} for substitute in substitutes]
     return jsonify({"substitutes": substitutes_data})
 
+# rote to get substitutes by ID
 @app.route('/substitute/<int:substitute_id>', methods=['GET'])
 def get_substitute_details(substitute_id):
     substitute = Substitute.query.filter_by(user_id=substitute_id).first()
@@ -125,42 +134,54 @@ def get_substitute_details(substitute_id):
     else:
         return jsonify({"error": "Substitute not found."}), 404
 
+# route to make_request from Teacher to Sub
 @app.route('/make_request', methods=['POST'])
 @login_required
 def make_request():
-    if session['user_role'] != 'Teacher':
-        return jsonify({"error": "Access denied"})
+    if request.method == 'POST':
+        data = request.get_json()
+        substitute_user_id = data.get('substituteUserId')
+        teacher_name = session['user_name']  # Use the correct key to get teacher's name
+        teacher_email = session['user_email']  # Use the correct key to get teacher's email
 
-    data = request.json
-    substitute_user_id = data.get('substituteUserId')
-    teacher_id = session.get('user_id')  
-    print("Teacher ID from session:", teacher_id)
+        # Create a new request in the database
+        new_request = Request(
+            teacher_id=session['teacher_user_id'],  # Use the correct key to get teacher's user ID
+            substitute_id=substitute_user_id,
+            teacher_name=teacher_name,
+            teacher_email=teacher_email,
+            status='pending'  # You can set the initial status here
+        )
+        db.session.add(new_request)
+        db.session.commit()
 
-    substitute = Substitute.query.filter_by(id=substitute_user_id).first()
+        return jsonify({"message": "Request sent successfully."})
 
-    if not substitute:
-         return jsonify({"error": "Substitute not found."}), 404
+# route to confirm_request from Sub to Teaceher  
+@app.route('/confirm_request/<int:request_id>', methods=['POST'])
+@login_required
+def confirm_request(request_id):
+    request = Request.query.get(request_id)
+    if request and request.substitute_id == session['user_id']:
+        request.status = 'confirmed'
+        db.session.commit()
+        return jsonify({"message": "Request confirmed successfully."})
+    else:
+        return jsonify({"error": "Invalid request or unauthorized access."}), 401
 
-    teacher = Teacher.query.filter(Teacher.user_id == teacher_id).first()
+# route to deny_request from Sub to Teaceher
+@app.route('/deny_request/<int:request_id>', methods=['POST'])
+@login_required
+def deny_request(request_id):
+    request = Request.query.get(request_id)
+    if request and request.substitute_id == session['user_id']:
+        request.status = 'denied'
+        db.session.commit()
+        return jsonify({"message": "Request denied successfully."})
+    else:
+        return jsonify({"error": "Invalid request or unauthorized access."}), 401
 
-    if not teacher:
-        return jsonify({"error": "Teacher not found."})
-
-    new_request = Request(
-        substitute_user_id=substitute.user.id,
-        teacher_user_id=teacher.id,
-        Course_Being_covered=teacher.course_name,
-        Confirmation=None,
-        Message_sub_sent_to=substitute.email,
-        Teacher_if_declined=None,
-        school_name=teacher.school_name,
-        Teacher_school_location=teacher.school_location,   
-    )
-
-    db.session.add(new_request)
-    db.session.commit()
-    return jsonify({"message": "Request sent successfully"})
-
+# route for signup
 @app.route('/auth/signup', methods=['POST'])
 def signup():
     if request.method == 'POST':
@@ -173,6 +194,7 @@ def signup():
 
     return "Sign Up Form"
 
+# route fo signup for teacher 
 @app.route('/auth/signup-teacher', methods=['POST'])
 def signup_teacher():
     name = request.json.get('name')
@@ -199,6 +221,7 @@ def signup_teacher():
 
     return jsonify(message=signup_confirmation_message('Teacher'))
 
+# route fo signup for substitute
 @app.route('/auth/signup-substitute', methods=['POST'])
 def signup_substitute():
     name = request.json.get('name')
@@ -224,6 +247,7 @@ def signup_substitute():
 
     return jsonify(message=signup_confirmation_message('Substitute'))
 
+# app route to update user for Admin 
 @app.route('/update_user_to_substitute/<int:user_id>', methods=['POST'])
 def update_user_to_substitute(user_id):
     user = User.query.get(user_id)
@@ -243,7 +267,7 @@ def update_user_to_substitute(user_id):
     else:
         return jsonify({"error": "User not found."}), 404
 
-
+# app route for sign up confirmation 
 def signup_confirmation_message(role):
     if role == 'Teacher':
         return "You have successfully signed up as a Teacher!"
@@ -251,7 +275,8 @@ def signup_confirmation_message(role):
         return "You have successfully signed up as a Substitute!"
     else:
         return "You have successfully signed up!"
-    
+
+# app route to create site admin 
 @app.route('/create_site_admin', methods=['GET'])
 def create_site_admin():
     email = 'colly@example.com'
@@ -270,6 +295,7 @@ def create_site_admin():
     db.session.commit()
     return jsonify({"message": "SiteAdmin user created successfully."})
 
+# app route for siteadmin to Delete user
 @app.route('/delete_user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = User.query.get(user_id)
@@ -292,6 +318,7 @@ def delete_user(user_id):
 
     return jsonify({"message": "User deleted successfully."})
 
+# app route for log out
 @app.route('/logout', methods=['DELETE'])
 def logout():
     session.clear()

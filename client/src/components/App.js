@@ -52,7 +52,7 @@ function App() {
   const { user, login } = useAuth();
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(true);
-  const [teacherId, setTeacherId] = useState(null); 
+  const [teacher_user_id, setTeacherId] = useState(null); 
   useEffect(() => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const email = urlSearchParams.get("email");
@@ -64,7 +64,7 @@ function App() {
           console.log("API Response Data:", data); 
           login(data);
           console.log("User role after login:", data.role);
-          setTeacherId(data.teacherId);
+          setTeacherId(data.teacher_user_id);
           window.history.replaceState({}, document.title, window.location.pathname);
         })
         .catch((error) => {
@@ -72,8 +72,10 @@ function App() {
         });
     } else {
       setIsLoading(false);
+      setTeacherId(null); 
     }
   }, [login]);
+  
   
 
   console.log("User Role:", user?.role);
@@ -89,11 +91,11 @@ function App() {
           <Route path="/about" component={About} />
           <Route path="/dashboard" render={() => <DashboardPage userRole={user?.role} />} />
           <Route path="/teacher-dashboard" render={() => {
-          console.log("Passed teacherId to TeacherDashboard:", teacherId); // Add this line
-         return <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} teacherId={teacherId} />;}}/>
+          console.log("Passed teacher_user_id to TeacherDashboard:", teacher_user_id);
+          return <TeacherDashboard userRole={user?.role} userName={user?.name} userEmail={user?.email} teacherId={teacher_user_id} />;}} />
           <Route path="/substitute-dashboard" component={SubstituteDashboard} />
           <Route path="/admin-dashboard" component={AdminDashboard} />
-          <Route path="/sub-details/:substituteId" component={SubsDetails} />
+          <Route path="/sub-details/:substituteId" render={(props) => <SubsDetails {...props} teacherId={teacher_user_id} />} />
           <Route component={NotFound} />
         </Switch>
       </div>
