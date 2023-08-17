@@ -6,6 +6,7 @@ const SubDetails = () => {
   const [substituteDetails, setSubstituteDetails] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [teacherUserId, setTeacherUserId] = useState(null); 
 
   useEffect(() => {
     fetch(`/substitute/${substituteId}`)
@@ -16,22 +17,32 @@ const SubDetails = () => {
       .catch((error) => {
         console.error("Error occurred while fetching substitute details:", error);
       });
+
+   
+    fetch('/get_teacher_user_id')
+      .then((response) => response.json())
+      .then((data) => {
+        setTeacherUserId(data.teacher_user_id);
+      })
+      .catch((error) => {
+        console.error("Error occurred while fetching teacher user ID:", error);
+      });
   }, [substituteId]);
 
   const sendRequest = async () => {
-    if (!substituteDetails) {
-      console.error("Substitute details not available.");
+    if (!substituteDetails || !teacherUserId) {
+      console.error("Substitute details or teacher's user ID not available.");
       return;
     }
-  
+
     const teacherName = prompt("Enter your name:");
     const teacherEmail = prompt("Enter your email:");
-  
+
     if (!teacherName || !teacherEmail) {
       console.error("Invalid name or email.");
       return;
     }
-  
+
     try {
       const response = await fetch('/make_request', {
         method: 'POST',
@@ -39,13 +50,13 @@ const SubDetails = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          substituteUserId: substituteDetails.user_id,
+          substitute_id: substituteDetails.user_id,
           teacherName: teacherName,
           teacherEmail: teacherEmail,
+          teacherUserId: teacherUserId, 
         }),
       });
-  
-  
+
       if (response.ok) {
         const data = await response.json();
         console.log('Request sent successfully:', data);

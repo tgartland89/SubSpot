@@ -88,6 +88,7 @@ export function denyRequest(requestId) {
     throw error;
   });
 }
+
 export function makeRequest(substituteId, teacherName, teacherEmail, teacherId) {
   return fetch('/make_request', {
     method: 'POST',
@@ -98,7 +99,7 @@ export function makeRequest(substituteId, teacherName, teacherEmail, teacherId) 
       substituteUserId: substituteId,
       teacherName: teacherName,
       teacherEmail: teacherEmail,
-      teacherId: teacher_user_id, // Add this line
+      teacherId: teacherId, 
     }),
   })
     .then((response) => {

@@ -110,6 +110,14 @@ def get_teachers():
     teachers_data = [{"id": teacher.id, "name": teacher.name, "email": teacher.email, "location": teacher.location, "phone": teacher.phone} for teacher in teachers]
     return jsonify({"teachers": teachers_data})
 
+# API endpoint to fetch the teacher's user ID
+@app.route('/get_teacher_user_id', methods=['GET'])
+@login_required
+def get_teacher_user_id():
+    teacher_user_id = session['teacher_user_id']
+    return jsonify({"teacher_user_id": teacher_user_id})
+
+
 # rote to get substitutes 
 @app.route('/get_substitutes', methods=['GET'])
 def get_substitutes():
@@ -135,27 +143,32 @@ def get_substitute_details(substitute_id):
         return jsonify({"error": "Substitute not found."}), 404
 
 # route to make_request from Teacher to Sub
+# route to make_request from Teacher to Sub
 @app.route('/make_request', methods=['POST'])
 @login_required
 def make_request():
     if request.method == 'POST':
         data = request.get_json()
-        substitute_user_id = data.get('substituteUserId')
-        teacher_name = session['user_name']  # Use the correct key to get teacher's name
-        teacher_email = session['user_email']  # Use the correct key to get teacher's email
+        substitute_user_id = data.get('substitute_id')  
+        teacher_name = session['user_name']
+        teacher_email = session['user_email']
 
-        # Create a new request in the database
+    
         new_request = Request(
-            teacher_id=session['teacher_user_id'],  # Use the correct key to get teacher's user ID
-            substitute_id=substitute_user_id,
-            teacher_name=teacher_name,
-            teacher_email=teacher_email,
-            status='pending'  # You can set the initial status here
+            teacher_user_id=session['teacher_user_id'],  
+            substitute_user_id=substitute_user_id,  
+            course_being_covered='Your Course',  
+            confirmation=False,
+            message_sub_sent_to='',
+            teacher_if_declined=False,
+            school_name='Your School Name',  
+            teacher_school_location='Your School Location',  
         )
         db.session.add(new_request)
         db.session.commit()
 
         return jsonify({"message": "Request sent successfully."})
+
 
 # route to confirm_request from Sub to Teaceher  
 @app.route('/confirm_request/<int:request_id>', methods=['POST'])
