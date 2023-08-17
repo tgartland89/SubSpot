@@ -32,8 +32,32 @@ export function getSubstitutes() {
   });
 }
 
+export function respondToRequest(requestId, response, message) {
+  return fetch(`/respond_to_request/${requestId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      response: response,
+      message: message,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to respond to request.");
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      console.error("Network error:", error);
+      throw error;
+    });
+}
+
+
 export function getIncomingRequests() {
-  return fetch('/get_incoming_requests', {
+  return fetch('/get_substitute_requests', {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -50,6 +74,7 @@ export function getIncomingRequests() {
     throw error;
   });
 }
+
 
 export function confirmRequest(requestId) {
   return fetch(`/confirm_request/${requestId}`, {

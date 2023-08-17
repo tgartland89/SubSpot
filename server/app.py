@@ -166,6 +166,43 @@ def make_request():
         db.session.commit()
 
         return jsonify({"message": "Request sent successfully."})
+    
+@app.route('/get_substitute_requests', methods=['GET'])
+@login_required  
+def get_substitute_requests():
+    substitute_id = session.get('user_id')
+    requests = Request.query.filter_by(substitute_user_id=substitute_id).all()
+    
+    requests_data = []
+    for request in requests:
+        if request.teacher:  
+            request_data = {
+                "id": request.id,
+                "teacher_name": request.teacher.name,
+                "course": request.course_being_covered,
+                "confirmation": request.confirmation,
+                "message_sub_sent_to": request.message_sub_sent_to
+            }
+            requests_data.append(request_data)
+    
+    return jsonify({"incoming_requests": requests_data})
+
+@app.route('/respond_to_request/<int:request_id>', methods=['POST'])
+@login_required  
+def respond_to_request(request_id):
+    substitute_id = session.get('user_id')
+    response_data = request.get_json()
+    response = response_data.get('response')
+    message = response_data.get('message')
+
+    request = Request.query.get(request_id)
+    if request and request.substitute_user_id == substitute_id:
+        request.confirmation = response
+        request.message_sub_sent_to = message
+        db.session.commit()
+        return jsonify({"message": "Response sent successfully."})
+    else:
+        return jsonify({"error": "Invalid request or unauthorized access."}), 401
 
 # route to confirm_request from Sub to Teaceher  
 @app.route('/confirm_request/<int:request_id>', methods=['POST'])

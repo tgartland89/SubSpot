@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getIncomingRequests, confirmRequest, denyRequest } from "./api";
+import { getIncomingRequests, respondToRequest } from "./api"; 
 
 const SubstituteDashboard = () => {
   const [incomingRequests, setIncomingRequests] = useState([]);
@@ -17,28 +17,16 @@ const SubstituteDashboard = () => {
     }
   };
 
-  const handleConfirmRequest = (requestId) => {
-    confirmRequest(requestId)
+  const handleRespondToRequest = (requestId, response, message) => {
+    respondToRequest(requestId, response, message)
       .then(() => {
         setIncomingRequests((prevRequests) =>
           prevRequests.map((request) =>
-            request.id === requestId ? { ...request, confirmation: "Accept" } : request
+            request.id === requestId ? { ...request, confirmation: response } : request
           )
         );
       })
-      .catch((error) => console.error("Error confirming request:", error));
-  };
-
-  const handleDenyRequest = (requestId) => {
-    denyRequest(requestId)
-      .then(() => {
-        setIncomingRequests((prevRequests) =>
-          prevRequests.map((request) =>
-            request.id === requestId ? { ...request, confirmation: "Decline" } : request
-          )
-        );
-      })
-      .catch((error) => console.error("Error denying request:", error));
+      .catch((error) => console.error("Error responding to request:", error));
   };
 
   return (
@@ -52,8 +40,8 @@ const SubstituteDashboard = () => {
           <p>Course: {request.course_being_covered}</p>
           {request.confirmation === null ? (
             <div>
-              <button onClick={() => handleConfirmRequest(request.id)}>Confirm</button>
-              <button onClick={() => handleDenyRequest(request.id)}>Deny</button>
+              <button onClick={() => handleRespondToRequest(request.id, "Accept", "Accepted the request.")}>Accept</button>
+              <button onClick={() => handleRespondToRequest(request.id, "Decline", "Declined the request.")}>Decline</button>
             </div>
           ) : (
             <p>Confirmation: {request.confirmation}</p>
