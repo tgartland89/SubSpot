@@ -4,7 +4,6 @@ import teacherImage from "../assets/teacher_computer_class.jpg";
 import substituteImage from "../assets/substitute_1.jpg";
 import appleImage from "../assets/green_apple.jpg";
 
-
 function Home() {
   useEffect(() => {
     const options = {

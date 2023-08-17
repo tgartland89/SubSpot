@@ -34,15 +34,7 @@ const SubDetails = () => {
       console.error("Substitute details or teacher's user ID not available.");
       return;
     }
-
-    const teacherName = prompt("Enter your name:");
-    const teacherEmail = prompt("Enter your email:");
-
-    if (!teacherName || !teacherEmail) {
-      console.error("Invalid name or email.");
-      return;
-    }
-
+  
     try {
       const response = await fetch('/make_request', {
         method: 'POST',
@@ -51,12 +43,10 @@ const SubDetails = () => {
         },
         body: JSON.stringify({
           substitute_id: substituteDetails.user_id,
-          teacherName: teacherName,
-          teacherEmail: teacherEmail,
-          teacherUserId: teacherUserId, 
+          teacherUserId: teacherUserId,
         }),
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         console.log('Request sent successfully:', data);
@@ -73,7 +63,6 @@ const SubDetails = () => {
       setSuccessMessage("");
     }
   };
-  
   
   return (
     <div className="sub-details-box light-blue-bg">
