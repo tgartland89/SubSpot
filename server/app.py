@@ -149,18 +149,18 @@ def make_request():
     if request.method == 'POST':
         data = request.get_json()
         substitute_user_id = data.get('substitute_id')
-        teacher_name = session.get('user_name') 
-        teacher_email = session.get('user_email')  
+
+        teacher = Teacher.query.filter_by(user_id=session['teacher_user_id']).first()
 
         new_request = Request(
-            teacher_user_id=session['teacher_user_id'],
             substitute_user_id=substitute_user_id,
-            course_being_covered='Your Course',
+            teacher_user_id=session['teacher_user_id'],
+            course_being_covered=teacher.course_name,  
             confirmation=False,
             message_sub_sent_to='',
             teacher_if_declined=False,
-            school_name='Your School Name',
-            teacher_school_location='Your School Location',
+            school_name=teacher.school_name,  
+            teacher_school_location=teacher.school_location, 
         )
         db.session.add(new_request)
         db.session.commit()
